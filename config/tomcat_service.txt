@@ -1,0 +1,6 @@
+	               maxThreads="600"
+	               minSpareThreads="100"
+	               acceptorThreadCount="4"
+	               acceptCount="500"
+	               enableLookups="false"
+	               URIEncoding="UTF-8" />

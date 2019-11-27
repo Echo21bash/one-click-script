@@ -1,0 +1,11 @@
+JAVA_OPTS="-Xms512m
+-Xmx512m
+-Xmn192m
+-Xss512k
+-XX:SurvivorRatio=10
+-XX:PermSize=96M
+-XX:MaxPermSize=128M
+-XX:+UseConcMarkSweepGC
+-XX:+CMSScavengeBeforeRemark
+-XX:+CMSParallelRemarkEnabled
+-XX:+AggressiveOpts"
