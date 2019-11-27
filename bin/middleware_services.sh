@@ -91,26 +91,9 @@ activemq_install(){
 
 activemq_config(){
 
-	cat > /tmp/activemq.xml.tmp << 'EOF'
-        <plugins> 
-           <simpleAuthenticationPlugin> 
-                 <users> 
-                      <authenticationUser username="${activemq.username}" password="${activemq.password}" groups="users,admins"/> 
-                 </users> 
-           </simpleAuthenticationPlugin> 
-        </plugins>
-EOF
-	
-	cat > /tmp/activemq.xml.networkConnector.tmp << EOF
-				<networkConnectors>
-						<networkConnector uri="static:(tcp://0.0.0.0:61616)" duplex="true" userName="${activemq_username}" password="${activemq_userpasswd}"/>
-				</networkConnectors>	
-EOF
-
-
 	if [[ ${deploy_mode} = '1' ]];then
-		#插入文本内容
-		sed -i '/<\/persistenceAdapter>/r /tmp/activemq.xml.tmp' ${home_dir}/conf/activemq.xml
+		#插入身份认证配置
+		sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
 		#注释无用的消息协议只开启tcp
 		sed -i 's#<transportConnector name#<!-- <transportConnector name#' ${home_dir}/conf/activemq.xml
 		sed -i 's#maxFrameSize=104857600"/>#maxFrameSize=104857600"/> -->#' ${home_dir}/conf/activemq.xml
@@ -120,8 +103,8 @@ EOF
 		sed -i 's#activemq.password=manager#activemq.password='${activemq_userpasswd}'#' ${home_dir}/conf/credentials.properties
 	elif [[ ${deploy_mode} = '2' ]];then
 		
-			#插入文本内容
-			sed -i '/<\/persistenceAdapter>/r /tmp/activemq.xml.tmp' ${home_dir}/conf/activemq.xml
+			#插入身份认证配置
+			sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
 			#注释无用的消息协议只开启tcp
 			sed -i 's#<transportConnector name#<!-- <transportConnector name#' ${home_dir}/conf/activemq.xml
 			sed -i 's#maxFrameSize=104857600"/>#maxFrameSize=104857600"/> -->#' ${home_dir}/conf/activemq.xml
@@ -135,13 +118,13 @@ EOF
 
 		elif [[ ${cluster_mode} = '2' ]];then
 			sed -i 's#brokerName="localhost"#brokerName="broker'${i}'"#' ${home_dir}/conf/activemq.xml
-			sed -i '/<\/plugins>/r /tmp/activemq.xml.networkConnector.tmp' ${home_dir}/conf/activemq.xml
+			sed -i "/<\/plugins>/r ${workdir}/config/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
 			sed -i 's#<transportConnector name="openwire" uri="tcp://0.0.0.0:61616#<transportConnector name="openwire" uri="tcp://0.0.0.0:'${activemq_conn_port}'#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<property name="port" value="8161"/>#<property name="port" value="'${activemq_mana_port}'"/>#' ${home_dir}/conf/jetty.xml
 		elif [[ ${cluster_mode} = '3' ]];then
 			sed -i 's#brokerName="localhost"#brokerName="broker'${weight_factor}'"#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<kahaDB directory="${activemq.data}/kahadb"/>#<kahaDB directory="'${shared_dir}'/broker'${weight_factor}'"/>#' ${home_dir}/conf/activemq.xml
-			sed -i '/<\/plugins>/r /tmp/activemq.xml.networkConnector.tmp' ${home_dir}/conf/activemq.xml
+			sed -i "/<\/plugins>/r ${workdir}/config/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
 			sed -i 's#<networkConnector uri="static:(tcp://0.0.0.0:61616)#<networkConnector uri="static:(tcp://0.0.0.0:'${activemq_networkconn_port}')#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<transportConnector name="openwire" uri="tcp://0.0.0.0:61616#<transportConnector name="openwire" uri="tcp://0.0.0.0:'${activemq_conn_port}'#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<property name="port" value="8161"/>#<property name="port" value="'${activemq_mana_port}'"/>#' ${home_dir}/conf/jetty.xml
@@ -281,68 +264,10 @@ rocketmq_namesrvaddr(){
 
 rocketmq_config(){
 
-	cat >${home_dir}/conf/namesrv.properties<<-EOF
-	rocketmqHome=
-	kvConfigPath=
-	listenPort=9876
-	EOF
-	cat >${home_dir}/conf/broker.properties<<-EOF
-	#所属集群名字
-	brokerClusterName=rocketmq-cluster
-	#broker名字，注意此处不同的配置文件填写的不一样
-	brokerName=broker-a
-	#0 表示 Master，>0 表示 Slave
-	brokerId=0
-	#nameServer地址，分号分割
-	namesrvAddr=127.0.0.1:9876
-	#在发送消息时，自动创建服务器不存在的topic，默认创建的队列数
-	defaultTopicQueueNums=4
-	#是否允许 Broker 自动创建Topic，建议线下开启，线上关闭
-	autoCreateTopicEnable=true
-	#是否允许 Broker 自动创建订阅组，建议线下开启，线上关闭
-	autoCreateSubscriptionGroup=true
-	#Broker 对外服务的监听端口
-	brokerIP1=
-	listenPort=10911
-	#删除文件时间点，默认凌晨 4点
-	deleteWhen=04
-	#文件保留时间，默认 48 小时
-	fileReservedTime=120
-	#commitLog每个文件的大小默认1G
-	mapedFileSizeCommitLog=1073741824
-	#ConsumeQueue每个文件默认存30W条，根据业务情况调整
-	mapedFileSizeConsumeQueue=300000
-	#destroyMapedFileIntervalForcibly=120000
-	#redeleteHangedFileInterval=120000
-	#检测物理文件磁盘空间
-	diskMaxUsedSpaceRatio=88
-	#存储路径
-	storePathRootDir=/laihui/base-app/roketmq-cluster/rocketmq-M1/data/store
-	#commitLog 存储路径
-	storePathCommitLog=/laihui/base-app/roketmq-cluster/rocketmq-M1/data/store/commitlog
-	#限制的消息大小
-	#maxMessageSize=65536
-	#flushCommitLogLeastPages=4
-	#flushConsumeQueueLeastPages=2
-	#flushCommitLogThoroughInterval=10000
-	#flushConsumeQueueThoroughInterval=60000
-	#Broker 的角色
-	#- ASYNC_MASTER 异步复制Master
-	#- SYNC_MASTER 同步双写Master
-	#- SLAVE
-	brokerRole=ASYNC_MASTER
-	#刷盘方式
-	#- ASYNC_FLUSH 异步刷盘
-	#- SYNC_FLUSH 同步刷盘
-	flushDiskType=ASYNC_FLUSH
-	#checkTransactionMessageEnable=false
-	#发消息线程池数量
-	#sendMessageThreadPoolNums=128
-	#发送消息是否使用可重入锁
-	#useReentrantLockWhenPutMessage:true
-	#拉消息线程池数量
-	#pullMessageThreadPoolNums=128
-	EOF
+	cat ${workdir}/config/rocketmq_namesrv.properties >${home_dir}/conf/namesrv.properties
+
+	cat ${workdir}/config/rocketmq_broker.properties >${home_dir}/conf/broker.properties
+
 
 	sed -i "s#rocketmqHome=#rocketmqHome=${home_dir}#" ${home_dir}/conf/namesrv.properties
 	sed -i "s#kvConfigPath=#kvConfigPath=${home_dir}/data/namesrv/kvConfig.json#" ${home_dir}/conf/namesrv.properties

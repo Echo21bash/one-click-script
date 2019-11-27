@@ -1,0 +1,7 @@
+        <plugins> 
+           <simpleAuthenticationPlugin> 
+                 <users> 
+                      <authenticationUser username="${activemq.username}" password="${activemq.password}" groups="users,admins"/> 
+                 </users> 
+           </simpleAuthenticationPlugin> 
+        </plugins>
