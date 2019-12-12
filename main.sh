@@ -11,6 +11,7 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/bin/version_down_unzip.sh
 . ${workdir}/bin/system_set.sh
 . ${workdir}/bin/tools.sh
+. ${workdir}/bin/system_optimize.sh
 . ${workdir}/bin/basic_environment.sh
 . ${workdir}/bin/web_services.sh
 . ${workdir}/bin/database_services.sh
