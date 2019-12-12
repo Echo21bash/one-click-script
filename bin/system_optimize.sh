@@ -209,4 +209,3 @@ system_optimize_permission(){
 	sed -i 's#^exec.*# #exec /sbin/shutdown -r now "Control-Alt-Delete pressed"#'/etc/init/control-alt-delete.conf
 	echo -e "${info} 锁定关键文件系统完成"
 }
-system_optimize_set
