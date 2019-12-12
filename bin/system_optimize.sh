@@ -1,17 +1,7 @@
 #!/bin/bash
 
 system_optimize_set(){
-	output_option "选择需要优化的项(可多选)" "\
-	 替换为国内YUM源\
-	 优化最大限制\
-	 优化SSHD服务\
-	 系统时间同步\
-	 优化内核参数\
-	 关闭SElinux\
-	 关闭非必须服务\
-	 设置shell终端参数\
-	 锁定系统关键文件\
-	 全部优化" "conf"
+	output_option "选择需要优化的项(可多选)" "替换为国内YUM源 优化最大限制 优化SSHD服务 系统时间同步 优化内核参 关闭SElinux 关闭非必须服务 设置shell终端参数 锁定系统关键文件 全部优化" "conf"
 
 	for conf in ${conf[@]}
 	do
