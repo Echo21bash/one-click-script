@@ -18,6 +18,8 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/bin/middleware_services.sh
 . ${workdir}/bin/storage_service.sh
 . ${workdir}/bin/operation_platform.sh
+. ${workdir}/bin/virtualization_platform.sh
+
 
 mysql_tool(){
 output_option 'MySQL常用脚本' '添加MySQL备份脚本  找回MySQLroot密码 ' 'num'
