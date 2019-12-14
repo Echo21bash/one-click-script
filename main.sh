@@ -104,16 +104,28 @@ esac
 }
 
 operation_platform(){
-output_option '请选择要安装的平台' 'K8S系统 ELK日志平台 Zabbix监控 Rancher平台(k8s集群管理)' 'platform'
+output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控' 'platform'
 case "$platform" in
-	1)k8s_install_ctl
+	1)elk_install_ctl
 	;;
-	2)elk_install_ctl
+	2)zabbix_install_ctl
 	;;
 	3)zabbix_install_ctl
 	;;
 esac
 
+}
+
+virtualization_platform(){
+output_option '请选择要安装的平台' 'Docker K8S系统 Rancher平台(k8s集群管理)' 'platform'
+case "$platform" in
+	1)docker_install
+	;;
+	2)k8s_install_ctl
+	;;
+	3)zabbix_install_ctl
+	;;
+esac
 }
 
 tools(){
