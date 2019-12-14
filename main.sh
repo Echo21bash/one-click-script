@@ -152,7 +152,7 @@ esac
 
 main(){
 
-output_option '请选择需要安装的服务' '基础环境 WEB服务 数据库服务 中间件服务 存储服务 运维平台 其他工具' 'mian'
+output_option '请选择需要安装的服务' '基础环境 WEB服务 数据库服务 中间件服务 存储服务 运维平台 虚拟化 其他工具' 'mian'
 
 case "$mian" in
 	1)basic_environment
@@ -167,7 +167,9 @@ case "$mian" in
 	;;
 	6)operation_platform
 	;;
-	7)tools
+	7)virtualization_platform
+	;;
+	8)tools
 	;;
 
 esac
