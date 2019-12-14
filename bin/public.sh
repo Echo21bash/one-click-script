@@ -87,7 +87,7 @@ output_option(){
 	j=0
 	for item in ${all_option[@]}
 	do
-		if [[ $i > 0 && $i < $last_option_subscript ]];then
+		if [[ $i -gt 0 && $i -lt $last_option_subscript ]];then
 			#选项数组
 			item_option[$j]=${all_option[$i]}
 			((j++))
