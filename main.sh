@@ -106,13 +106,13 @@ esac
 }
 
 operation_platform(){
-output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控' 'platform'
+output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控 红帽服务器集群(RHCS)' 'platform'
 case "$platform" in
 	1)elk_install_ctl
 	;;
 	2)zabbix_install_ctl
 	;;
-	3)zabbix_install_ctl
+	3)rhcs_install_ctl
 	;;
 esac
 
