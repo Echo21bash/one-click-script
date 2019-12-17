@@ -358,6 +358,7 @@ rhcs_install_set(){
 }
 
 rhcs_install_ctl(){
+	rhcs_install_set
 	if [[ ${os_release} = 6 ]];then
 		yum install -y pacemaker
 	fi
