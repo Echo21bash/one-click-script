@@ -349,6 +349,14 @@ zabbix_install_ctl(){
 	clear_install
 }
 
+rhcs_install_set(){
+	input_option "输入集群名称" "ha_cluster" "cluster_name"
+	cluster_name=${input_value}
+	diy_echo "首先配置管理主机免密登录各节点" "${yellow}" "${info}" 
+	auto_ssh_keygen
+	node_name=(${host_name[@]})
+}
+
 rhcs_install_ctl(){
 	if [[ ${os_release} = 6 ]];then
 		yum install -y pacemaker

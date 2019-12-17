@@ -1,24 +1,33 @@
 #!/bin/bash
 
 auto_ssh_keygen(){
+	
+	input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_name"
+	host_name=(${input_value[@]})
+	
 	expect_dir=`which expect 2>/dev/null`
 	[ -z ${expect_dir} ] && yum install expect -y
-	input_option "请输入ssh互信主机的信息,格式ip:port:passwd(多个空格隔开)" "127.0.0.1:22:root:123456" "ssh_ip"
-	ssh_ip=(${input_value[@]})
+	
 	[ ! -f /root/.ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
-	for ip in ${ssh_ip[@]}
+	for host in ${host_name[@]}
 	do
-		addr=`echo $ip | awk -F : '{print $1}'`
-		port=`echo $ip | awk -F : '{print $2}'`
-		user=`echo $ip | awk -F : '{print $3}'`
-		passwd=`echo $ip | awk -F : '{print $4}'`
+		user=root
+		input_option "请输入${host}的SSH端口号" "22" "port"
+		port=${input_value}
+		input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
+		passwd=${input_value}
 		expect <<-EOF
-		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub ${user}@${addr} -p ${port}
+		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub ${user}@${host} -p ${port}
 		expect {
 			"yes/no" {send "yes\r";exp_continue}
 			"password:" {send "$passwd\r";exp_continue}
         }
 		EOF
+		if [[ $? = 0 ]];then
+			diy_echo "主机${host}免密登录配置完成" "${green}" "${info}"
+		else
+			diy_echo "主机${host}免密登录配置失败" "${red}" "${info}" 
+		fi
 	done
 }
 
