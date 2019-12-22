@@ -9,18 +9,20 @@ auto_ssh_keygen(){
 	[ -z ${expect_dir} ] && yum install expect -y
 	
 	[ ! -f /root/.ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
+	local i
+	i=0
 	for host in ${host_name[@]}
 	do
-		user=root
-		input_option "请输入${host}的SSH端口号" "22" "port"
-		port=${input_value}
+		input_option "请输入root的SSH端口号" "22" "port"
+		port[$i]=${input_value}
 		input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
-		passwd=${input_value}
+		passwd[$i]=${input_value}
+		((i++))
 		expect <<-EOF
-		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub ${user}@${host} -p ${port}
+		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host[$i]} -p ${port[$i]}
 		expect {
 			"yes/no" {send "yes\r";exp_continue}
-			"password:" {send "$passwd\r";exp_continue}
+			"password:" {send "${passwd[$i]}\r";exp_continue}
         }
 		EOF
 		if [[ $? = 0 ]];then

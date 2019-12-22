@@ -20,10 +20,19 @@ colour_keyword(){
 
 diy_echo(){
 	#$1内容 $2颜色(非必须) $3前缀关键字(非必须)
-	if [[ $3 = '' ]];then
-		echo -e "$2$1${plain}"
-	else
+	if [[ $# = '3' ]];then
 		echo -e "$3 $2$1${plain}"
+	fi
+	
+	if [[ $# = '2' ]];then
+		if [[ $2 =~ 'info' || $2 =~ 'warning' || $2 =~ 'error' ]];then
+			echo -e "$2 $1${plain}"
+		else
+			echo -e "$2$1${plain}"
+		fi
+	fi
+	if [[ $# = '1' ]];then
+		echo -e "$1"
 	fi
 }
 
