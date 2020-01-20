@@ -87,7 +87,7 @@ long_query_time = 1
 #log_queries_not_using_indexes = 1
 
 #wsrep config
-#wsrep_provider = 
+#wsrep_provider = /usr/lib64/galera-3/libgalera_smm.so
 #wsrep_cluster_address = "gcomm://"
 #wsrep_cluster_name = "mycluster"
 #wsrep_node_name = "node1"
