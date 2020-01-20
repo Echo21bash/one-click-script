@@ -254,7 +254,7 @@ online_down(){
 		;;
 	esac
 
-	cd ${install_dir} && axel -n 10 -a ${down_url} -o ${file_name}
+	cd ${install_dir} && axel -n 24 -a ${down_url} -o ${file_name}
   if [ $? = '0' ];then
 		diy_echo "${online_select_version}下载完成..." "" "${info}"
 	else
