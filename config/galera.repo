@@ -1,5 +1,5 @@
 [galera]
 name = Galera
-baseurl = https://releases.galeracluster.com/galera-3/DIST/RELEASE/ARCH
+baseurl = https://releases.galeracluster.com/galera-3/centos/7/x86_64
 gpgkey = https://releases.galeracluster.com/GPG-KEY-galeracluster.com
 gpgcheck = 1
