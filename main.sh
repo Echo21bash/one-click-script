@@ -7,19 +7,20 @@
 #                            by---wang2017.7
 ###########################################################
 workdir=$(cd $(dirname $0); pwd)
-. ${workdir}/bin/public.sh
-. ${workdir}/bin/version_down_unzip.sh
-. ${workdir}/bin/system_set.sh
-. ${workdir}/bin/tools.sh
-. ${workdir}/bin/system_optimize.sh
-. ${workdir}/bin/basic_environment.sh
-. ${workdir}/bin/web_services.sh
-. ${workdir}/bin/database_services.sh
-. ${workdir}/bin/middleware_services.sh
-. ${workdir}/bin/storage_service.sh
-. ${workdir}/bin/operation_platform.sh
-. ${workdir}/bin/virtualization_platform.sh
+. ${workdir}/scripts/public.sh
+. ${workdir}/scripts/version_down_unzip.sh
+. ${workdir}/scripts/system_set.sh
+. ${workdir}/scripts/tools.sh
+. ${workdir}/scripts/system_optimize.sh
+. ${workdir}/scripts/basic_environment.sh
+. ${workdir}/scripts/web_services.sh
+. ${workdir}/scripts/database_services.sh
+. ${workdir}/scripts/middleware_services.sh
+. ${workdir}/scripts/storage_service.sh
+. ${workdir}/scripts/operation_platform.sh
+. ${workdir}/scripts/virtualization_platform.sh
 
+export PATH=${workdir}/bin:$PATH
 
 mysql_tool(){
 output_option 'MySQL常用脚本' '添加MySQL备份脚本  找回MySQLroot密码 ' 'num'
