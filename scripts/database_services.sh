@@ -24,6 +24,10 @@ mysql_install(){
 	#安装编译工具及库文件
 	echo -e "${info} 正在安装编译工具及库文件..."
 	yum install -y perl-Module-Pluggable libaio autoconf boost-program-options
+	if [[ $branch = 2 ]];then
+		cat ${workdir}/config/galera.repo >/etc/yum.repos.d/galera.repo
+		yum install -y galera-3
+	fi
 	if [ $? = "0" ];then
 		echo -e "${info} 编译工具及库文件安装成功."
 	else
