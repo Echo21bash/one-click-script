@@ -20,6 +20,7 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/operation_platform.sh
 . ${workdir}/scripts/virtualization_platform.sh
 
+chmod -R +x ${workdir}/bin
 export PATH=${workdir}/bin:$PATH
 
 mysql_tool(){
