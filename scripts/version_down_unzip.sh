@@ -103,10 +103,10 @@ online_version(){
 			fi
 		;;
 		mongodb)
-			wget ${url}/x86_64-${version_number} -O /tmp/all_version >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 		;;
 		tomcat)
-			wget ${url}/${soft_name}-${version_number} -O /tmp/all_version >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
 		;;
 		k8s)
 			yum list --showduplicates kubeadm >/tmp/all_version
@@ -155,10 +155,10 @@ online_version(){
 			all_version_general
 		;;
 		java)
-			wget ${url}/md5sum.txt -O /tmp/all_version >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}/md5sum.txt >/dev/null 2>&1
 		;;
 		ruby)
-			wget ${url}/${version_number} -O /tmp/all_version >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}/${version_number} >/dev/null 2>&1
 		;;
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
