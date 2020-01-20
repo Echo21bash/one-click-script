@@ -97,9 +97,9 @@ online_version(){
 	case "$soft_name" in
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				curl -sL ${mysql_url}/MySQL-${version_number} >/tmp/all_version
+				curl -Ls -o /tmp/all_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
 			else
-				curl -sL ${mysql_galera_url}/mysql-wsrep-${version_number}/binary >/tmp/all_version
+				curl -Ls -o /tmp/all_version ${mysql_galera_url}/mysql-wsrep-${version_number}/binary >/dev/null 2>&1
 			fi
 		;;
 		mongodb)
