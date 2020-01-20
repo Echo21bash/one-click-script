@@ -1,0 +1,5 @@
+[galera]
+name = Galera
+baseurl = https://releases.galeracluster.com/galera-3/DIST/RELEASE/ARCH
+gpgkey = https://releases.galeracluster.com/GPG-KEY-galeracluster.com
+gpgcheck = 1
