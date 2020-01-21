@@ -25,7 +25,11 @@ mysql_install(){
 	echo -e "${info} 正在安装编译工具及库文件..."
 	yum install -y perl-Module-Pluggable libaio autoconf boost-program-options
 	if [[ $branch = 2 ]];then
-		cat ${workdir}/config/galera.repo >/etc/yum.repos.d/galera.repo
+		if [[ ${os_release} = 6 ]];then
+			cat ${workdir}/config/galera6.repo >/etc/yum.repos.d/galera.repo
+		elif [[ ${os_release} = 7 ]];then
+			cat ${workdir}/config/galera7.repo >/etc/yum.repos.d/galera.repo
+		fi
 		yum install -y galera-3
 	fi
 	if [ $? = "0" ];then
