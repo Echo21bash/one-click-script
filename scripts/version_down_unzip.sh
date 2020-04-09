@@ -281,7 +281,7 @@ install_dir_set(){
 	if [[ ! -d ${home_dir} ]];then
 		mkdir -p ${home_dir}
 	else
-		if [[ `ls -A ${home_dir}` = '' ]];then
+		if [[ `ls -A ${home_dir}` ! = '' ]];then
 			diy_echo "Already existing folders${home_dir},Please check!" "" "${error}"
 			exit 1
 		fi
