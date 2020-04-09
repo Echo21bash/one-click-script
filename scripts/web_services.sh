@@ -35,7 +35,7 @@ tomcat_install(){
 tomcat_config(){
 	#修改配置参数
 	sed -i '/<Connector port="8080" protocol="HTTP\/1.1"/,/redirectPort="8443" \/>/s/redirectPort="8443" \/>/redirectPort="8443"/' ${home_dir}/conf/server.xml
-	sed -i '/^               redirectPort="8443"$/r ../config/tomcat_service' ${home_dir}/conf/server.xml
+	sed -i '/^               redirectPort="8443"$/r ../config/tomcat_service.txt' ${home_dir}/conf/server.xml
 	sed -i '/<\/Host>/i \      <!--<Context path="" docBase="" reloadable="true">\n      <\/Context>-->' ${home_dir}/conf/server.xml
 
   #禁用shutdown端口
