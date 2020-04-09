@@ -55,12 +55,7 @@ php_install_set(){
 		output_option '请选择需要安装的php模块(可多选)' 'redis memcached' 'php_modules'
 		php_modules=(${output_value[@]})
 	fi
-	php_install_depend	
-	[ ${php_mode} = 1 ] && fpm="" && apxs2="--with-apxs2=`find / -name apxs`"
-	[ ${php_mode} = 2 ] && fpm="--enable-fpm" && apxs2=""
-	[ ${php_mode} = 3 ] && fpm="--enable-fpm" && apxs2="--with-apxs2=`which apxs`"
-	[[ ${version_number} < '7.0' ]] && mysql="--with-mysql=mysqlnd"
-	[[ ${version_number} = '7.0' || ${version_number} > '7.0' ]] && mysql=""
+
 }
 
 php_install_depend(){
@@ -95,7 +90,12 @@ php_install(){
 }
 
 php_compile(){
-
+	#编译参数获取
+	[ ${php_mode} = 1 ] && fpm="" && apxs2="--with-apxs2=`find / -name apxs`"
+	[ ${php_mode} = 2 ] && fpm="--enable-fpm" && apxs2=""
+	[ ${php_mode} = 3 ] && fpm="--enable-fpm" && apxs2="--with-apxs2=`which apxs`"
+	[[ ${version_number} < '7.0' ]] && mysql="--with-mysql=mysqlnd"
+	[[ ${version_number} = '7.0' || ${version_number} > '7.0' ]] && mysql=""
 	./configure --prefix=${home_dir} --with-config-file-path=${home_dir}/etc --with-config-file-scan-dir=${home_dir}/etc.d ${fpm} ${apxs2} ${mysql} --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-mhash --with-openssl --with-zlib --with-bz2 --with-curl --with-libxml-dir --with-gd --with-jpeg-dir --with-png-dir --with-zlib --enable-mbstring --with-mcrypt --enable-sockets --with-iconv-dir --with-xsl --enable-zip --with-pcre-dir --with-pear --enable-session  --enable-gd-native-ttf --enable-xml --with-freetype-dir --enable-inline-optimization --enable-shared --enable-bcmath --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-mbregex --enable-pcntl --with-xmlrpc --with-gettext --enable-exif --with-readline --with-recode --with-tidy --enable-soap
 	make && make install
 	if [ $? = "0" ];then
@@ -198,6 +198,7 @@ php_install_ctl(){
 	php_install_set
 	install_dir_set
 	download_unzip
+	php_install_depend
 	php_install
 	clear_install
 }
