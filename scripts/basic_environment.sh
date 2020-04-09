@@ -55,7 +55,7 @@ php_install_set(){
 		output_option '请选择需要安装的php模块(可多选)' 'redis memcached' 'php_modules'
 		php_modules=(${output_value[@]})
 	fi
-		
+	php_install_depend	
 	[ ${php_mode} = 1 ] && fpm="" && apxs2="--with-apxs2=`find / -name apxs`"
 	[ ${php_mode} = 2 ] && fpm="--enable-fpm" && apxs2=""
 	[ ${php_mode} = 3 ] && fpm="--enable-fpm" && apxs2="--with-apxs2=`which apxs`"
@@ -198,7 +198,6 @@ php_install_ctl(){
 	php_install_set
 	install_dir_set
 	download_unzip
-	php_install_depend
 	php_install
 	clear_install
 }
