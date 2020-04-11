@@ -35,7 +35,7 @@ tomcat_install(){
 tomcat_config(){
 	#修改配置参数
 	sed -i '/<Connector port="8080" protocol="HTTP\/1.1"/,/redirectPort="8443" \/>/s/redirectPort="8443" \/>/redirectPort="8443"/' ${home_dir}/conf/server.xml
-	sed -i '/^               redirectPort="8443"$/r ../config/tomcat_service.txt' ${home_dir}/conf/server.xml
+	sed -i '/^               redirectPort="8443"$/r '${workdir}'/config/tomcat_service.txt' ${home_dir}/conf/server.xml
 	sed -i '/<\/Host>/i \      <!--<Context path="" docBase="" reloadable="true">\n      <\/Context>-->' ${home_dir}/conf/server.xml
 
 	#禁用shutdown端口
@@ -68,7 +68,7 @@ check_java_version(){
 memory_overflow_config(){
 
 	N=`grep -n '^# OS' ${home_dir}/bin/catalina.sh | awk -F ':' '{print $1}'`
-	sed -i ''$N'i# JAVA_OPTS (Optional) Java runtime options used when any command is executed.' ${home_dir}/bin/catalina.sh
+	sed -i "$N i# JAVA_OPTS (Optional) Java runtime options used when any command is executed.\n" ${home_dir}/bin/catalina.sh
 	
 	if [[ ${java_version} < '1.8' ]];then
 		sed -i "/^# JAVA_OPTS.*/r ${workdir}/config/tomcat_jvm7.txt" ${home_dir}/bin/catalina.sh
@@ -141,7 +141,7 @@ nginx_compile(){
 
 nginx_config(){
 	conf_dir=${home_dir}/conf
-	cat ../config/nginx.conf >${conf_dir}/nginx.conf
+	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
 	\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	add_log_cut nginx ${home_dir}/logs/*.log
 }

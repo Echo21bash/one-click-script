@@ -1,11 +1,11 @@
-JAVA_OPTS="-Xms512m
--Xmx512m
--Xmn192m
--Xss512k
--XX:SurvivorRatio=10
--XX:MetaspaceSize=96m
--XX:MaxMetaspaceSize=128m
--XX:+UseConcMarkSweepGC
--XX:+CMSScavengeBeforeRemark
--XX:+CMSParallelRemarkEnabled
+JAVA_OPTS="-Xms512m \
+-Xmx512m \
+-Xmn192m \
+-Xss512k \
+-XX:SurvivorRatio=10 \
+-XX:MetaspaceSize=96m \
+-XX:MaxMetaspaceSize=128m \
+-XX:+UseConcMarkSweepGC \
+-XX:+CMSScavengeBeforeRemark \
+-XX:+CMSParallelRemarkEnabled \
 -XX:+AggressiveOpts"
