@@ -184,18 +184,29 @@ minio_install_ctl(){
 }
 
 fastdfs_install_set(){
-	output_option '安装模式' '单机 集群' 'deploy_mode'
-	output_option '安装的模块' 'tracker storage' 'install_module'
+	
 	input_option '请输入文件存储路径' '/data/fdfs' 'file_dir'
 	file_dir=${input_value}
-
-	if [[ ${install_module[@]} =~ '1' ]];then
-		input_option '请输入tracker端口' '22122' 'tracker_port'
+	diy_echo "配置tracker服务" "${yellow}" "${info}"
+	input_option '请输入tracker端口' '22122' 'tracker_port'
+	diy_echo "配置storage服务" "${yellow}" "${info}"
+	input_option '请输入storage端口' '23000' 'storage_port'
+	input_option '请输入tracker_server地址(多个空格隔开)' '127.0.0.1:22122' 'tracker_ip'
+	tracker_ip=(${input_value[@]})
+	input_option '是否开启fastdht' 'n' 'fastdht'
+	fastdht=${input_value}
+	yes_or_no ${fastdht}
+	if [[ $? = 0 ]];then
+		input_option '请输入fastdht地址(多个空格隔开)' '127.0.0.1:11411' 'fastdht_ip'
+		fastdht_ip=(${input_value[@]})
+		fastdht=y
 	fi
-	if [[ ${install_module[@]} =~ '2' ]];then
-		input_option '请输入storage端口' '23000' 'storage_port'
-		input_option '请输入tracker_server地址' '127.0.0.1:22122' 'tracker_ip'
-		tracker_ip=(${input_value[@]})
+	input_option '是否安装fastdht' 'y' 'install_fastdht'
+	install_fastdht=${input_value}
+	yes_or_no ${install_fastdht}
+	if [[ $? = 0 ]];then
+		input_option '请输入fastdht端口' '11411' 'fastdht_port'
+		install_fastdht=y
 	fi
 
 }
@@ -227,7 +238,7 @@ fastdfs_install(){
 	sed -i 's#TARGET_INIT_PATH=.*#TARGET_INIT_PATH=$DESTDIR/etc/init.d#' ./make.sh
 
 	diy_echo "正在安装fastdfs服务..." "" "${info}"
-		./make.sh && ./make.sh install
+	./make.sh && ./make.sh install
 	if [[ $? = '0' ]];then
 		diy_echo "fastdfs安装完成." "" "${info}"
 	else
@@ -237,7 +248,23 @@ fastdfs_install(){
 	ln -sfn ${home_dir}/include/fastdfs /usr/include
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib/libfdfsclient.so
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib64/libfdfsclient.so
-
+	
+	if [[ ${install_fastdht} = 'y' ]];then
+		wget https://codeload.github.com/hebaodanroot/fastdht/tar.gz/patch-1 -O fastdht-patch-1.tar.gz && tar -zxf fastdht-patch-1.tar.gz
+		cd fastdht-patch-1
+		#fastdht安装目录配置
+		sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
+		sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh
+		sed -i 's#TARGET_CONF_PATH=.*#TARGET_CONF_PATH=$DESTDIR/etc#' ./make.sh
+		sed -i 's#TARGET_INIT_PATH=.*#TARGET_INIT_PATH=$DESTDIR/etc/init.d#' ./make.sh
+		./make.sh && ./make.sh install
+		if [[ $? = '0' ]];then
+			diy_echo "fastdht安装完成." "" "${info}"
+		else
+			diy_echo "fastdht安装失败." "${yellow}" "${error}"
+			exit
+		fi
+	fi
 }
 
 fastdfs_config(){
@@ -246,37 +273,54 @@ fastdfs_config(){
 	cp ${home_dir}/etc/storage.conf.sample ${home_dir}/etc/storage.conf
 	cp ${home_dir}/etc/client.conf.sample ${home_dir}/etc/client.conf
 	get_ip
-	
+
 	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/client.conf
 	sed -i "s#^tracker_server.*#tracker_server=${local_ip}:${tracker_port}#" ${home_dir}/etc/client.conf
 
-	if [[ ${install_module[@]} =~ '1' ]];then
-		sed -i "s#^port.*#port=${tracker_port}#" ${home_dir}/etc/tracker.conf
-		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/tracker.conf
+
+	sed -i "s#^port.*#port=${tracker_port}#" ${home_dir}/etc/tracker.conf
+	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/tracker.conf
+	
+	sed -i "s#^port.*#port=${storage_port}#" ${home_dir}/etc/storage.conf
+	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/storage.conf
+	sed -i "s#^store_path0.*#store_path0=${file_dir}#" ${home_dir}/etc/storage.conf
+	sed -i "s#^tracker_server.*#\#tracker_server=127.0.0.1:22122#" ${home_dir}/etc/storage.conf
+	sed -i "/#standard log/itracker_server=${input_value[0]}" ${home_dir}/etc/storage.conf
+	sed -i "/#standard log/itracker_server=${input_value[1]}" ${home_dir}/etc/storage.conf
+	sed -i "/#standard log/itracker_server=${input_value[2]}" ${home_dir}/etc/storage.conf
+	if [[ ${fastdht} = 'y' ]];then
+		sed -i "s#^check_file_duplicate.*#check_file_duplicate=1#" ${home_dir}/etc/storage.conf
+		sed -i "/##include /home/yuqing/fastdht/a#include ${home_dir}/etc/fdht_servers.conf" ${home_dir}/etc/storage.conf
+		len=${#fastdht_ip[@]}
+		echo "group_count = ${len}">${home_dir}/etc/fdht_servers.conf
+		for ((i=0;i<$len;i++))
+		do
+			echo "group0 = fastdht_ip[$i]">>${home_dir}/etc/fdht_servers.conf
+		done
 	fi
-	if [[ ${install_module[@]} =~ '2' ]];then
-		sed -i "s#^port.*#port=${storage_port}#" ${home_dir}/etc/storage.conf
-		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/storage.conf
-		sed -i "s#^store_path0.*#store_path0=${file_dir}#" ${home_dir}/etc/storage.conf
-		sed -i "s#^tracker_server.*#\#tracker_server=127.0.0.1:22122#" ${home_dir}/etc/storage.conf
-		sed -i "/#standard log/itracker_server=${input_value[0]}" ${home_dir}/etc/storage.conf
-		sed -i "/#standard log/itracker_server=${input_value[1]}" ${home_dir}/etc/storage.conf
-		sed -i "/#standard log/itracker_server=${input_value[2]}" ${home_dir}/etc/storage.conf
+
+	if [[ ${install_fastdht} = 'y' ]];then
+		sed -i "s#^port.*#port=${fastdht_port}#" ${home_dir}/etc/fdhtd.conf
+		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/fdhtd.conf
 	fi
 	add_log_cut fastdfs ${file_dir}/logs/*.log
 	add_sys_env "PATH=${home_dir}/bin:\$PATH"
 }
 
 add_fastdfs_service(){
-	if [[ ${install_module[@]} =~ '1' ]];then
-		ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
+	
+	ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
+	conf_system_service
+	add_system_service fdfs_trackerd ${home_dir}/init
+
+	ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
+	conf_system_service
+	add_system_service fdfs_storaged ${home_dir}/init
+
+	if [[ ${install_fastdht} = 'y' ]];then
+		ExecStart="${home_dir}/bin/fdhtd ${home_dir}/etc/fdhtd.conf start"
 		conf_system_service
-		add_system_service fdfs_trackerd ${home_dir}/init
-	fi
-	if [[ ${install_module[@]} =~ '2' ]];then
-		ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
-		conf_system_service
-		add_system_service fdfs_storaged ${home_dir}/init
+		add_system_service fastdht ${home_dir}/init
 	fi
 }
 
