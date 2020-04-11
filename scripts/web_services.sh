@@ -122,9 +122,9 @@ nginx_compile(){
 	cd ${tar_dir}
 	if [[ x${add_module} = 'x' ]];then
 		./configure --prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module
-	else
-		wget https://codeload.github.com/happyfish100/libfastcommon/tar.gz/master -O libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
-		cd libfastcommon-master && ./make.sh  && ./make.sh install && cd ..
+	fi
+	if [[ x${add_module} = 'x1' ]];then
+		diy_echo "请确保正确安装了fastdfs,否则会编译失败！" "${yellow}" "${warning}"
 		wget https://codeload.github.com/happyfish100/fastdfs-nginx-module/zip/master -O fastdfs-nginx-module-master.zip && unzip -o fastdfs-nginx-module-master.zip
 		./configure --prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module --add-module=${tar_dir}/${add_module_value}-master/src
 		#sed -i 's///'
@@ -141,7 +141,8 @@ nginx_compile(){
 
 nginx_config(){
 	conf_dir=${home_dir}/conf
-	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
+	\cp ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
+	\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	add_log_cut nginx ${home_dir}/logs/*.log
 }
 
