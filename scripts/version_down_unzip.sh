@@ -119,7 +119,7 @@ online_version(){
 	}
 
 	ver_rule_general1(){
-		option=$(cat /tmp/all_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u -n  -k 3 -t '.' )
+		option=$(cat /tmp/all_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,3}" | sort -u -n  -k 3 -t '.' )
 	}
 
 	ver_rule_general2(){
@@ -127,7 +127,7 @@ online_version(){
 	}
 	
 	ver_rule_last_rev(){
-		option='latest version'
+		option='latest-version'
 	}
 	
 	ver_rule_other(){
@@ -254,7 +254,7 @@ online_down(){
 		;;
 	esac
 
-	cd ${install_dir} && axel -n 24 -a ${down_url} -o ${file_name}
+	cd ${install_dir} && axel -n 24 -a ${down_url} -o ${file_name} || curl -sL ${down_url} -o ${file_name}
   if [ $? = '0' ];then
 		diy_echo "${online_select_version}下载完成..." "" "${info}"
 	else
