@@ -188,8 +188,15 @@ fastdfs_install_set(){
 	output_option '安装的模块' 'tracker storage' 'install_module'
 	input_option '请输入文件存储路径' '/data/fdfs' 'file_dir'
 	file_dir=${input_value}
-	input_option '请输入tracker端口' '22122' 'tracker_port'
-	input_option '请输入storage端口' '23000' 'storage_port'
+
+	if [[ ${install_module[@]} =~ '1' ]];then
+		input_option '请输入tracker端口' '22122' 'tracker_port'
+	fi
+	if [[ ${install_module[@]} =~ '2' ]];then
+		input_option '请输入storage端口' '23000' 'storage_port'
+		input_option '请输入tracker_server地址' '127.0.0.1:22122' 'tracker_ip'
+		tracker_ip=(${input_value[@]})
+	fi
 
 }
 
@@ -239,30 +246,38 @@ fastdfs_config(){
 	cp ${home_dir}/etc/storage.conf.sample ${home_dir}/etc/storage.conf
 	cp ${home_dir}/etc/client.conf.sample ${home_dir}/etc/client.conf
 	get_ip
-	sed -i "s#base_path=.*#base_path=${file_dir}#" ${home_dir}/etc/client.conf
-	sed -i "s#tracker_server=.*#tracker_server=${local_ip}:${tracker_port}#" ${home_dir}/etc/client.conf
+	
+	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/client.conf
+	sed -i "s#^tracker_server.*#tracker_server=${local_ip}:${tracker_port}#" ${home_dir}/etc/client.conf
 
-	sed -i "s#port=23000#port=${storage_port}#" ${home_dir}/etc/storage.conf
-	sed -i "s#base_path=.*#base_path=${file_dir}#" ${home_dir}/etc/storage.conf
-	sed -i "s#store_path0=.*#store_path0=${file_dir}#" ${home_dir}/etc/storage.conf
-	sed -i "s#tracker_server=.*#tracker_server=${local_ip}:${tracker_port}#" ${home_dir}/etc/storage.conf
-
-	sed -i "s#port=22122#port=${tracker_port}#" ${home_dir}/etc/tracker.conf
-	sed -i "s#base_path=.*#base_path=${file_dir}#" ${home_dir}/etc/tracker.conf
+	if [[ ${install_module[@]} =~ '1' ]];then
+		sed -i "s#^port.*#port=${tracker_port}#" ${home_dir}/etc/tracker.conf
+		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/tracker.conf
+	fi
+	if [[ ${install_module[@]} =~ '2' ]];then
+		sed -i "s#^port.*#port=${storage_port}#" ${home_dir}/etc/storage.conf
+		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/storage.conf
+		sed -i "s#^store_path0.*#store_path0=${file_dir}#" ${home_dir}/etc/storage.conf
+		sed -i "s#^tracker_server.*#\#tracker_server=127.0.0.1:22122#" ${home_dir}/etc/storage.conf
+		sed -i "/#standard log/itracker_server=${input_value[0]}" ${home_dir}/etc/storage.conf
+		sed -i "/#standard log/itracker_server=${input_value[1]}" ${home_dir}/etc/storage.conf
+		sed -i "/#standard log/itracker_server=${input_value[2]}" ${home_dir}/etc/storage.conf
+	fi
 	add_log_cut fastdfs ${file_dir}/logs/*.log
 	add_sys_env "PATH=${home_dir}/bin:\$PATH"
 }
 
 add_fastdfs_service(){
-
-	ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
-	conf_system_service
-	add_system_service fdfs_trackerd ${home_dir}/init
-
-	ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
-	conf_system_service
-	add_system_service fdfs_storaged ${home_dir}/init
-
+	if [[ ${install_module[@]} =~ '1' ]];then
+		ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
+		conf_system_service
+		add_system_service fdfs_trackerd ${home_dir}/init
+	fi
+	if [[ ${install_module[@]} =~ '2' ]];then
+		ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
+		conf_system_service
+		add_system_service fdfs_storaged ${home_dir}/init
+	fi
 }
 
 fastdfs_install_ctl(){
