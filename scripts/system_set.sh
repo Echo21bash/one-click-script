@@ -197,8 +197,16 @@ add_system_service(){
 	service_file_dir=$2
 	start_arg=$3
 	if [[ "${os_release}" < '7' ]]; then
+		if [[ -f /etc/init.d/${service_name} ]];then
+			input_option "已经存在服务名${service_name},请重新设置服务名称(可覆盖)" "${service_name}" 'service_name'
+			service_name=${input_value}
+		fi
 		\cp ${service_file_dir} /etc/init.d/${service_name}
 	elif [[ "${os_release}" > '6' ]]; then
+		if [[ -f /etc/systemd/system/${service_name}.service ]];then
+			input_option "已经存在服务名${service_name},请重新设置服务名称(可覆盖)" "${service_name}" 'service_name'
+			service_name=${input_value}
+		fi
 		\cp ${service_file_dir} /etc/systemd/system/${service_name}.service
 	fi
 	service_control
