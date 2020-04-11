@@ -38,13 +38,13 @@ tomcat_config(){
 	sed -i '/^               redirectPort="8443"$/r ../config/tomcat_service.txt' ${home_dir}/conf/server.xml
 	sed -i '/<\/Host>/i \      <!--<Context path="" docBase="" reloadable="true">\n      <\/Context>-->' ${home_dir}/conf/server.xml
 
-  #禁用shutdown端口
-  sed -i 's/<Server port="8005"/<Server port="-1"/' ${home_dir}/conf/server.xml
-  #注释AJP
-  sed -i 's#<Connector port="8009".*#<!-- <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /> -->#' ${home_dir}/conf/server.xml
- 	#修改http端口
-  sed -i 's/<Connector port="8080"/<Connector port="'${http_port}'"/' ${home_dir}/conf/server.xml
-  #日志切割
+	#禁用shutdown端口
+	sed -i 's/<Server port="8005"/<Server port="-1"/' ${home_dir}/conf/server.xml
+	#注释AJP
+	sed -i 's#<Connector port="8009".*#<!-- <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" /> -->#' ${home_dir}/conf/server.xml
+	#修改http端口
+	sed -i 's/<Connector port="8080"/<Connector port="'${http_port}'"/' ${home_dir}/conf/server.xml
+	#日志切割
 	add_log_cut ${home_dir_name} ${home_dir}/logs/catalina.out
 }
 
@@ -141,7 +141,7 @@ nginx_compile(){
 
 nginx_config(){
 	conf_dir=${home_dir}/conf
-	\cp ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
+	cat ../config/nginx.conf >${conf_dir}/nginx.conf
 	\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	add_log_cut nginx ${home_dir}/logs/*.log
 }
