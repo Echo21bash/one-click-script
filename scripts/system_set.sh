@@ -176,6 +176,7 @@ conf_system_service(){
 		Environment=${Environment:-}
 
 		WorkingDirectory=${WorkingDirectory:-}
+		PIDFile=${PIDFile:-}
 		ExecStart=${ExecStart:-} ${ARGS:-}
 		ExecReload=${ExecReload:-/bin/kill -s HUP \$MAINPID}
 		ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}

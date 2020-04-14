@@ -272,6 +272,9 @@ fastdfs_config(){
 	cp ${home_dir}/etc/tracker.conf.sample ${home_dir}/etc/tracker.conf
 	cp ${home_dir}/etc/storage.conf.sample ${home_dir}/etc/storage.conf
 	cp ${home_dir}/etc/client.conf.sample ${home_dir}/etc/client.conf
+	cp ${tar_dir}/conf/http.conf ${home_dir}/etc
+	cp ${tar_dir}/conf/mime.types ${home_dir}/etc
+	cp ${workdir}/conf/fastdfs_start.sh ${home_dir}/bin/start.sh && chmod +x ${home_dir}/bin/start.sh
 	get_ip
 
 	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/client.conf
@@ -315,18 +318,22 @@ fastdfs_config(){
 
 add_fastdfs_service(){
 	
-	ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
+	Type="forking"
+	ExecStart="${home_dir}/bin/start.sh fdfs_trackerd"
+	PIDFile="${file_dir}/data/fdfs_trackerd.pid"
 	conf_system_service
 	add_system_service fdfs_trackerd ${home_dir}/init
 
-	ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
+	ExecStart="${home_dir}/bin/start.sh fdfs_storaged"
+	PIDFile="${file_dir}/data/fdfs_storaged.pid"
 	conf_system_service
 	add_system_service fdfs_storaged ${home_dir}/init
 
 	if [[ ${install_fastdht} = 'y' ]];then
-		ExecStart="${home_dir}/bin/fdhtd ${home_dir}/etc/fdhtd.conf start"
+		ExecStart="${home_dir}/bin/start.sh fdhtd"
+		PIDFile="${file_dir}/data/fdhtd.pid.pid"
 		conf_system_service
-		add_system_service fastdht ${home_dir}/init
+		add_system_service fdhtd ${home_dir}/init
 	fi
 }
 
