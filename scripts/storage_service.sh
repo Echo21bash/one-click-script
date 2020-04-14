@@ -285,17 +285,23 @@ fastdfs_config(){
 	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/storage.conf
 	sed -i "s#^store_path0.*#store_path0=${file_dir}#" ${home_dir}/etc/storage.conf
 	sed -i "s#^tracker_server.*#\#tracker_server=127.0.0.1:22122#" ${home_dir}/etc/storage.conf
-	sed -i "/#standard log/itracker_server=${input_value[0]}" ${home_dir}/etc/storage.conf
-	sed -i "/#standard log/itracker_server=${input_value[1]}" ${home_dir}/etc/storage.conf
-	sed -i "/#standard log/itracker_server=${input_value[2]}" ${home_dir}/etc/storage.conf
+	#配置多个tracker_ip
+	len=${#fastdht_ip[@]}
+	for ((i=0;i<$len;i++))
+	do
+		sed -i "/#standard log/itracker_server=${tracker_ip[$i]}" ${home_dir}/etc/storage.conf
+	done
+	
+
 	if [[ ${fastdht} = 'y' ]];then
 		sed -i "s#^check_file_duplicate.*#check_file_duplicate=1#" ${home_dir}/etc/storage.conf
 		sed -i "/##include /home/yuqing/fastdht/a#include ${home_dir}/etc/fdht_servers.conf" ${home_dir}/etc/storage.conf
+		#配置多个fdht_servers
 		len=${#fastdht_ip[@]}
 		echo "group_count = ${len}">${home_dir}/etc/fdht_servers.conf
 		for ((i=0;i<$len;i++))
 		do
-			echo "group0 = fastdht_ip[$i]">>${home_dir}/etc/fdht_servers.conf
+			echo "group0 = ${fastdht_ip[$i]}">>${home_dir}/etc/fdht_servers.conf
 		done
 	fi
 
