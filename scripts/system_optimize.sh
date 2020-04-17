@@ -29,7 +29,7 @@ system_optimize_set(){
 }
 
 system_optimize_yum(){
-	diy_echo "添加必要yum源,并安装必要的命令..." "" "${info}"
+	
 	[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 
 	if [[ ${os_release} < "7" ]];then
@@ -47,14 +47,14 @@ system_optimize_yum(){
 	fi
 	yum -y install bash-completion wget chrony vim
 	if [ $? -eq 0 ];then
-		diy_echo "添加完成yum源,并安装必要的命令..." "" "${info}"
+		diy_echo "完成yum源优化,并安装必要的命令..." "" "${info}"
 	else
-		diy_echo "更新yum源失败请检查网络!" "" "${error}"
+		diy_echo "yum源优化失败请检查网络!" "" "${error}"
 	fi
 }
 
 system_optimize_Limits(){
-	echo -e "${info} Removing system process and file open limit..."
+	echo -e "${info} 最大进程数和最大打开文件数优化"
 	LIMIT=`grep nofile /etc/security/limits.conf |grep -v "^#"|wc -l`
 	if [ $LIMIT -eq 0 ];then
 		[ ! -f /etc/security/limits.conf.bakup ] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
@@ -63,9 +63,9 @@ system_optimize_Limits(){
 		[ -f /etc/security/limits.d/20-nproc.conf ] && sed -i 's/*          soft    nproc     4096/*          soft    nproc     65536/' /etc/security/limits.d/20-nproc.conf
 		ulimit -HSn 65536
 		if [ $? -eq 0 ];then
-			echo -e "${info} Remove system process and file open limit successfully"
+			diy_echo "完成最大进程数和最大打开文件数优化" "" "${info}"
 		else
-			echo -e "${error} Failed to remove system process and file open limit"
+			diy_echo "完成最大进程数和最大打开文件数优化" "${red}" "${error}"
 		fi
 	fi
   #Centos7对于systemd service的资源设置，则需修改全局配置，全局配置文件放在/etc/systemd/system.conf和/etc/systemd/user.conf，同时也会加载两个对应目录中的所有.conf文件/etc/systemd/system.conf.d/*.conf和/etc/systemd/user.conf.d/*.conf。system.conf是系统实例使用的，user.conf是用户实例使用的。
@@ -82,7 +82,7 @@ system_optimize_Limits(){
 }
 
 system_optimize_sshd(){
-	echo -e "${info} Modifing ssh default parameters..."
+
 	[ ! -f /etc/ssh/sshd_config.bakup ] && cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bakup
 	sed -i 's/#Port 22/Port 52233/g' /etc/ssh/sshd_config
 	sed -i 's/^#LogLevel INFO/LogLevel INFO/g' /etc/ssh/sshd_config
@@ -98,31 +98,28 @@ system_optimize_sshd(){
 	echo 'UseDNS no'
 	echo '+------------------------------------+'
 	if [[ ${os_release} < '7' ]];then
-		/etc/init.d/sshd reload >/dev/null 2>&1 && echo -e "${info} Modify ssh default parameters successfully" || echo -e "${error} Failed to modify ssh default parameters"
+		/etc/init.d/sshd reload >/dev/null 2>&1 && diy_echo "完成SSHD服务优化" "" "${info}" || diy_echo "SSHD服务优化失败" "" "${error}"
 	else
-		systemctl restart sshd && echo -e "${info} Modify ssh default parameters successfully" || echo -e "${error} Failed to modify ssh default parameters"
+		systemctl restart sshd && diy_echo "完成SSHD服务优化" "" "${info}" || diy_echo "SSHD服务优化失败" "" "${error}"
 	fi
 }
 
 system_optimize_systime(){
-	echo -e "${info} Synchronizing system time..."
 	rm -rf /etc/localtime
 	ln -sfn /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	NTPDATE=`grep ntpdate /var/spool/cron/root 2>/dev/null |wc -l`
+	yum -y install chrony
+
 	if [ $NTPDATE -eq 0 ];then
-		echo "#times sync by lee at bakup" >>/var/spool/cron/root
-		echo "0 */2 * * * /usr/sbin/ntpdate time.pool.aliyun.com >/dev/null 2>&1" >> /var/spool/cron/root
-		ntpdate time.pool.aliyun.com > /dev/null 2>&1
+		sed '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
 		if [ $? -eq 0 ];then
-			echo -e "${info} Configuration time synchronization completed"
+			diy_echo "完成时间同步配置" "" "${info}"
 		else
-			echo -e "${error} Configuration time synchronization failed"
+			diy_echo "时间同步配置失败" "" "${error}"
 		fi
 	fi
 }
 
 system_optimize_kernel(){
-	echo -e "${info} Optimizing kernel parameters"
 	[ ! -f /etc/sysctl.conf.bakup ] && cp /etc/sysctl.conf /etc/sysctl.conf.bakup
 	[[ -z `grep -E '^net.ipv4.tcp_fin_timeout' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_fin_timeout = 10'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_keepalive_time' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_keepalive_time = 600'>>/etc/sysctl.conf
@@ -139,52 +136,51 @@ system_optimize_kernel(){
 	[[ -z `grep -E '^vm.max_map_count' /etc/sysctl.conf` ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf
 	[[ -z `grep -E '^vm.swappiness' /etc/sysctl.conf` ]] && echo 'vm.swappiness = 0'>>/etc/sysctl.conf
 
-
 	sysctl -p>/dev/null 2>&1
-	echo -e "${info} Optimize kernel parameter completion"
+	diy_echo "完成内核参数调整" "" "${info}"
+
 }
 
 system_optimize_selinux(){
-  
-	echo -e "${info} Disabling selinux and closing the firewall..."
+
 	[ ! -f /etc/selinux/config.bakup ] && cp /etc/selinux/config /etc/selinux/config.bakup
 	[[ ${os_release} < "7" ]] && /etc/init.d/iptables stop >/dev/null
 	[[ ${os_release} > "6" ]] && systemctl stop firewalld.service >/dev/null
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	setenforce 0
 	if [ ! -z `grep SELINUX=disabled /etc/selinux/config` ];then
-		echo -e "${info} Disable selinux and close the firewall to complete"
+		diy_echo "完成禁用selinux、关闭防火墙" "" "${info}"
 	else
-		echo -e "${error} Disabling selinux and shutting down the firewall failed"
+		diy_echo "禁用selinux、关闭防火墙失败" "" "${error}"
 	fi
 }
 
 system_optimize_service(){
-	echo -e "${info} Slashing startup items..."
+
 	if [[ ${os_release} < "7" ]];then
 		for A in `chkconfig --list |grep -E '3:on|3:启用' |awk '{print $1}' `
 		do
 			chkconfig $A off
 		done
-		for A in rsyslog network sshd crond;do chkconfig $A on;done
+		for A in rsyslog network sshd crond chronyd;do chkconfig $A on;done
 	else
 		for A in `systemctl list-unit-files|grep enabled |awk '{print $1}'`
-		do 
+		do
 			systemctl disable $A >/dev/null
 		done
-		for A in rsyslog network sshd crond;do systemctl enable $A;done
+		for A in rsyslog network sshd crond chronyd;do systemctl enable $A;done
 	fi
 	diy_echo "精简开机自启动完成" "" "${info}"
 }
 
 system_optimize_profile(){
-	echo -e "${info} 设置默认历史记录数和连接超时时间..."
+
 	if [ -z `grep TMOUT=600 /etc/profile` ];then
 		echo "TMOUT=600" >>/etc/profile
 		echo "HISTSIZE=10" >>/etc/profile
 		echo "HISTFILESIZE=10" >>/etc/profile
 		source /etc/profile
-		echo -e "${info} 设置默认历史记录数和连接超时时间完成"
+		diy_echo "完成历史记录数和连接超时时间调整" "" "${info}"
 	fi
 }
 
@@ -197,5 +193,5 @@ system_optimize_permission(){
 	chattr +i /etc/gshadow
 	/bin/mv /usr/bin/chattr /usr/bin/lock
 	sed -i 's#^exec.*# #exec /sbin/shutdown -r now "Control-Alt-Delete pressed"#'/etc/init/control-alt-delete.conf
-	echo -e "${info} 锁定关键文件系统完成"
+	diy_echo "完成系统关键文件锁定" "" "${info}"
 }

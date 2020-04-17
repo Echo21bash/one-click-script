@@ -55,6 +55,7 @@ online_url(){
 	java_url='https://repo.huaweicloud.com/java/jdk'
 	java_url="http://mirrors.linuxeye.com/jdk"
 	ruby_url="http://mirrors.ustc.edu.cn/ruby"
+	ruby_url="http://cache.ruby-china.com/pub/ruby"
 	node_url="http://mirrors.ustc.edu.cn/node"
 	#tomcat_url="http://archive.apache.org/dist/tomcat"
 	tomcat_url="http://mirrors.ustc.edu.cn/apache/tomcat"
@@ -90,23 +91,54 @@ online_url(){
 online_version(){
 
 	all_version_general(){
-		curl -Ls -o /tmp/all_version ${url} >/dev/null 2>&1
+		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
+		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+	}
+	all_version_general1(){
+		curl -Ls -o /tmp/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
+		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 	}
 	
 	all_version_other(){
 	case "$soft_name" in
+		node)
+			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
+			cat /tmp/tmp_version | grep -Eio "v${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
+		;;
+		node)
+			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
+			cat /tmp/tmp_version | grep -Eio "v${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
+		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				curl -Ls -o /tmp/all_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
+				curl -Ls -o /tmp/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
+				if [[ ${os_bit} = '64' ]];then
+					cat /tmp/tmp_version | grep -Eio "mysql-${version_number}\.[0-9]{1,2}-linux-glibc2.12-x86_64" | sort -u >/tmp/all_version
+				else
+					cat /tmp/tmp_version | grep -Eio "mysql-${version_number}\.[0-9]{1,2}-linux-glibc2.12-i686" | sort -u >/tmp/all_version
+				fi
 			else
-				curl -Ls -o /tmp/all_version ${mysql_galera_url}/mysql-wsrep-${version_number}/binary >/dev/null 2>&1
+				curl -Ls -o /tmp/tmp_version ${mysql_galera_url} >/dev/null 2>&1
+				if [[ ${os_bit} = '64' ]];then
+					cat /tmp/tmp_version | grep -Eio "mysql-wsrep-${version_number}\.[0-9]{1,2}-[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+				fi
 			fi
+
 		;;
 		mongodb)
-			curl -sL -o /tmp/all_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
+		;;
+		java)
+			curl -sL -o /tmp/tmp_version ${url}/md5sum.txt >/dev/null 2>&1
+			if [[ ${os_bit} = '64' ]];then
+				cat /tmp/tmp_version | grep -Eio "jdk-${version_number}u.*x64" | sort -u >/tmp/all_version
+			else
+				cat /tmp/tmp_version  | grep -Eio "jdk-${version_number}u.*i586" | sort -u >/tmp/all_version
+			fi
 		;;
 		tomcat)
-			curl -sL -o /tmp/all_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+			curl -sL -o /tmp/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+			cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
 		;;
 		k8s)
 			yum list --showduplicates kubeadm >/tmp/all_version
@@ -114,77 +146,38 @@ online_version(){
 	esac
 	}
 
-	ver_rule_general(){
-		option=$(cat /tmp/all_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u -n  -k 3 -t '.' )
-	}
-
-	ver_rule_general1(){
-		option=$(cat /tmp/all_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,3}" | sort -u -n  -k 3 -t '.' )
-	}
-
-	ver_rule_general2(){
-		option=$(cat /tmp/all_version | grep -Eio "${soft_name}-${version_number}.[0-9]{1,2}" | sort -u -n  -k 3 -t '.' )
-	}
-	
-	ver_rule_last_rev(){
-		option='latest-version'
-	}
-	
-	ver_rule_other(){
-	
-		case "$soft_name" in
-		java)
-			if [[ ${os_bit} = '64' ]];then
-				option=$(cat /tmp/all_version | grep -Eio "jdk-${version_number}u.*x64" | sort -u)
-			else
-				option=$(cat /tmp/all_version | grep -Eio "jdk-${version_number}u.*i586" | sort -u)
-			fi
-		;;
-		node)
-			option=$(cat /tmp/all_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u -n  -k 2 -t '.')
+	all_version_github(){
+	case "$soft_name" in
+		fastdfs)
+			curl -sL -o /tmp/all_version ${url}/tags >/dev/null 2>&1
 		;;
 	esac
-
+	
 	}
 
+	ver_rule_general(){
+		option=$(cat /tmp/all_version)
+	}
 
 	diy_echo "正在获取在线版本..." "" "${info}"
-	#generated_version
+	#所有可用版本
 	case "$soft_name" in
-		node|nginx|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
+		nginx|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
 			all_version_general
 		;;
-		java)
-			curl -sL -o /tmp/all_version ${url}/md5sum.txt >/dev/null 2>&1
-		;;
 		ruby)
-			curl -sL -o /tmp/all_version ${url}/${version_number} >/dev/null 2>&1
+			all_version_general1
 		;;
-		mysql|mongodb|tomcat|k8s)
+		node|mysql|mongodb|tomcat|java|k8s)
 			all_version_other
 		;;
-
-	esac
-
-	#ver_rule
-	case "$soft_name" in
-		ruby|mysql|mongodb|zookeeper|kafka|activemq|rocketmq|elasticsearch|logstash|kibana|filebeat|zabbix|k8s|grafana)
-			ver_rule_general
-		;;
-		tomcat)
-			ver_rule_general1
-		;;
-		nginx|redis|memcached|php)
-			ver_rule_general2
-		;;
-		fastdfs|minio)
-			ver_rule_last_rev
-		;;
-		java|node)
-			ver_rule_other
+		fastdfs)
+			all_version_github
 		;;
 	esac
 
+
+	ver_rule_general
 	output_option '请选择在线版本号' "${option}" 'online_select_version'
 	[ -z ${online_select_version} ] && diy_echo "镜像站没有该版本" "$red" "$error" && exit 1
 	online_select_version=(${output_value[@]})
@@ -195,12 +188,10 @@ online_version(){
 online_down(){
 	#拼接下载链接
 	case "$soft_name" in
-		java|nginx|redis|memcached|php)
+		java|nginx|redis|memcached|php|ruby)
 			down_url="${url}/${online_select_version}.tar.gz"
 		;;
-		ruby)
-			down_url="${url}/${soft_name}-${online_select_version}.tar.gz"
-		;;
+
 		elasticsearch|logstash)
 			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.tar.gz"
 		;;
@@ -212,14 +203,13 @@ online_down(){
 			fi
 		;;
 		node)
-			down_url="${url}/v${online_select_version}/node-v${online_select_version}-linux-x64.tar.gz"
+			down_url="${url}/${online_select_version}/node-${online_select_version}-linux-x64.tar.gz"
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				[[ ${os_bit} = '64' ]] && down_url="${url}/MySQL-${version_number}/mysql-${online_select_version}-linux-glibc2.12-x86_64.tar.gz"
-				[[ ${os_bit} = '32' ]] && down_url="${url}/MySQL-${version_number}/mysql-${online_select_version}-linux-glibc2.12-i686.tar.gz"
+				down_url="${url}/MySQL-${version_number}/${online_select_version}.tar.gz"
 			else
-				[[ ${os_bit} = '64' ]] && down_url="${mysql_galera_url}/mysql-wsrep-${version_number}/binary/mysql-wsrep-${online_select_version}-`cat /tmp/all_version | grep -Eio "[0-9]{2}\.[0-9]{2}" | sort -u`-linux-x86_64.tar.gz"
+				down_url="${mysql_galera_url}/${online_select_version}/binary/${online_select_version}-linux-x86_64.tar.gz"
 			fi
 		;;
 		mongodb)
