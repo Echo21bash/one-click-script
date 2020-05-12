@@ -1,10 +1,11 @@
 #!/bin/bash
 
 auto_ssh_keygen(){
-	
-	input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_name"
-	host_name=(${input_value[@]})
-	
+	#host_name主机名，ssh_port ssh端口,passwd 密码
+	if [[ -z ${host_name} ]];then
+		input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_name"
+		host_name=(${input_value[@]})
+	fi
 	expect_dir=`which expect 2>/dev/null`
 	[ -z ${expect_dir} ] && yum install expect -y
 	
@@ -13,13 +14,18 @@ auto_ssh_keygen(){
 	i=0
 	for host in ${host_name[@]}
 	do
-		input_option "请输入root的SSH端口号" "22" "port"
-		port[$i]=${input_value}
-		input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
-		passwd[$i]=${input_value}
+		if [[ -z ${ssh_port[$i]} ]];then
+			input_option "请输入root的SSH端口号" "22" "ssh_port"
+			ssh_port[$i]=${input_value}
+		fi
+		if [[ -z ${ssh_port[$i]} ]];then
+			input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
+			passwd[$i]=${input_value}
+		fi
+
 		((i++))
 		expect <<-EOF
-		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host[$i]} -p ${port[$i]}
+		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host[$i]} -p ${ssh_port[$i]}
 		expect {
 			"yes/no" {send "yes\r";exp_continue}
 			"password:" {send "${passwd[$i]}\r";exp_continue}
@@ -62,12 +68,12 @@ add_sysuser_sftp(){
 	chown -R ${name}.sftp_users ${sftp_dir}
 	sed -i 's[^Subsystem.*sftp.*/usr/libexec/openssh/sftp-server[#Subsystem	sftp	/usr/libexec/openssh/sftp-server[' /etc/ssh/sshd_config
 	if [[ -z `grep -E '^ForceCommand    internal-sftp' /etc/ssh/sshd_config` ]];then
-		cat >>/etc/ssh/sshd_config<<EOF
-Subsystem       sftp    internal-sftp
-Match Group sftp_users
-ChrootDirectory %h
-ForceCommand    internal-sftp
-EOF
+		cat >>/etc/ssh/sshd_config<<-EOF
+		Subsystem       sftp    internal-sftp
+		Match Group sftp_users
+		ChrootDirectory %h
+		ForceCommand    internal-sftp
+		EOF
 	fi
 }
 
