@@ -182,6 +182,7 @@ conf_system_service(){
 		ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}
 		TimeoutStopSec=5
 		Restart=${Restart:-on-failure}
+		LimitNOFILE=65536
 		[Install]
 		WantedBy=multi-user.target
 		EOF
