@@ -48,7 +48,7 @@ auto_ssh_keygen(){
 		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host} -p ${ssh_port[$i]}
 		expect {
 			"yes/no" {send "yes\r";exp_continue}
-			"password:" {send "${passwd[$i]}\r";exp_continue}
+			"password" {send "${passwd[$i]}\r";exp_continue}
         }
 		EOF
 		if [[ $? = 0 ]];then
