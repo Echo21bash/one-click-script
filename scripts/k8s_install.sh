@@ -41,15 +41,7 @@ send_file(){
 	done
 
 }
-install_etcd(){
-	
-	mkdir -p ${etcd_dir}/{bin,cfg,ssl}
-	cd /tmp
-	tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
-	mv etcd-v3.2.30-linux-arm64/{etcd,etcdctl} ${etcd_dir}/bin/
-	rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64
-	
-}
+
 
 etcd_conf(){
 
@@ -60,23 +52,8 @@ etcd_conf(){
 		do
 			if [[ ${host} = "${etcd_ip}" ]];then
 				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} bash -c "
-				install_etcd
-				add_system
-				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
-				#[Member]
-				name: "etcd-$j"
-				data-dir: "${etcd_data_dir}"
-				listen-peer-urls: "https://${etcd_ip[$i]}:2380"
-				listen-client-urls: "https://${etcd_ip[$i]}:2379"
-				cert-file: "${etcd_dir}/ssl/etcd.pem"
-				key-file: "${etcd_dir}/ssl/etcd-key.pem"
-				peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-				peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-				trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-				peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-				EOF
-				exit"
+				ssh ${host_name[$i]} -p ${ssh_port[$i]} "${workdir}/scripts/k8s_etcd.sh"
+				
 			fi
 		done
 	fi
@@ -89,29 +66,7 @@ etcd_conf(){
 		do
 			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} bash -c "
-				install_etcd
-				add_system
-				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
-				#[Member]
-				name: "etcd-$j"
-				data-dir: "${etcd_data_dir}"
-				listen-peer-urls: "https://${etcd_ip[$i]}:2380"
-				listen-client-urls: "https://${etcd_ip[$i]}:2379"
-				#[Clustering]
-				initial-advertise-peer-urls: "https://${etcd_ip[$i]}:2380"
-				advertise-client-urls: "https://${etcd_ip[$i]}:2379"
-				initial-cluster: "${etcd_cluster_ip}"
-				initial-cluster-token: "etcd-cluster"
-				initial-cluster-state: "new"
-				cert-file: "${etcd_dir}/ssl/etcd.pem"
-				key-file: "${etcd_dir}/ssl/etcd-key.pem"
-				peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-				peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-				trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-				peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-				EOF
-				exit"
+				ssh ${host_name[$i]} -p ${ssh_port[$i]} "${workdir}/scripts/k8s_etcd.sh"
 				((j++))
 			fi
 			((i++))
