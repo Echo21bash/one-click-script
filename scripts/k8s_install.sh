@@ -45,9 +45,9 @@ install_etcd(){
 	
 	mkdir -p ${etcd_dir}/{bin,cfg,ssl}
 	cd /tmp
-	tar zxvf etcd-v3.2.12-linux-amd64.tar.gz
+	tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
 	mv etcd-v3.2.30-linux-arm64/{etcd,etcdctl} ${etcd_dir}/bin/
-	rm -rf etcd-v3.2.12-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64
+	rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64
 	
 }
 
@@ -60,9 +60,9 @@ etcd_conf(){
 		do
 			if [[ ${host} = "${etcd_ip}" ]];then
 				send_file
+				ssh ${host_name[$i]} -p ${ssh_port[$i]}
 				install_etcd
 				add_system
-				ssh ${host_name[$i]} -p ${ssh_port[$i]}
 				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
 				#[Member]
 				name: "etcd-$j"
@@ -89,9 +89,9 @@ etcd_conf(){
 		do
 			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
+				ssh ${host_name[$i]} -p ${ssh_port[$i]}
 				install_etcd
 				add_system
-				ssh ${host_name[$i]} -p ${ssh_port[$i]}
 				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
 				#[Member]
 				name: "etcd-$j"
