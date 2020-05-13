@@ -5,14 +5,19 @@ down_file(){
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		file_name=$2
-		axel -n 24 -a ${down_url} -o ${file_name}
-		if [[ $? = '0' ]];then
-			diy_echo "下载完成" "${info}"
+		if [[ ! -f ${file_name} ]];then
+			axel -n 24 -a ${down_url} -o ${file_name}
+			if [[ $? = '0' ]];then
+				diy_echo "${file_name}下载完成" "${info}"
+			else
+				diy_echo "${file_name}下载失败" "${red}" "${error}"
+			fi
 		else
-			diy_echo "下载失败" "${red}" "${error}"
+			diy_echo "已经存在文件${file_name}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
+		exit
 	fi
 }
 
