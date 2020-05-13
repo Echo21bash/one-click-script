@@ -68,17 +68,22 @@ k8s_env_check(){
 k8s_install_set(){
 
 	output_option "选择安装方式" "kubeadm 二进制安装" install_method
-	output_option "选择节点类型" "master node" node_type
-	node_type=${output_value}
-	if [[ ${node_type} = 'master' ]];then
-		diy_echo "禁止master节点部署pod时某些组件可能会等待合适的node节点才会部署完成" "${yellow}" "${info}"
-		input_option "是否允许master节点部署pod" "y" k8s_master_pod && k8s_master_pod=${ipput_value}
-		output_option "选择网络组件" "flannel" k8s_net && k8s_net=${output_value}
-		output_option "选择周边组件" "dashboard metrics heapster" k8s_module && k8s_module=${output_value[@]}
+	if [[ ${install_method} = '1' ]];then
+	
+		output_option "选择节点类型" "master node" node_type
+		node_type=${output_value}
+		if [[ ${node_type} = 'master' ]];then
+			diy_echo "禁止master节点部署pod时某些组件可能会等待合适的node节点才会部署完成" "${yellow}" "${info}"
+			input_option "是否允许master节点部署pod" "y" k8s_master_pod && k8s_master_pod=${ipput_value}
+			output_option "选择网络组件" "flannel" k8s_net && k8s_net=${output_value}
+			output_option "选择周边组件" "dashboard metrics heapster" k8s_module && k8s_module=${output_value[@]}
+		else
+			diy_echo "master节点执行kubeadm token list" "" "${info}"
+			input_option "请输入master节点token" "22d578.d921a7cf51352441" tonken && tonken=${input_value[@]}
+			input_option "请输入kube-apiserver地址" "192.168.1.2:6443" apiserver_ip && apiserver_ip=${input_value[@]}
+		fi
 	else
-		diy_echo "master节点执行kubeadm token list" "" "${info}"
-		input_option "请输入master节点token" "22d578.d921a7cf51352441" tonken && tonken=${input_value[@]}
-		input_option "请输入kube-apiserver地址" "192.168.1.2:6443" apiserver_ip && apiserver_ip=${input_value[@]}
+		sh ${workdir}/scripts/k8s_install.sh
 	fi
 }
 
