@@ -34,7 +34,7 @@ auto_ssh_keygen(){
 			input_option "请输入root的SSH端口号" "22" "ssh_port"
 			ssh_port[$i]=${input_value}
 		fi
-		if [[ -z ${ssh_port[$i]} ]];then
+		if [[ -z ${passwd[$i]} ]];then
 			input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
 			passwd[$i]=${input_value}
 		fi
