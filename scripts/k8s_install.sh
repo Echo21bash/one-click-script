@@ -58,7 +58,7 @@ etcd_conf(){
 		local i=0
 		for host in ${host_name[@]};
 		do
-			if [[ ${host} = '${etcd_ip}' ]];then
+			if [[ ${host} = "${etcd_ip}" ]];then
 				send_file
 				install_etcd
 				add_system
@@ -87,7 +87,7 @@ etcd_conf(){
 		local j=0
 		for host in ${host_name[@]};
 		do
-			if [[ ${host} = '${etcd_ip[$j]}' ]];then
+			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
 				install_etcd
 				add_system
