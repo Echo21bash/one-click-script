@@ -1,6 +1,10 @@
 #!/bin/bash
 
-. ${workdir}/config/k8s/k8s.conf
+env_load(){
+	. ${workdir}/config/k8s/k8s.conf
+	auto_ssh_keygen
+}
+
 auto_ssh_keygen
 install_cfssl(){
 	down_file https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 /usr/local/bin/cfssl
