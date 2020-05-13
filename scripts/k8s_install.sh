@@ -5,7 +5,6 @@ env_load(){
 	auto_ssh_keygen
 }
 
-auto_ssh_keygen
 install_cfssl(){
 	down_file https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 /usr/local/bin/cfssl
 	down_file https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 /usr/local/bin/cfssljson
