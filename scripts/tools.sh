@@ -1,5 +1,21 @@
 #!/bin/bash
 
+down_file(){
+	#$1下载链接、$2保存路径及名称
+	if [[ -n $1 && -n $2 ]];then
+		down_url=$1
+		file_name=$2
+		axel -n 24 -a ${down_url} -o ${file_name}
+		if [[ $? = '0' ]];then
+			diy_echo "下载完成" "${info}"
+		else
+			diy_echo "下载失败" "${red}" "${error}"
+		fi
+	else
+		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
+	fi
+}
+
 auto_ssh_keygen(){
 	#host_name主机名，ssh_port ssh端口,passwd 密码
 	if [[ -z ${host_name} ]];then

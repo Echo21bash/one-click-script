@@ -137,15 +137,6 @@ output_option(){
 
 }
 
-down_file(){
-	#$1下载链接、$2保存路径及名称
-	if [[ -n $1 && -n $2 ]];then
-		axel -n 24 -a ${down_url} -o ${file_name}
-	else
-		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
-	fi
-}
-
 only_allow_numbers(){
 	#判断纯数字正确返回0
 	local j=0

@@ -133,6 +133,7 @@ add_system(){
 }
 
 k8s_bin_install(){
+	env_load
 	install_cfssl
 	create_etcd_ca
 	down_k8s_file
