@@ -44,7 +44,6 @@ auto_ssh_keygen(){
 			passwd[$i]=${input_value}
 		fi
 
-		((i++))
 		expect <<-EOF
 		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host} -p ${ssh_port[$i]}
 		expect {
@@ -57,6 +56,7 @@ auto_ssh_keygen(){
 		else
 			diy_echo "主机${host}免密登录配置失败" "${red}" "${info}" 
 		fi
+		((i++))
 	done
 }
 
