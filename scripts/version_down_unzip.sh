@@ -141,7 +141,7 @@ online_version(){
 			cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
 		;;
 		k8s)
-			yum list --showduplicates kubeadm >/tmp/all_version
+			yum list --showduplicates kubeadm | awk  '{print $2}' | grep -v "[a-z:]" | grep -Eio "${version_number}">/tmp/all_version
 		;;
 	esac
 	}

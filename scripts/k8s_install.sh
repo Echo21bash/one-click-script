@@ -129,10 +129,13 @@ add_system(){
 
 }
 
-install_cfssl
-create_etcd_ca
-down_k8s_file
-send_file
-install_etcd
-etcd_conf
-add_system
+k8s_bin_install(){
+	install_cfssl
+	create_etcd_ca
+	down_k8s_file
+	send_file
+	install_etcd
+	etcd_conf
+	add_system
+
+}
