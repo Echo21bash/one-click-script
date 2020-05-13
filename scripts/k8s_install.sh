@@ -34,7 +34,7 @@ send_file(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${etcd_ip[$j]}" ]];then
-			scp ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp -P ${ssh_port[i]}
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp
 			((j++))
 		fi
 		((i++))
