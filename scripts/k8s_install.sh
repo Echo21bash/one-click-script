@@ -85,7 +85,7 @@ etcd_conf(){
 		get_etcd_cluster_ip
 		local i=0
 		local j=0
-		for host in ${	[@]};
+		for host in ${host_name[@]};
 		do
 			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
@@ -146,8 +146,5 @@ k8s_bin_install(){
 	install_cfssl
 	create_etcd_ca
 	down_k8s_file
-	
 	etcd_conf
-	
-
 }
