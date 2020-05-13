@@ -60,7 +60,7 @@ etcd_conf(){
 		do
 			if [[ ${host} = "${etcd_ip}" ]];then
 				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} << cmd
+				ssh ${host_name[$i]} -p ${ssh_port[$i]} bash -c "
 				install_etcd
 				add_system
 				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
@@ -76,8 +76,7 @@ etcd_conf(){
 				trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 				peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 				EOF
-				exit
-cmd
+				exit"
 			fi
 		done
 	fi
@@ -90,7 +89,7 @@ cmd
 		do
 			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} << cmd
+				ssh ${host_name[$i]} -p ${ssh_port[$i]} bash -c "
 				install_etcd
 				add_system
 				cat >>${etcd_dir}/cfg/etcd.conf <-EOF  
@@ -112,8 +111,7 @@ cmd
 				trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 				peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 				EOF
-				exit
-cmd
+				exit"
 				((j++))
 			fi
 			((i++))
