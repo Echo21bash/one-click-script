@@ -33,7 +33,7 @@ send_file(){
 	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = '${etcd_ip[$j]}' ]];then
+		if [[ ${host} = "${etcd_ip[$j]}" ]];then
 			scp ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp -P ${ssh_port[i]}
 			((j++))
 		fi
@@ -85,7 +85,7 @@ etcd_conf(){
 		get_etcd_cluster_ip
 		local i=0
 		local j=0
-		for host in ${host_name[@]};
+		for host in ${	[@]};
 		do
 			if [[ ${host} = "${etcd_ip[$j]}" ]];then
 				send_file
