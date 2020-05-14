@@ -80,7 +80,7 @@ etcd_install_ctl(){
 	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${etcd_ip}" ]];then
+		if [[ ${host} = "${etcd_ip[$j]}" ]];then
 			etcd_conf
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-amd64.tar.gz root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ca.pem  root@${host}:/tmp
