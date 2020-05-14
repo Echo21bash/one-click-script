@@ -45,6 +45,7 @@ auto_ssh_keygen(){
 		fi
 
 		expect <<-EOF
+		set timeout -1
 		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host} -p ${ssh_port[$i]}
 		expect {
 			"*yes/no" { send "yes\r";exp_continue}
