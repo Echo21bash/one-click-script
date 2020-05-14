@@ -68,7 +68,7 @@ add_log_cut(){
 conf_system_service(){
 #必传参数ExecStart
 	if [[ "${os_release}" -lt 7 ]]; then
-		cat >${home_dir}/init<<-EOF
+		cat >${home_dir}/${initd:-init}<<-EOF
 		#!/bin/bash
 		# chkconfig: 345 70 60
 		# description: ${soft_name} daemon
@@ -84,7 +84,7 @@ conf_system_service(){
 		ARGS="${ARGS:-}"
 		ExecStop="${ExecStop:-}"
 		EOF
-		cat >>${home_dir}/init<<-'EOF'
+		cat >>${home_dir}/${initd:-init}<<-'EOF'
 		#EUV
 		[[ -f ${EnvironmentFile} ]] && . ${EnvironmentFile}
 		[[ -f ${Environment} ]] && export ${Environment}
@@ -163,7 +163,7 @@ conf_system_service(){
 		esac
 		EOF
 	elif [[ "${os_release}" -ge 7 ]]; then
-		cat >${home_dir}/init<<-EOF
+		cat >${home_dir}/${initd:-init}<<-EOF
 		[Unit]
 		Description=${soft_name}
 		After=syslog.target network.target
@@ -178,6 +178,7 @@ conf_system_service(){
 		WorkingDirectory=${WorkingDirectory:-}
 		PIDFile=${PIDFile:-}
 		ExecStart=${ExecStart:-} ${ARGS:-}
+		ExecStartPost="${ExecStartPost:-}"
 		ExecReload=${ExecReload:-/bin/kill -s HUP \$MAINPID}
 		ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}
 		TimeoutStopSec=5
@@ -188,10 +189,12 @@ conf_system_service(){
 		EOF
 	fi
 	#删除空值
-	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${home_dir}/init
-	[[ -z ${Environment} ]] && sed -i /Environment=/d ${home_dir}/init
-	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${home_dir}/init
-	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${home_dir}/init
+	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${home_dir}/${initd:-init}
+	[[ -z ${Environment} ]] && sed -i /Environment=/d ${home_dir}/${initd:-init}
+	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${home_dir}/${initd:-init}
+	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${home_dir}/${initd:-init}
+	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${home_dir}/${initd:-init}
+
 }
 #添加守护进程
 add_system_service(){
