@@ -31,7 +31,6 @@ down_k8s_file(){
 
 etcd_conf(){
 
-	etcd_num=${#etcd_ip[*]}
 	if [[ ${etcd_num} = '1' ]];then
 		cat >${tmp_dir}/etcd.yml <<-EOF
 		#[Member]
@@ -122,8 +121,8 @@ etcd_install_ctl(){
 
 get_etcd_cluster_ip(){
 
+	etcd_num=${#etcd_ip[*]}
 	local i=0
-  
 	for ((i=1;i<${etcd_num};i++));
 	do
 		etcd_cluster_ip=${etcd_cluster_ip}etcd-$i=https://${etcd_ip[$i]}:2380,
