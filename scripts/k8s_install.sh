@@ -191,7 +191,7 @@ etcd_install_ctl(){
 flannel_conf(){
 
 	cat >${tmp_dir}/flannel <<-EOF
-	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${etcd_dir}/ssl/ca.pem -etcd-certfile=${etcd_dir}/ssl/server.pem -etcd-keyfile=${etcd_dir}/ssl/server-key.pem"
+	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${etcd_dir}/ssl/ca.pem -etcd-certfile=${etcd_dir}/ssl/etcd.pem -etcd-keyfile=${etcd_dir}/ssl/etcd-key.pem"
 	EOF
 }
 
