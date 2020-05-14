@@ -190,7 +190,7 @@ etcd_install_ctl(){
 
 flannel_conf(){
 
-	cat >${tmp_dir}/flanneld <<-EOF
+	cat >${tmp_dir}/flannel <<-EOF
 	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${etcd_dir}/ssl/ca.pem -etcd-certfile=${etcd_dir}/ssl/server.pem -etcd-keyfile=${etcd_dir}/ssl/server-key.pem"
 	EOF
 }
@@ -208,7 +208,7 @@ flannel_install_ctl(){
 
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel-v0.10.0-linux-amd64.tar.gz root@${host}:/tmp
 	
-			scp  -P ${ssh_port[i]} ${tmp_dir}/flanneld root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}
@@ -217,7 +217,7 @@ flannel_install_ctl(){
 			tar zxvf flannel-v0.10.0-linux-amd64.tar.gz
 			\cp {flanneld,mk-docker-opts.sh} ${flannel_dir}/bin/
 			\cp ca*pem etcd*pem ${etcd_dir}/ssl
-			\cp flanneld ${flannel_dir}/cfg
+			\cp flannel ${flannel_dir}/cfg
 			rm -rf flannel-v0.10.0-linux-amd64.tar.gz
 			systemctl daemon-reload"
 			
