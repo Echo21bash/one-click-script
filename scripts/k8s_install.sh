@@ -33,25 +33,32 @@ etcd_conf(){
 
 	etcd_num=${#etcd_ip[*]}
 	if [[ ${etcd_num} = '1' ]];then
-		cat >${tmp_dir}/etcd.conf <<-EOF
+		cat >${tmp_dir}/etcd.yml <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
 		listen-peer-urls: "https://${etcd_ip[$i]}:2380"
 		listen-client-urls: "https://${etcd_ip[$i]}:2379"
-		cert-file: "${etcd_dir}/ssl/etcd.pem"
-		key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		peer-transport-security:
+		 cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		client-transport-security:
+		 cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 		EOF
 	fi
 
 
 	if [[ ${etcd_num} > '1' ]];then
-		get_etcd_cluster_ip
-		cat >${tmp_dir}/etcd.conf <<-EOF
+		cat >${tmp_dir}/etcd.yml <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
@@ -63,18 +70,27 @@ etcd_conf(){
 		initial-cluster: "${etcd_cluster_ip}"
 		initial-cluster-token: "etcd-cluster"
 		initial-cluster-state: "new"
-		cert-file: "${etcd_dir}/ssl/etcd.pem"
-		key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		peer-transport-security:
+		 cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		client-transport-security:
+		 cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
 		EOF
 	fi
 
 }
 
 etcd_install_ctl(){
+	get_etcd_cluster_ip
 	add_system
 	local i=0
 	local j=0
@@ -87,7 +103,7 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ca-key.pem  root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.pem  root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-key.pem  root@${host}:/tmp
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.conf  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.yml  root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}
@@ -95,8 +111,8 @@ etcd_install_ctl(){
 			tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
 			\cp etcd-v3.2.30-linux-amd64/{etcd,etcdctl} ${etcd_dir}/bin/
 			\cp ca*pem etcd*pem ${etcd_dir}/ssl
-			\cp etcd.conf ${etcd_dir}/cfg
-			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64"
+			\cp etcd.yml ${etcd_dir}/cfg
+			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-amd64"
 			
 			((j++))
 		fi
@@ -106,20 +122,19 @@ etcd_install_ctl(){
 
 get_etcd_cluster_ip(){
 
-	local j=1
 	local i=0
   
-	for ((j=1;j<=${etcd_num};j++));
+	for ((i=1;i<${etcd_num};i++));
 	do
-		etcd_cluster_ip=${etcd_cluster_ip}etcd-$j=https://${etcd_ip[$i]}:2380,
-		((i++))
+		etcd_cluster_ip=${etcd_cluster_ip}etcd-$i=https://${etcd_ip[$i]}:2380,
+
 	done
 }
 
 add_system(){
 	home_dir=${tmp_dir}
 	Type="notify"
-	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.conf"
+	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
 	conf_system_service
 	
 }
