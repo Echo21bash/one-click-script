@@ -215,10 +215,10 @@ flannel_install_ctl(){
 			mkdir -p ${etcd_data_dir}
 			cd /tmp
 			tar zxvf flannel-v0.10.0-linux-amd64.tar.gz
-			\cp flannel-v0.10.0-linux-amd64/{flanneld,mk-docker-opts.sh} ${flannel_dir}/bin/
+			\cp {flanneld,mk-docker-opts.sh} ${flannel_dir}/bin/
 			\cp ca*pem etcd*pem ${etcd_dir}/ssl
 			\cp flanneld ${flannel_dir}/cfg
-			rm -rf flannel-v0.10.0-linux-amd64.tar.gz flannel-v0.10.0-linux-amd64
+			rm -rf flannel-v0.10.0-linux-amd64.tar.gz
 			systemctl daemon-reload"
 			
 			((j++))
