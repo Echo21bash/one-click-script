@@ -106,12 +106,14 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}
+			mkdir -p ${etcd_data_dir}
 			cd /tmp
 			tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
 			\cp etcd-v3.2.30-linux-amd64/{etcd,etcdctl} ${etcd_dir}/bin/
 			\cp ca*pem etcd*pem ${etcd_dir}/ssl
 			\cp etcd.yml ${etcd_dir}/cfg
-			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-amd64"
+			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-amd64
+			systemctl daemon-reload && systemctl restart etcd.service"
 			
 			((j++))
 		fi
@@ -135,7 +137,6 @@ add_system(){
 	Type="notify"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
 	conf_system_service
-	
 }
 
 k8s_bin_install(){
