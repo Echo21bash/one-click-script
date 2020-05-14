@@ -119,6 +119,22 @@ etcd_install_ctl(){
 		fi
 		((i++))
 	done
+	etcd_start
+}
+
+etcd_start(){
+	local i=0
+	local j=0
+	for host in ${host_name[@]};
+	do
+		if [[ ${host} = "${etcd_ip[$j]}" ]];then
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			systemctl restart etcd.service"
+			((j++))
+		fi
+		((i++))
+	done
+
 }
 
 get_etcd_cluster_ip(){
