@@ -1,17 +1,17 @@
 {
   "signing": {
     "default": {
-      "expiry": "87600h"
-    },
+      "expiry": "8760h"
+    }, 
     "profiles": {
-      "www": {
-         "expiry": "87600h",
-         "usages": [
-            "signing",
-            "key encipherment",
-            "server auth",
-            "client auth"
-        ]
+      "kubernetes": {
+        "usages": [
+          "signing", 
+          "key encipherment", 
+          "server auth", 
+          "client auth"
+        ], 
+        "expiry": "8760h"
       }
     }
   }

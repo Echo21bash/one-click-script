@@ -1,5 +1,11 @@
 {
-  "CN": "kubernetes", 
+  "CN": "system:kube-scheduler", 
+  "hosts": [
+    "127.0.0.1", 
+    "192.168.10.12", 
+    "192.168.10.13", 
+    "192.168.10.14"
+  ], 
   "key": {
     "algo": "rsa", 
     "size": 2048
@@ -9,7 +15,7 @@
       "C": "CN", 
       "ST": "ShangHai", 
       "L": "ShangHai", 
-      "O": "k8s", 
+      "O": "system:kube-scheduler", 
       "OU": "System"
     }
   ]

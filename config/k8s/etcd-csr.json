@@ -1,19 +1,22 @@
 {
-    "CN": "etcd",
-    "hosts": [
+  "CN": "etcd", 
+  "hosts": [
+    "127.0.0.1", 
     "20.1.0.238",
     "20.1.0.239",
     "20.1.0.240"
-    ],
-    "key": {
-        "algo": "rsa",
-        "size": 2048
-    },
-    "names": [
-        {
-            "C": "CN",
-            "L": "BeiJing",
-            "ST": "BeiJing"
-        }
-    ]
+  ], 
+  "key": {
+    "algo": "rsa", 
+    "size": 2048
+  }, 
+  "names": [
+    {
+      "C": "CN", 
+      "ST": "ShangHai", 
+      "L": "ShangHai", 
+      "O": "k8s", 
+      "OU": "System"
+    }
+  ]
 }
