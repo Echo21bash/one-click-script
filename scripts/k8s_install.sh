@@ -28,51 +28,78 @@ down_k8s_file(){
 	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-arm64.tar.gz ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz
 }
 
-send_file(){
-	local i=0
-	local j=0
-	for host in ${host_name[@]};
-	do
-		if [[ ${host} = "${etcd_ip[$j]}" ]];then
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp
-			((j++))
-		fi
-		((i++))
-	done
-
-}
-
 
 etcd_conf(){
 
 	etcd_num=${#etcd_ip[*]}
 	if [[ ${etcd_num} = '1' ]];then
-		local i=0
-		for host in ${host_name[@]};
-		do
-			if [[ ${host} = "${etcd_ip}" ]];then
-				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} "${workdir}/scripts/k8s_etcd.sh"
-				
-			fi
-		done
+		cat >>${tmp_dir}/etcd.conf <-EOF
+		#[Member]
+		name: "etcd-$j"
+		data-dir: "${etcd_data_dir}"
+		listen-peer-urls: "https://${etcd_ip[$i]}:2380"
+		listen-client-urls: "https://${etcd_ip[$i]}:2379"
+		cert-file: "${etcd_dir}/ssl/etcd.pem"
+		key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		EOF
 	fi
+
 
 	if [[ ${etcd_num} > '1' ]];then
 		get_etcd_cluster_ip
-		local i=0
-		local j=0
-		for host in ${host_name[@]};
-		do
-			if [[ ${host} = "${etcd_ip[$j]}" ]];then
-				send_file
-				ssh ${host_name[$i]} -p ${ssh_port[$i]} "${workdir}/scripts/k8s_etcd.sh"
-				((j++))
-			fi
-			((i++))
-		done
-
+		cat >>${tmp_dir}/etcd.conf <-EOF  
+		#[Member]
+		name: "etcd-$j"
+		data-dir: "${etcd_data_dir}"
+		listen-peer-urls: "https://${etcd_ip[$j]}:2380"
+		listen-client-urls: "https://${etcd_ip[$j]}:2379"
+		#[Clustering]
+		initial-advertise-peer-urls: "https://${etcd_ip[$j]}:2380"
+		advertise-client-urls: "https://${etcd_ip[$j]}:2379"
+		initial-cluster: "${etcd_cluster_ip}"
+		initial-cluster-token: "etcd-cluster"
+		initial-cluster-state: "new"
+		cert-file: "${etcd_dir}/ssl/etcd.pem"
+		key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+		peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+		trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+		EOF
 	fi
+
+}
+
+etcd_install_ctl(){
+	
+	local i=0
+	local j=0
+	for host in ${host_name[@]};
+	do
+		if [[ ${host} = "${etcd_ip}" ]];then
+			etcd_conf
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ca\*pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd\*pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.conf  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/init root@${host}:/etc/systemd/system/etcd.service
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			mkdir -p ${etcd_dir}/{bin,cfg,ssl}
+			cd /tmp
+			tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
+			\cp etcd-v3.2.30-linux-arm64/{etcd,etcdctl} ${etcd_dir}/bin/
+			\cp ca*pem etcd*pem ${etcd_dir}/ssl
+			\cp etcd.conf ${etcd_dir}/cfg
+			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64"
+			
+			((j++))
+		fi
+		((i++))
+	done
 }
 
 get_etcd_cluster_ip(){
@@ -88,12 +115,11 @@ get_etcd_cluster_ip(){
 }
 
 add_system(){
-	home_dir=${etcd_dir}
+	home_dir=${tmp_dir}
 	Type="notify"
-	ExecStart="${home_dir}/bin/etcd --config-file=${home_dir}/cfg/etcd.conf"
+	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.conf"
 	conf_system_service
-	add_system_service etcd ${home_dir}/init
-
+	
 }
 
 k8s_bin_install(){
@@ -101,5 +127,5 @@ k8s_bin_install(){
 	install_cfssl
 	create_etcd_ca
 	down_k8s_file
-	etcd_conf
+	etcd_install_ctl
 }
