@@ -25,7 +25,7 @@ create_etcd_ca(){
 
 
 down_k8s_file(){
-	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-arm64.tar.gz ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz
+	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-amd64.tar.gz ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz
 }
 
 
@@ -33,7 +33,7 @@ etcd_conf(){
 
 	etcd_num=${#etcd_ip[*]}
 	if [[ ${etcd_num} = '1' ]];then
-		cat >>${tmp_dir}/etcd.conf <-EOF
+		cat >${tmp_dir}/etcd.conf <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
@@ -51,7 +51,7 @@ etcd_conf(){
 
 	if [[ ${etcd_num} > '1' ]];then
 		get_etcd_cluster_ip
-		cat >>${tmp_dir}/etcd.conf <-EOF  
+		cat >${tmp_dir}/etcd.conf <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
@@ -75,23 +75,25 @@ etcd_conf(){
 }
 
 etcd_install_ctl(){
-	
+	add_system
 	local i=0
 	local j=0
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${etcd_ip}" ]];then
 			etcd_conf
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-arm64.tar.gz root@${host}:/tmp
-			scp  -P ${ssh_port[i]} ${tmp_dir}/ca\*pem  root@${host}:/tmp
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd\*pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-amd64.tar.gz root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ca.pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ca-key.pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.pem  root@${host}:/tmp
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-key.pem  root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.conf  root@${host}:/tmp
 			scp  -P ${ssh_port[i]} ${tmp_dir}/init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}
 			cd /tmp
 			tar zxvf etcd-v3.2.30-linux-amd64.tar.gz
-			\cp etcd-v3.2.30-linux-arm64/{etcd,etcdctl} ${etcd_dir}/bin/
+			\cp etcd-v3.2.30-linux-amd64/{etcd,etcdctl} ${etcd_dir}/bin/
 			\cp ca*pem etcd*pem ${etcd_dir}/ssl
 			\cp etcd.conf ${etcd_dir}/cfg
 			rm -rf etcd-v3.2.30-linux-amd64.tar.gz etcd-v3.2.30-linux-arm64"
