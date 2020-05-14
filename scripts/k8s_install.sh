@@ -125,7 +125,7 @@ get_etcd_cluster_ip(){
 
 	etcd_num=${#etcd_ip[*]}
 	local i=0
-	for ((i=1;i<${etcd_num};i++));
+	for ((i=0;i<${etcd_num};i++));
 	do
 		etcd_cluster_ip=${etcd_cluster_ip}etcd-$i=https://${etcd_ip[$i]}:2380,
 

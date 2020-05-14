@@ -191,6 +191,7 @@ conf_system_service(){
 	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${home_dir}/init
 	[[ -z ${Environment} ]] && sed -i /Environment=/d ${home_dir}/init
 	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${home_dir}/init
+	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${home_dir}/init
 }
 #添加守护进程
 add_system_service(){
