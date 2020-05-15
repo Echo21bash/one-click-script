@@ -21,7 +21,8 @@ env_load(){
 	nf_conntrack_ipv4
 	nf_conntrack
 	EOF
-	modprobe br_netfilter ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
+	modprobe br_netfilter
+	modprobe ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
 	cat >/etc/sysctl.d/95-k8s-sysctl.conf<<-EOF
 	net.ipv4.ip_forward = 1
 	net.bridge.bridge-nf-call-iptables = 1
@@ -29,9 +30,11 @@ env_load(){
 	net.bridge.bridge-nf-call-arptables = 1
 	EOF
 	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
-	conf=(1 2 4 5 6 7)
+	
 	. /root/public.sh
-	sh /root/system_optimize.sh"
+	. /root/system_optimize.sh
+	conf=(1 2 4 5 6 7)
+	system_optimize_set"
 	((i++))
 	done
 	
@@ -347,7 +350,7 @@ kubelet_conf(){
 	--cert-dir=${k8s_dir}/ssl \
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
 	EOF
-	cat > ${tmp_dir}/cfg/kubelet.config  <<-EOF
+	cat > ${tmp_dir}/kubelet.config  <<-EOF
 	kind: KubeletConfiguration
 	apiVersion: kubelet.config.k8s.io/v1beta1
 	address: 192.168.135.129
@@ -366,7 +369,7 @@ kubelet_conf(){
 }
 
 proxy_conf(){
-	cat >  /opt/kubernetes/cfg/kube-proxy  <<-EOF
+	cat > ${tmp_dir}/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \
 	--v=4 \
 	--hostname-override=192.168.135.129 \
@@ -388,8 +391,10 @@ master_install_ctl(){
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
 			((j++))
@@ -411,10 +416,8 @@ node_install_ctl(){
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-proxy,kubelet} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
 			

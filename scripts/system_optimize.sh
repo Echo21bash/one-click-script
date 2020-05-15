@@ -47,7 +47,7 @@ system_optimize_yum(){
 		yum clean all >/dev/null 2>&1
 	fi
 	yum -y install bash-completion wget chrony vim >/dev/null 2>&1
-	if [ $? = 0 ];then
+	if [[ $? = 0 ]];then
 		diy_echo "完成yum源优化,并安装必要的命令..." "" "${info}"
 	else
 		diy_echo "yum源优化失败请检查网络!" "" "${error}"

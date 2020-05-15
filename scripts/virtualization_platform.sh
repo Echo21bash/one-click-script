@@ -52,7 +52,7 @@ k8s_env_check(){
 		gpgcheck=0
 		EOF
 	fi
-	#开启ipvs
+
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
 	br_netfilter
 	ip_vs
@@ -62,7 +62,8 @@ k8s_env_check(){
 	nf_conntrack_ipv4
 	nf_conntrack
 	EOF
-	modprobe br_netfilter ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
+	modprobe br_netfilter
+	modprobe ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
 	cat >/etc/sysctl.d/95-k8s-sysctl.conf<<-EOF
 	net.ipv4.ip_forward = 1
 	net.bridge.bridge-nf-call-iptables = 1

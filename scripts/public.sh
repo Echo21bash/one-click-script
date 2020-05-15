@@ -243,3 +243,4 @@ sys_info_detail(){
 }
 #必须函数调用
 colour_keyword
+sys_info
