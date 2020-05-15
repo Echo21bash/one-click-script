@@ -178,7 +178,7 @@ conf_system_service(){
 		WorkingDirectory=${WorkingDirectory:-}
 		PIDFile=${PIDFile:-}
 		ExecStart=${ExecStart:-} ${ARGS:-}
-		ExecStartPost="${ExecStartPost:-}"
+		ExecStartPost=${ExecStartPost:-}
 		ExecReload=${ExecReload:-/bin/kill -s HUP \$MAINPID}
 		ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}
 		TimeoutStopSec=5
