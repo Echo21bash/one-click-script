@@ -1,22 +1,25 @@
 {
-  "CN": "system:kube-controller-manager", 
-  "key": {
-    "algo": "rsa", 
-    "size": 2048
-  }, 
-  "hosts": [
-    "127.0.0.1", 
-    "192.168.10.12", 
-    "192.168.10.13", 
-    "192.168.10.14"
-  ], 
-  "names": [
-    {
-      "C": "CN", 
-      "ST": "ShangHai", 
-      "L": "ShangHai", 
-      "O": "system:kube-controller-manager", 
-      "OU": "System"
-    }
-  ]
+    "CN": "system:kube-controller-manager",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "hosts": [
+      "127.0.0.1",
+      "10.211.55.11",
+      "10.211.55.12",
+      "10.211.55.13",
+	  "k8s-master1",
+	  "k8s-master2",
+	  "k8s-master3"
+    ],
+    "names": [
+      {
+        "C": "CN",
+        "ST": "BeiJing",
+        "L": "BeiJing",
+        "O": "system:kube-controller-manager",
+        "OU": "System"
+      }
+    ]
 }

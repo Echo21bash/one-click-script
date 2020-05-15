@@ -25,6 +25,8 @@ create_etcd_ca(){
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-scheduler-csr.json | cfssljson -bare kube-scheduler
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-proxy-csr.json | cfssljson -bare kube-proxy
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/proxy-client-csr.json | cfssljson -bare proxy-client
+
 }
 
 down_k8s_file(){
@@ -150,7 +152,7 @@ add_system(){
 	##flannel
 	Type="notify"
 	initd="flannel_init"
-	EnvironmentFile="${flannel_dir}/cfg/flanneld"
+	EnvironmentFile="${flannel_dir}/cfg/flannel"
 	ExecStart="${flannel_dir}/bin/flanneld --ip-masq \$FLANNEL_OPTIONS"
 	ExecStartPost="${flannel_dir}/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker"
 	conf_system_service
