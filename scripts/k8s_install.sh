@@ -6,6 +6,48 @@ env_load(){
 	tmp_dir=/tmp/install_tmp
 	mkdir -p ${tmp_dir}
 	cd ${tmp_dir}
+	
+	local i=0
+	for host in ${host_name[@]};
+	do
+	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
+	ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
+	br_netfilter
+	ip_vs
+	ip_vs_rr
+	ip_vs_wrr
+	ip_vs_sh
+	nf_conntrack_ipv4
+	nf_conntrack
+	EOF
+	modprobe br_netfilter ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
+	cat >/etc/sysctl.d/95-k8s-sysctl.conf<<-EOF
+	net.ipv4.ip_forward = 1
+	net.bridge.bridge-nf-call-iptables = 1
+	net.bridge.bridge-nf-call-ip6tables = 1
+	net.bridge.bridge-nf-call-arptables = 1
+	EOF
+	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
+	conf=(1 2 4 5 6 7)
+	. /root/public.sh
+	sh /root/system_optimize.sh"
+	((i++))
+	done
+	
+	local i=0
+	local j=0
+	for host in ${host_name[@]};
+	do
+		if [[ ${host} = "${node_ip[$j]}" ]];then
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			curl -Ls -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+			yum install -y docker-ce && mkdir /etc/docker"
+			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker
+			((j++))
+		fi
+		((i++))
+	done
 }
 
 install_cfssl(){
@@ -225,12 +267,11 @@ flannel_install_ctl(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${node_ip[$j]}" ]];then
-			docker_install
 			flannel_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem } root@${host}:${flannel_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel root@${host}:${flannel_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
@@ -249,9 +290,9 @@ apiserver_conf(){
 	KUBE_APISERVER_OPTS="--logtostderr=true \
 	--v=4 \
 	--etcd-servers=${etcd_endpoints} \
-	--bind-address=0.0.0.0 \
+	--bind-address=master_ip[$j] \
 	--secure-port=6443 \
-	--advertise-address=0.0.0.0 \
+	--advertise-address=master_ip[$j] \
 	--allow-privileged=true \
 	--service-cluster-ip-range=10.0.0.0/24 \
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \
@@ -340,6 +381,9 @@ master_install_ctl(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${master_ip[$j]}" ]];then
+			apiserver_conf
+			scheduler_conf
+			controller_manager_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
@@ -361,6 +405,8 @@ node_install_ctl(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${node_ip[$j]}" ]];then
+			kubelet_conf
+			proxy_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-proxy,kubelet} root@${host}:${k8s_dir}/bin
@@ -386,7 +432,6 @@ create_token(){
 	EOF
 
 }
-
 
 k8s_bin_install(){
 	env_load

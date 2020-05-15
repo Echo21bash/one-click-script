@@ -1,8 +1,9 @@
 #!/bin/bash
 
 system_optimize_set(){
-	output_option "选择需要优化的项(可多选)" "替换为国内YUM源 优化最大限制 优化SSHD服务 系统时间同步 优化内核参 关闭SElinux 关闭非必须服务 设置shell终端参数 锁定系统关键文件 全部优化" "conf"
-
+	if [[ -z ${conf[@]} ]];then
+		output_option "选择需要优化的项(可多选)" "替换为国内YUM源 优化最大限制 优化SSHD服务 系统时间同步 优化内核参数 关闭SElinux 关闭非必须服务 设置shell终端参数 锁定系统关键文件 全部优化" "conf"
+	fi
 	for conf in ${conf[@]}
 	do
 		case "$conf" in
@@ -34,19 +35,19 @@ system_optimize_yum(){
 
 	if [[ ${os_release} < "7" ]];then
 		[[ ! -f /etc/yum.repos.d/epel.repo ]] && \
-		wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
+		curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
 		[[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]] && \
-		wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
+		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
 		yum clean all >/dev/null 2>&1
 	else
 		[[ ! -f /etc/yum.repos.d/epel.repo ]] && \
-		wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
+		curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
 		[[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]] && \
-		wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
+		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
 		yum clean all >/dev/null 2>&1
 	fi
-	yum -y install bash-completion wget chrony vim
-	if [ $? -eq 0 ];then
+	yum -y install bash-completion wget chrony vim >/dev/null 2>&1
+	if [ $? = 0 ];then
 		diy_echo "完成yum源优化,并安装必要的命令..." "" "${info}"
 	else
 		diy_echo "yum源优化失败请检查网络!" "" "${error}"
@@ -54,7 +55,7 @@ system_optimize_yum(){
 }
 
 system_optimize_Limits(){
-	echo -e "${info} 最大进程数和最大打开文件数优化"
+
 	LIMIT=`grep nofile /etc/security/limits.conf |grep -v "^#"|wc -l`
 	if [ $LIMIT -eq 0 ];then
 		[ ! -f /etc/security/limits.conf.bakup ] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup

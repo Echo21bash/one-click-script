@@ -192,7 +192,7 @@ sys_info(){
 }
 
 get_ip(){
-	local_ip=$(ip addr | grep -E 'eth[0-9]{1}|eno[0-9]{1,}|ens[0-9]{1,}|enp[0-9]{1,}' | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v  "^255\.|\.255$|^127\.|^0\." | head -n 1)
+	local_ip=$(ip addr | grep -E 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v  "^255\.|\.255$|^127\.|^0\." | head -n 1)
 }
 
 get_public_ip(){
@@ -200,7 +200,7 @@ get_public_ip(){
 }
 
 get_net_name(){
-	net_name=$(ip addr | grep -oE 'eth[0-9]{1}|eno[0-9]{1,}|ens[0-9]{1,}' | head -n 1)
+	net_name=$(ip addr | grep -oE 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | head -n 1)
 }
 
 sys_info_detail(){
