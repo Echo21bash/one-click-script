@@ -381,9 +381,10 @@ node_install_ctl(){
 }
 
 create_token(){
-	cat > /opt/kubernetes/cfg/token.csv <<-EOF
+	cat > ${k8s_dir}/cfg/token.csv <<-EOF
 	674c457d4dcf2eefe4920d7dbb6b0ddc,kubelet-bootstrap,10001,"system:kubelet-bootstrap"
 	EOF
+
 }
 
 
@@ -392,6 +393,7 @@ k8s_bin_install(){
 	install_cfssl
 	create_etcd_ca
 	down_k8s_file
+	add_system
 	etcd_install_ctl
 	flannel_install_ctl
 	master_install_ctl
