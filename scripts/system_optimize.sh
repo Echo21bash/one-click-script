@@ -111,12 +111,15 @@ system_optimize_systime(){
 	yum -y install chrony
 
 	if [ $? -eq 0 ];then
-		sed '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
-		if [ $? -eq 0 ];then
-			diy_echo "完成时间同步配置" "" "${info}"
-		else
-			diy_echo "时间同步配置失败" "" "${error}"
+		if [[ -z `grep time.pool.aliyun.com /etc/chrony.conf` ]];then
+			sed -i '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
+			if [ $? -eq 0 ];then
+				diy_echo "完成时间同步配置" "" "${info}"
+			else
+				diy_echo "时间同步配置失败" "" "${error}"
+			fi
 		fi
+
 	fi
 }
 
