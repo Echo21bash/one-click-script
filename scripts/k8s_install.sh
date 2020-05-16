@@ -109,8 +109,8 @@ etcd_conf(){
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
-		listen-peer-urls: "https://${etcd_ip[$i]}:2380"
-		listen-client-urls: "https://${etcd_ip[$i]}:2379"
+		listen-peer-urls: "https://${host_name[$i]}:2380"
+		listen-client-urls: "https://${host_name[$i]}:2379"
 		peer-transport-security:
 		 cert-file: "${etcd_dir}/ssl/etcd.pem"
 		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
