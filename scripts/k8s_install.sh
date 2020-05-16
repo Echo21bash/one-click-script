@@ -103,7 +103,7 @@ down_k8s_file(){
 }
 
 etcd_conf(){
-
+	etcd_num=${#etcd_ip[@]}
 	if [[ ${etcd_num} = '1' ]];then
 		cat >${tmp_dir}/etcd.yml <<-EOF
 		#[Member]
