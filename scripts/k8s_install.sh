@@ -163,13 +163,11 @@ etcd_conf(){
 
 etcd_start(){
 	local i=0
-	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${etcd_ip[$j]}" ]];then
+		if [[ "${etcd_ip[@]}" =~ ${host} ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl restart etcd.service" &
-			((j++))
 		fi
 		((i++))
 	done
