@@ -168,7 +168,7 @@ etcd_start(){
 	do
 		if [[ ${host} = "${etcd_ip[$j]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			systemctl restart etcd.service &"
+			systemctl restart etcd.service" &
 			((j++))
 		fi
 		((i++))
@@ -252,10 +252,9 @@ etcd_install_ctl(){
 	get_etcd_cluster_ip
 	
 	local i=0
-	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${etcd_ip[$j]}" ]];then
+		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
@@ -265,7 +264,6 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
-			((j++))
 		fi
 		((i++))
 	done
@@ -283,10 +281,9 @@ flannel_conf(){
 flannel_install_ctl(){
 	
 	local i=0
-	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${node_ip[$j]}" ]];then
+		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			flannel_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
@@ -297,7 +294,6 @@ flannel_install_ctl(){
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
 			sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service			
 			systemctl daemon-reload"
-			((j++))
 		fi
 		((i++))
 	done
@@ -397,10 +393,9 @@ proxy_conf(){
 
 master_install_ctl(){
 	local i=0
-	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${master_ip[$j]}" ]];then
+		if [[ "${master_ip[@]}" =~ ${host} ]];then
 			apiserver_conf
 			scheduler_conf
 			controller_manager_conf
@@ -414,7 +409,6 @@ master_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
-			((j++))
 		fi
 		((i++))
 	done
@@ -423,10 +417,9 @@ master_install_ctl(){
 
 node_install_ctl(){
 	local i=0
-	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${node_ip[$j]}" ]];then
+		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			kubelet_conf
 			proxy_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -437,8 +430,7 @@ node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
-			
-			((j++))
+
 		fi
 		((i++))
 	done
