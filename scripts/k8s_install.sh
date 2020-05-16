@@ -134,11 +134,11 @@ etcd_conf(){
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
-		listen-peer-urls: "https://${etcd_ip[$j]}:2380"
-		listen-client-urls: "https://${etcd_ip[$j]}:2379"
+		listen-peer-urls: "https://${host_name[$i]}:2380"
+		listen-client-urls: "https://${host_name[$i]}:2379"
 		#[Clustering]
-		initial-advertise-peer-urls: "https://${etcd_ip[$j]}:2380"
-		advertise-client-urls: "https://${etcd_ip[$j]}:2379"
+		initial-advertise-peer-urls: "https://${host_name[$i]}:2380"
+		advertise-client-urls: "https://${host_name[$i]}:2379"
 		initial-cluster: "${etcd_cluster_ip}"
 		initial-cluster-token: "etcd-cluster"
 		initial-cluster-state: "new"
@@ -250,8 +250,8 @@ add_system(){
 
 etcd_install_ctl(){
 	get_etcd_cluster_ip
-	
 	local i=0
+	local j=0
 	for host in ${host_name[@]};
 	do
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
@@ -264,6 +264,7 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
+			((j++))
 		fi
 		((i++))
 	done
@@ -306,9 +307,9 @@ apiserver_conf(){
 	KUBE_APISERVER_OPTS="--logtostderr=true \
 	--v=4 \
 	--etcd-servers=${etcd_endpoints} \
-	--bind-address=master_ip[$j] \
+	--bind-address={host_name[$i]} \
 	--secure-port=6443 \
-	--advertise-address=master_ip[$j] \
+	--advertise-address={host_name[$i]} \
 	--allow-privileged=true \
 	--service-cluster-ip-range=10.0.0.0/24 \
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \
