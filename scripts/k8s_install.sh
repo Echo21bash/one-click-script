@@ -74,9 +74,9 @@ create_etcd_ca(){
 	
 	for ip in ${master_ip[*]}
 	do
-		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-		sed -i "/"127.0.0.1",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+		sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	done
 	
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
@@ -174,6 +174,7 @@ etcd_start(){
 }
 
 etcd_check(){
+	sleep 5
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -185,7 +186,7 @@ etcd_check(){
 				${etcd_dir}/bin/etcdctl \
 				--ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem \
 				--endpoints="${etcd_endpoints}" \
-				set /coreos.com/network/config  '{ "Network": "172.17.0.0/16", "Backend": {"Type": "vxlan"}}'
+				set /coreos.com/network/config  '{ \"Network\": \"172.17.0.0/16\", \"Backend\": {\"Type\": \"vxlan\"}}'
 			else
 				echo etcd集群不可用
 				exit
@@ -225,6 +226,7 @@ add_system(){
 	ExecStartPost="${flannel_dir}/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker"
 	conf_system_service
 	##apiserver
+	ExecStartPost=
 	Type="notify"
 	initd="apiserver_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-apiserver"
@@ -295,12 +297,35 @@ flannel_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel root@${host}:${flannel_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
-			sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service			
+			[[ -z `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
 			systemctl daemon-reload"
 		fi
 		((i++))
 	done
 
+}
+
+kubectl_conf(){
+	#创建~/.kube/config
+	${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+	--certificate-authority=${k8s_dir}/ssl/ca.pem \
+	--embed-certs=true \
+	--server=https://192.168.1.3:6443 \
+	--kubeconfig=/root/.kube/config
+	#设置客户端认证参数
+	${k8s_dir}/bin/kubectl config set-credentials admin \
+	--client-certificate=${k8s_dir}/ssl/admin.pem \
+	--client-key=${k8s_dir}/ssl/admin-key.pem \
+	--embed-certs=true \
+	--kubeconfig=/root/.kube/config
+	#设置上下文参数
+	${k8s_dir}/bin/kubectl config set-context kubernetes \
+	--cluster=kubernetes \
+	--user=admin \
+	--kubeconfig=/root/.kube/config
+
+	#设置默认上下文
+	${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
 }
 
 apiserver_conf(){
@@ -309,9 +334,9 @@ apiserver_conf(){
 	KUBE_APISERVER_OPTS="--logtostderr=true \
 	--v=4 \
 	--etcd-servers=${etcd_endpoints} \
-	--bind-address={host_name[$i]} \
+	--bind-address=${host_name[$i]} \
 	--secure-port=6443 \
-	--advertise-address={host_name[$i]} \
+	--advertise-address=${host_name[$i]} \
 	--allow-privileged=true \
 	--service-cluster-ip-range=10.0.0.0/24 \
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \
@@ -405,7 +430,7 @@ master_install_ctl(){
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem}  root@${host}:${k8s_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
