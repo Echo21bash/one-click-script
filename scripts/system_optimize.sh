@@ -110,7 +110,7 @@ system_optimize_systime(){
 	ln -sfn /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	yum -y install chrony
 
-	if [ $NTPDATE -eq 0 ];then
+	if [ $? -eq 0 ];then
 		sed '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
 		if [ $? -eq 0 ];then
 			diy_echo "完成时间同步配置" "" "${info}"
@@ -193,6 +193,5 @@ system_optimize_permission(){
 	chattr +i /etc/shadow
 	chattr +i /etc/gshadow
 	/bin/mv /usr/bin/chattr /usr/bin/lock
-	sed -i 's#^exec.*# #exec /sbin/shutdown -r now "Control-Alt-Delete pressed"#'/etc/init/control-alt-delete.conf
 	diy_echo "完成系统关键文件锁定" "" "${info}"
 }

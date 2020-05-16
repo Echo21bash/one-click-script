@@ -22,7 +22,12 @@ env_load(){
 	nf_conntrack
 	EOF
 	modprobe br_netfilter
-	modprobe ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4 nf_conntrack
+	modprobe ip_vs
+	modprobe ip_vs_rr
+	modprobe ip_vs_wrr
+	modprobe ip_vs_sh
+	modprobe nf_conntrack_ipv4
+	modprobe nf_conntrack
 	cat >/etc/sysctl.d/95-k8s-sysctl.conf<<-EOF
 	net.ipv4.ip_forward = 1
 	net.bridge.bridge-nf-call-iptables = 1
