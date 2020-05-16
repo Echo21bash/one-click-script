@@ -62,6 +62,17 @@ install_cfssl(){
 }
 
 create_etcd_ca(){
+	for ip in ${etcd_ip[*]}
+	do
+		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/etcd-csr.json
+	done
+	
+	for ip in ${master_ip[*]}
+	do
+		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+		sed -i "/"127.0.0.1",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+	done
 	
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
@@ -151,7 +162,7 @@ etcd_start(){
 	do
 		if [[ ${host} = "${etcd_ip[$j]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			systemctl restart etcd.service"
+			systemctl restart etcd.service &"
 			((j++))
 		fi
 		((i++))
@@ -162,7 +173,7 @@ etcd_check(){
 	local i=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${etcd_ip}" ]];then
+		if [[ ${host} = "${etcd_ip[0]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health
 			if [[ $? = '0' ]];then

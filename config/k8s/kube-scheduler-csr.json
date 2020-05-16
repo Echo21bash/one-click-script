@@ -1,22 +1,20 @@
 {
-    "CN": "system:kube-scheduler",
-    "hosts": [
-      "127.0.0.1",
-      "20.1.0.238",
-      "20.1.0.239",
-      "20.1.0.240"
-    ],
-    "key": {
-        "algo": "rsa",
-        "size": 2048
-    },
-    "names": [
-      {
-        "C": "CN",
-        "ST": "BeiJing",
-        "L": "BeiJing",
-        "O": "system:kube-scheduler",
-        "OU": "System"
-      }
-    ]
+  "CN": "system:kube-scheduler",
+  "hosts": [
+    "127.0.0.1"
+
+  ],
+  "key": {
+      "algo": "rsa",
+      "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "BeiJing",
+      "L": "BeiJing",
+      "O": "system:kube-scheduler",
+      "OU": "System"
+    }
+  ]
 }
