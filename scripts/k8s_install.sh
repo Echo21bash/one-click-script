@@ -93,7 +93,7 @@ create_etcd_ca(){
 
 down_k8s_file(){
 	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-amd64.tar.gz ${tmp_dir}/etcd-v3.2.30-linux-amd64.tar.gz
-	down_file https://github.com/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/flannel-v0.10.0-linux-amd64.tar.gz
+	down_file https://gitee.com/rootww/soft/raw/master/flannel/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/flannel-v0.10.0-linux-amd64.tar.gz
 	down_file https://storage.googleapis.com/kubernetes-release/release/v1.15.6/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/kubernetes-server-linux-amd64.tar.gz
 	tar -zxf etcd-v3.2.30-linux-amd64.tar.gz
 	tar -zxf flannel-v0.10.0-linux-amd64.tar.gz

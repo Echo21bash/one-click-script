@@ -10,7 +10,14 @@ down_file(){
 			if [[ $? = '0' ]];then
 				diy_echo "${file_name}下载完成" "${info}"
 			else
-				diy_echo "${file_name}下载失败" "${red}" "${error}"
+				diy_echo "${file_name}下载失败,正在重试" "${red}" "${error}"
+				axel -n 16 -a ${down_url} -o ${file_name}
+				if [[ $? = '0' ]];then
+					diy_echo "${file_name}下载完成" "${info}"
+				else
+					diy_echo "${file_name}下载失败请检查" "${red}" "${error}"
+					exit
+				fi
 			fi
 		else
 			diy_echo "已经存在文件${file_name}" "${info}"
