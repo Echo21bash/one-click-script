@@ -196,14 +196,18 @@ etcd_check(){
 }
 
 get_etcd_cluster_ip(){
-
-	etcd_num=${#etcd_ip[*]}
 	local i=0
-	for ((i=0;i<${etcd_num};i++));
+	local j=0
+	for host in ${host_name[@]};
 	do
-		etcd_cluster_ip=${etcd_cluster_ip}etcd-$i=https://${etcd_ip[$i]}:2380,
-		etcd_endpoints=${etcd_endpoints}https://${etcd_ip[$i]}:2379,
+		if [[ ${etcd_ip[@]} =~ ${host} ]];then
+			etcd_cluster_ip=${etcd_cluster_ip}etcd-$j=https://${host_name[$i]}:2380,
+			etcd_endpoints=${etcd_endpoints}https://${host_name[$i]}:2379,
+			((j++))
+		fi
+		((i++))
 	done
+	
 }
 
 add_system(){
