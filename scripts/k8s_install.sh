@@ -359,8 +359,11 @@ scheduler_conf(){
 	cat >${tmp_dir}/kube-scheduler <<-EOF 
 	KUBE_SCHEDULER_OPTS="--logtostderr=true \
 	--v=4 \
+	--tls-cert-file=${k8s_dir}/ssl/kube-scheduler.pem \
+	--tls-private-key-file=${k8s_dir}/ssl/kube-scheduler-key.pem \
+	--client-ca-file=${k8s_dir}/ssl/ca.pem
 	--master=127.0.0.1:8080 \
-	--leader-elect"
+	--leader-elect=true"
 	EOF
 }
 
