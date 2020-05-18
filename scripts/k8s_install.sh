@@ -211,6 +211,9 @@ get_etcd_cluster_ip(){
 		fi
 		((i++))
 	done
+	#删除最后的逗号
+	etcd_cluster_ip=${etcd_cluster_ip%,*}
+	etcd_endpoints=${etcd_endpoints%,*}
 
 }
 
@@ -239,7 +242,7 @@ add_system(){
 	Type="simple"
 	initd="scheduler_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
-	ExecStart="${k8s_dir}/bin/kube-scheduler \$$KUBE_SCHEDULER_OPTS"
+	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
 	conf_system_service
 	##controller
 	Type="simple"
@@ -252,6 +255,12 @@ add_system(){
 	initd="proxy_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
+	conf_system_service
+	##proxy
+	Type="simple"
+	initd="kubelet_init"
+	EnvironmentFile="${k8s_dir}/cfg/kubelet"
+	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
 	conf_system_service
 }
 
@@ -282,7 +291,7 @@ etcd_install_ctl(){
 flannel_conf(){
 
 	cat >${tmp_dir}/conf/flannel <<-EOF
-	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${flannel_dir}/ssl/ca.pem -etcd-certfile=${flannel_dir}/ssl/flannel.pem -etcd-keyfile=${flannel_dir}/ssl/flannel-key.pem"
+	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${flannel_dir}/ssl/ca.pem -etcd-certfile=${flannel_dir}/ssl/flanneld.pem -etcd-keyfile=${flannel_dir}/ssl/flanneld-key.pem"
 	EOF
 }
 
@@ -322,25 +331,25 @@ master_node_conf(){
 apiserver_conf(){
 	cat >${tmp_dir}/conf/kube-apiserver <<-EOF 
 	
-	KUBE_APISERVER_OPTS="--logtostderr=true \
-	--v=4 \
-	--etcd-servers=${etcd_endpoints} \
-	--bind-address=${host_name[$i]} \
-	--secure-port=6443 \
-	--advertise-address=${host_name[$i]} \
-	--allow-privileged=true \
-	--service-cluster-ip-range=10.0.0.0/24 \
-	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \
-	--authorization-mode=RBAC,Node \
-	--enable-bootstrap-token-auth \
-	--token-auth-file=${k8s_dir}/cfg/token.csv \
-	--service-node-port-range=30000-50000 \
-	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \
-	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \
-	--client-ca-file=${k8s_dir}/ssl/ca.pem \
-	--service-account-key-file=${k8s_dir}/ssl/ca-key.pem \
-	--etcd-cafile=${k8s_dir}/ssl/ca.pem \
-	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \
+	KUBE_APISERVER_OPTS="--logtostderr=true \\
+	--v=4 \\
+	--etcd-servers=${etcd_endpoints} \\
+	--bind-address=${host_name[$i]} \\
+	--secure-port=6443 \\
+	--advertise-address=${host_name[$i]} \\
+	--allow-privileged=true \\
+	--service-cluster-ip-range=10.0.0.0/24 \\
+	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \\
+	--authorization-mode=RBAC,Node \\
+	--enable-bootstrap-token-auth \\
+	--token-auth-file=${k8s_dir}/cfg/token.csv \\
+	--service-node-port-range=30000-50000 \\
+	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \\
+	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \\
+	--client-ca-file=${k8s_dir}/ssl/ca.pem \\
+	--service-account-key-file=${k8s_dir}/ssl/ca-key.pem \\
+	--etcd-cafile=${k8s_dir}/ssl/ca.pem \\
+	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \\
 	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem"
 	EOF
 
@@ -348,62 +357,49 @@ apiserver_conf(){
 
 scheduler_conf(){
 	cat >${tmp_dir}/conf/kube-scheduler <<-EOF 
-	KUBE_SCHEDULER_OPTS="--logtostderr=true \
-	--v=4 \
-	--tls-cert-file=${k8s_dir}/ssl/kube-scheduler.pem \
-	--tls-private-key-file=${k8s_dir}/ssl/kube-scheduler-key.pem \
-	--client-ca-file=${k8s_dir}/ssl/ca.pem
-	--master=127.0.0.1:8080 \
+	KUBE_SCHEDULER_OPTS="--logtostderr=true \\
+	--v=4 \\
+	--tls-cert-file=${k8s_dir}/ssl/kube-scheduler.pem \\
+	--tls-private-key-file=${k8s_dir}/ssl/kube-scheduler-key.pem \\
+	--client-ca-file=${k8s_dir}/ssl/ca.pem \\
+	--master=127.0.0.1:8080 \\
 	--leader-elect=true"
 	EOF
 }
 
 controller_manager_conf(){
 	cat >${tmp_dir}/conf/kube-controller-manager <<-EOF 
-	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \
-	--v=4 \
-	--master=127.0.0.1:8080 \
-	--leader-elect=true \
-	--address=127.0.0.1 \
-	--service-cluster-ip-range=10.0.0.0/24 \
-	--cluster-name=kubernetes \
-	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \
-	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem \
-	--root-ca-file=${k8s_dir}/ssl/ca.pem \
+	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \\
+	--v=4 \\
+	--master=127.0.0.1:8080 \\
+	--leader-elect=true \\
+	--address=127.0.0.1 \\
+	--service-cluster-ip-range=10.0.0.0/24 \\
+	--cluster-name=kubernetes \\
+	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \\
+	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem \\
+	--root-ca-file=${k8s_dir}/ssl/ca.pem \\
 	--service-account-private-key-file=${k8s_dir}/ssl/ca-key.pem"
 	EOF
 }
 
 kubelet_conf(){
+	
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
-	KUBELET_OPTS="--logtostderr=true \
-	--v=4 \
-	--hostname-override=192.168.135.129 \
-	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \
-	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \
-	--config=${k8s_dir}/cfg/kubelet.config \
-	--cert-dir=${k8s_dir}/ssl \
+	KUBELET_OPTS="--logtostderr=true \\
+	--v=4 \\
+	--hostname-override=192.168.135.129 \\
+	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
+	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
+	--config=${k8s_dir}/cfg/kubelet.config \\
+	--cert-dir=${k8s_dir}/ssl \\
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
 	EOF
-	cat > ${tmp_dir}/conf/kubelet.config  <<-EOF
-	kind: KubeletConfiguration
-	apiVersion: kubelet.config.k8s.io/v1beta1
-	address: 192.168.135.129
-	port: 10250
-	readOnlyPort: 10255
-	cgroupDriver: cgroupfs
-	clusterDNS: ["10.0.0.2"]
-	clusterDomain: cluster.local.
-	failSwapOn: false
-	authentication:
-	  anonymous:
-		enabled: true 
-	  webhook:
-		enabled: false
-	EOF
+
 }
 
 proxy_conf(){
+
 	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \
 	--v=4 \
@@ -471,8 +467,48 @@ node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			systemctl daemon-reload"
+			systemctl daemon-reload
+			#创建kube-proxy.kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=https://${vip}:6443 \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials kube-proxy \
+			--client-certificate=${k8s_dir}/ssl/kube-proxy.pem \
+			--client-key=${k8s_dir}/ssl/kube-proxy-key.pem \
+			--embed-certs=true \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context default \
+			--cluster=kubernetes \
+			--user=kube-proxy \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
+			#创建bootstrap.kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=https://${vip}:6443 \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
+			--token=674c457d4dcf2eefe4920d7dbb6b0ddc \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context default \
+			--cluster=kubernetes \
+			--user=kubelet-bootstrap \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			systemctl start kube-proxy kubelet
+			"
 
 		fi
 		((i++))
