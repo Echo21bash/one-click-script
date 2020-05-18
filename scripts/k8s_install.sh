@@ -295,7 +295,7 @@ flannel_install_ctl(){
 			flannel_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/flannel/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/flannel root@${host}:${flannel_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
@@ -309,6 +309,9 @@ flannel_install_ctl(){
 }
 
 master_node_conf(){
+	cat > ${tmp_dir}/conf/token.csv <<-EOF
+	674c457d4dcf2eefe4920d7dbb6b0ddc,kubelet-bootstrap,10001,"system:kubelet-bootstrap"
+	EOF
 	master_num=${#master_ip[@]}
 	if [[ ${master_num} = '1' ]];then
 		vip=${master_ip}
@@ -447,7 +450,8 @@ master_install_ctl(){
 			--user=admin \
 			--kubeconfig=/root/.kube/config
 			#设置默认上下文
-			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config"
+			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
+			systemctl start kube-apiserver kube-scheduler kube-controller-manager"
 		fi
 		((i++))
 	done
@@ -474,13 +478,6 @@ node_install_ctl(){
 		((i++))
 	done
 	
-
-}
-
-create_token(){
-	cat > ${tmp_dir}/conf/token.csv <<-EOF
-	674c457d4dcf2eefe4920d7dbb6b0ddc,kubelet-bootstrap,10001,"system:kubelet-bootstrap"
-	EOF
 
 }
 
