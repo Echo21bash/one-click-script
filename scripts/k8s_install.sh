@@ -39,7 +39,8 @@ env_load(){
 	. /root/public.sh
 	. /root/system_optimize.sh
 	conf=(1 2 4 5 6 7)
-	system_optimize_set"
+	system_optimize_set
+	rm -rf /root/public.sh /root/system_optimize.sh"
 	((i++))
 	done
 	
