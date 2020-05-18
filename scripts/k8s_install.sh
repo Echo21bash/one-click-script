@@ -310,7 +310,8 @@ flannel_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
 			[[ `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` = '' ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
-			systemctl daemon-reload"
+			systemctl daemon-reload
+			systemctl start flanneld"
 		fi
 		((i++))
 	done
