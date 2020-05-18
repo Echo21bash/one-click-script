@@ -4,7 +4,7 @@ env_load(){
 	. ${workdir}/config/k8s/k8s.conf
 	auto_ssh_keygen
 	tmp_dir=/tmp/install_tmp
-	mkdir -p ${tmp_dir}
+	mkdir -p ${tmp_dir}/{soft,ssl,conf}
 	cd ${tmp_dir}
 	
 	local i=0
@@ -78,7 +78,7 @@ create_etcd_ca(){
 		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
 		sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	done
-	
+	cd ${tmp_dir}/ssl
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/flanneld-csr.json | cfssljson -bare flanneld
@@ -88,24 +88,27 @@ create_etcd_ca(){
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-scheduler-csr.json | cfssljson -bare kube-scheduler
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-proxy-csr.json | cfssljson -bare kube-proxy
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/proxy-client-csr.json | cfssljson -bare proxy-client
-
+	cd ..
 }
 
 down_k8s_file(){
-	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-amd64.tar.gz ${tmp_dir}/etcd-v3.2.30-linux-amd64.tar.gz
-	down_file https://github.com/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/flannel-v0.10.0-linux-amd64.tar.gz
-	down_file https://download.fastgit.org/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/flannel-v0.10.0-linux-amd64.tar.gz
-	down_file https://storage.googleapis.com/kubernetes-release/release/v1.15.6/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/kubernetes-server-linux-amd64.tar.gz
+	mkdir -p ${tmp_dir}/soft/flannel
+	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v3.2.30-linux-amd64.tar.gz
+	down_file https://github.com/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v0.10.0-linux-amd64.tar.gz
+	down_file https://download.fastgit.org/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v0.10.0-linux-amd64.tar.gz
+	down_file https://storage.googleapis.com/kubernetes-release/release/v1.15.6/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
+	cd ${tmp_dir}/soft
 	tar -zxf etcd-v3.2.30-linux-amd64.tar.gz
-	tar -zxf flannel-v0.10.0-linux-amd64.tar.gz
+	tar -zxf flannel-v0.10.0-linux-amd64.tar.gz -C ${tmp_dir}/soft/flannel
 	tar -zxf kubernetes-server-linux-amd64.tar.gz
-
+	cd ..
 }
 
 etcd_conf(){
+	
 	etcd_num=${#etcd_ip[@]}
 	if [[ ${etcd_num} = '1' ]];then
-		cat >${tmp_dir}/etcd.yml <<-EOF
+		cat >${tmp_dir}/conf/etcd.yml <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
@@ -130,7 +133,7 @@ etcd_conf(){
 
 
 	if [[ ${etcd_num} > '1' ]];then
-		cat >${tmp_dir}/etcd.yml <<-EOF
+		cat >${tmp_dir}/conf/etcd.yml <<-EOF
 		#[Member]
 		name: "etcd-$j"
 		data-dir: "${etcd_data_dir}"
@@ -180,8 +183,7 @@ etcd_check(){
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health
-			if [[ $? = '0' ]];then
+			if /opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health;then
 				echo etcd集群可用
 				${etcd_dir}/bin/etcdctl \
 				--ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem \
@@ -233,19 +235,19 @@ add_system(){
 	ExecStart="${k8s_dir}/bin/kube-apiserver \$KUBE_APISERVER_OPTS"
 	conf_system_service
 	##scheduler
-	#Type="notify"
+	Type="simple"
 	initd="scheduler_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
-	ExecStart="${k8s_dir}/bin/kube-apiserver \$$KUBE_SCHEDULER_OPTS"
+	ExecStart="${k8s_dir}/bin/kube-scheduler \$$KUBE_SCHEDULER_OPTS"
 	conf_system_service
 	##controller
-	#Type="notify"
+	Type="simple"
 	initd="controller_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"
 	conf_system_service
 	##proxy
-	#Type="notify"
+	Type="simple"
 	initd="proxy_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
@@ -262,9 +264,9 @@ etcd_install_ctl(){
 			etcd_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd-v3.2.30-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.yml  root@${host}:${etcd_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v3.2.30-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
@@ -278,7 +280,7 @@ etcd_install_ctl(){
 
 flannel_conf(){
 
-	cat >${tmp_dir}/flannel <<-EOF
+	cat >${tmp_dir}/conf/flannel <<-EOF
 	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${flannel_dir}/ssl/ca.pem -etcd-certfile=${flannel_dir}/ssl/flannel.pem -etcd-keyfile=${flannel_dir}/ssl/flannel-key.pem"
 	EOF
 }
@@ -292,12 +294,12 @@ flannel_install_ctl(){
 			flannel_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel root@${host}:${flannel_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/flannel root@${host}:${flannel_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
-			[[ -z `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
+			[[ `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` = '' ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
 			systemctl daemon-reload"
 		fi
 		((i++))
@@ -310,7 +312,7 @@ kubectl_conf(){
 	${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 	--certificate-authority=${k8s_dir}/ssl/ca.pem \
 	--embed-certs=true \
-	--server=https://192.168.1.3:6443 \
+	--server=https://20.1.0.239:6443 \
 	--kubeconfig=/root/.kube/config
 	#设置客户端认证参数
 	${k8s_dir}/bin/kubectl config set-credentials admin \
@@ -342,7 +344,7 @@ apiserver_conf(){
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \
 	--authorization-mode=RBAC,Node \
 	--enable-bootstrap-token-auth \
-	--token-auth-file=/opt/kubernetes/cfg/token.csv \
+	--token-auth-file=${k8s_dir}/cfg/token.csv \
 	--service-node-port-range=30000-50000 \
 	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \
 	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \
@@ -374,10 +376,10 @@ controller_manager_conf(){
 	--master=127.0.0.1:8080 \
 	--leader-elect=true \
 	--address=127.0.0.1 \
-	--service-cluster-ip-range=10.0.0.0/24 \ 
+	--service-cluster-ip-range=10.0.0.0/24 \
 	--cluster-name=kubernetes \
 	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \
-	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem  \
+	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem \
 	--root-ca-file=${k8s_dir}/ssl/ca.pem \
 	--service-account-private-key-file=${k8s_dir}/ssl/ca-key.pem"
 	EOF
@@ -432,9 +434,9 @@ master_install_ctl(){
 			controller_manager_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,token.csv}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
@@ -455,9 +457,9 @@ node_install_ctl(){
 			proxy_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/kubernetes/server/bin/{kube-proxy,kubelet} root@${host}:${k8s_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet} root@${host}:${k8s_dir}/bin
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload"
@@ -470,7 +472,7 @@ node_install_ctl(){
 }
 
 create_token(){
-	cat > ${k8s_dir}/cfg/token.csv <<-EOF
+	cat > ${tmp_dir}/conf/token.csv <<-EOF
 	674c457d4dcf2eefe4920d7dbb6b0ddc,kubelet-bootstrap,10001,"system:kubelet-bootstrap"
 	EOF
 
