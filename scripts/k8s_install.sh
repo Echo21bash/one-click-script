@@ -388,11 +388,11 @@ kubelet_conf(){
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=4 \\
-	--hostname-override=192.168.135.129 \\
+	--hostname-override=${host_name[$i]} \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
-	--config=${k8s_dir}/cfg/kubelet.config \\
 	--cert-dir=${k8s_dir}/ssl \\
+	--fail-swap-on=false \\
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
 	EOF
 
@@ -403,7 +403,7 @@ proxy_conf(){
 	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \
 	--v=4 \
-	--hostname-override=192.168.135.129 \
+	--hostname-override=${host_name[$i]} \
 	--cluster-cidr=10.0.0.0/24 \
 	--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
 	EOF
@@ -447,7 +447,12 @@ master_install_ctl(){
 			--kubeconfig=/root/.kube/config
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
-			systemctl start kube-apiserver kube-scheduler kube-controller-manager"
+			systemctl start kube-apiserver kube-scheduler kube-controller-manager
+			sleep 10
+			#将kubelet-bootstrap用户绑定到系统集群角色
+			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap \
+			--clusterrole=system:node-bootstrapper \
+			--user=kubelet-bootstrap"
 		fi
 		((i++))
 	done
