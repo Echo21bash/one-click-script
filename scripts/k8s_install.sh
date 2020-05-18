@@ -317,7 +317,7 @@ master_node_conf(){
 }
 
 apiserver_conf(){
-	cat >${tmp_dir}/kube-apiserver <<-EOF 
+	cat >${tmp_dir}/conf/kube-apiserver <<-EOF 
 	
 	KUBE_APISERVER_OPTS="--logtostderr=true \
 	--v=4 \
@@ -344,7 +344,7 @@ apiserver_conf(){
 }
 
 scheduler_conf(){
-	cat >${tmp_dir}/kube-scheduler <<-EOF 
+	cat >${tmp_dir}/conf/kube-scheduler <<-EOF 
 	KUBE_SCHEDULER_OPTS="--logtostderr=true \
 	--v=4 \
 	--tls-cert-file=${k8s_dir}/ssl/kube-scheduler.pem \
@@ -356,7 +356,7 @@ scheduler_conf(){
 }
 
 controller_manager_conf(){
-	cat >${tmp_dir}/kube-controller-manager <<-EOF 
+	cat >${tmp_dir}/conf/kube-controller-manager <<-EOF 
 	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \
 	--v=4 \
 	--master=127.0.0.1:8080 \
@@ -372,7 +372,7 @@ controller_manager_conf(){
 }
 
 kubelet_conf(){
-	cat > ${tmp_dir}/kubelet <<-EOF
+	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \
 	--v=4 \
 	--hostname-override=192.168.135.129 \
@@ -382,7 +382,7 @@ kubelet_conf(){
 	--cert-dir=${k8s_dir}/ssl \
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
 	EOF
-	cat > ${tmp_dir}/kubelet.config  <<-EOF
+	cat > ${tmp_dir}/conf/kubelet.config  <<-EOF
 	kind: KubeletConfiguration
 	apiVersion: kubelet.config.k8s.io/v1beta1
 	address: 192.168.135.129

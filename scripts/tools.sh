@@ -6,6 +6,7 @@ down_file(){
 		down_url=$1
 		file_name=$2
 		if [[ ! -f ${file_name} ]];then
+			diy_echo "正在下载${down_url}" "${info}"
 			axel -n 16 -a ${down_url} -o ${file_name}
 			if [[ $? = '0' ]];then
 				diy_echo "${file_name}下载完成" "${info}"
