@@ -210,7 +210,7 @@ get_etcd_cluster_ip(){
 		fi
 		((i++))
 	done
-	
+
 }
 
 add_system(){
@@ -249,7 +249,7 @@ add_system(){
 	##proxy
 	Type="simple"
 	initd="proxy_init"
-	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
+	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
 	conf_system_service
 }
@@ -307,27 +307,12 @@ flannel_install_ctl(){
 
 }
 
-kubectl_conf(){
-	#创建~/.kube/config
-	${k8s_dir}/bin/kubectl config set-cluster kubernetes \
-	--certificate-authority=${k8s_dir}/ssl/ca.pem \
-	--embed-certs=true \
-	--server=https://20.1.0.239:6443 \
-	--kubeconfig=/root/.kube/config
-	#设置客户端认证参数
-	${k8s_dir}/bin/kubectl config set-credentials admin \
-	--client-certificate=${k8s_dir}/ssl/admin.pem \
-	--client-key=${k8s_dir}/ssl/admin-key.pem \
-	--embed-certs=true \
-	--kubeconfig=/root/.kube/config
-	#设置上下文参数
-	${k8s_dir}/bin/kubectl config set-context kubernetes \
-	--cluster=kubernetes \
-	--user=admin \
-	--kubeconfig=/root/.kube/config
+master_node_conf(){
+	master_num=${#master_ip[@]}
+	if [[ ${master_num} = '1' ]];then
+		vip=${master_ip}
+	fi
 
-	#设置默认上下文
-	${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
 }
 
 apiserver_conf(){
@@ -415,7 +400,7 @@ kubelet_conf(){
 }
 
 proxy_conf(){
-	cat > ${tmp_dir}/kube-proxy  <<-EOF
+	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \
 	--v=4 \
 	--hostname-override=192.168.135.129 \
@@ -425,6 +410,7 @@ proxy_conf(){
 }
 
 master_install_ctl(){
+	master_node_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -441,7 +427,26 @@ master_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			systemctl daemon-reload"
+			systemctl daemon-reload
+			#创建~/.kube/config
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=https://${vip}:6443 \
+			--kubeconfig=/root/.kube/config
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials admin \
+			--client-certificate=${k8s_dir}/ssl/admin.pem \
+			--client-key=${k8s_dir}/ssl/admin-key.pem \
+			--embed-certs=true \
+			--kubeconfig=/root/.kube/config
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context kubernetes \
+			--cluster=kubernetes \
+			--user=admin \
+			--kubeconfig=/root/.kube/config
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config"
 		fi
 		((i++))
 	done
