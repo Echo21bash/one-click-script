@@ -93,15 +93,19 @@ create_etcd_ca(){
 }
 
 down_k8s_file(){
-	mkdir -p ${tmp_dir}/soft/flannel
-	down_file https://mirrors.huaweicloud.com/etcd/v3.2.30/etcd-v3.2.30-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v3.2.30-linux-amd64.tar.gz
-	down_file https://github.com/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v0.10.0-linux-amd64.tar.gz
-	down_file https://download.fastgit.org/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v0.10.0-linux-amd64.tar.gz
-	down_file https://storage.googleapis.com/kubernetes-release/release/v1.15.6/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
+	mkdir -p ${tmp_dir}/soft/{flannel,cni}
+	down_file https://mirrors.huaweicloud.com/etcd/v${etcd_ver}/etcd-v${etcd_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64.tar.gz
+	down_file https://github.com/coreos/flannel/releases/download/v${flannel_ver}/flannel-v${flannel_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v${flannel_ver}-linux-amd64.tar.gz
+	down_file https://download.fastgit.org/coreos/flannel/releases/download/v${flannel_ver}/flannel-v${flannel_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/flannel-v${flannel_ver}-linux-amd64.tar.gz
+	down_file https://storage.googleapis.com/kubernetes-release/release/v${k8s_ver}/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
+	down_file https://github.com/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
+	down_file https://download.fastgit.org/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
+
 	cd ${tmp_dir}/soft
-	tar -zxf etcd-v3.2.30-linux-amd64.tar.gz
-	tar -zxf flannel-v0.10.0-linux-amd64.tar.gz -C ${tmp_dir}/soft/flannel
+	tar -zxf etcd-v${etcd_ver}-linux-amd64.tar.gz
+	tar -zxf flannel-v${flannel_ver}-linux-amd64.tar.gz -C ${tmp_dir}/soft/flannel
 	tar -zxf kubernetes-server-linux-amd64.tar.gz
+	tar -zxf cni-plugins-linux-amd64-v${cni_ver}.tgz -C ${tmp_dir}/soft/cni
 	cd ..
 }
 
@@ -274,7 +278,7 @@ etcd_install_ctl(){
 			etcd_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v3.2.30-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
@@ -310,8 +314,9 @@ flannel_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
 			[[ `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` = '' ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
+			sed -i 's#ExecStart.*#ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock $DOCKER_NETWORK_OPTIONS#' /usr/lib/systemd/system/docker.service
 			systemctl daemon-reload
-			systemctl start flanneld"
+			systemctl start flanneld docker.service"
 		fi
 		((i++))
 	done
@@ -385,11 +390,27 @@ controller_manager_conf(){
 }
 
 kubelet_conf(){
-	
+	cat > ${tmp_dir}/conf/kubelet.yml <<-EOF
+	kind: KubeletConfiguration
+	apiVersion: kubelet.config.k8s.io/v1beta1
+	address: ${host_name[$i]}
+	port: 10250
+	readOnlyPort: 10255
+	cgroupDriver: cgroupfs
+	clusterDNS: ["10.0.0.2"]
+	clusterDomain: cluster.local.
+	failSwapOn: false
+	authentication:
+	  anonymous:
+		enabled: true 
+	  webhook:
+		enabled: false
+	EOF
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=4 \\
 	--hostname-override=${host_name[$i]} \\
+	--config=${k8s_dir}/cfg/kubelet.yml
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
 	--cert-dir=${k8s_dir}/ssl \\
@@ -471,7 +492,7 @@ node_install_ctl(){
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -515,7 +536,6 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			systemctl start kube-proxy kubelet
 			"
-
 		fi
 		((i++))
 	done
