@@ -80,6 +80,8 @@ create_etcd_ca(){
 		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
 		sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	done
+	sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+	
 	cd ${tmp_dir}/ssl
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
@@ -229,13 +231,7 @@ add_system(){
 	initd="etcd_init"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
 	conf_system_service
-	##flannel
-	Type="notify"
-	initd="flannel_init"
-	EnvironmentFile="${flannel_dir}/cfg/flannel"
-	ExecStart="${flannel_dir}/bin/flanneld --ip-masq \$FLANNEL_OPTIONS"
-	ExecStartPost="${flannel_dir}/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker"
-	conf_system_service
+
 	##apiserver
 	ExecStartPost=
 	Type="notify"
