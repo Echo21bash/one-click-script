@@ -493,7 +493,7 @@ master_install_ctl(){
 			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 			"
-		if
+		fi
 	done
 	
 	
