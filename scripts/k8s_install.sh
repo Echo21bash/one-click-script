@@ -191,7 +191,7 @@ etcd_check(){
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			if /opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health;then
 				echo etcd集群可用
-				${etcd_dir}/bin/etcdctl \
+				#${etcd_dir}/bin/etcdctl \
 				--ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem \
 				--endpoints="${etcd_endpoints}" \
 				set /coreos.com/network/config  '{ \"Network\": \"172.17.0.0/16\", \"Backend\": {\"Type\": \"vxlan\"}}'
