@@ -40,6 +40,7 @@ env_load(){
 	. /root/system_optimize.sh
 	conf=(1 2 4 5 6 7)
 	system_optimize_set
+	yum install ipvsadm ipset jq sysstat conntrack libseccomp conntrack-tools socat -y
 	rm -rf /root/public.sh /root/system_optimize.sh"
 	((i++))
 	done
@@ -344,11 +345,10 @@ apiserver_conf(){
 	--secure-port=6443 \\
 	--advertise-address=${host_name[$i]} \\
 	--allow-privileged=true \\
-	--service-cluster-ip-range=10.0.0.0/24 \\
+	--service-cluster-ip-range=10.96.0.0/12 \\
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \\
 	--authorization-mode=RBAC,Node \\
 	--enable-bootstrap-token-auth \\
-	--token-auth-file=${k8s_dir}/cfg/token.csv \\
 	--service-node-port-range=30000-50000 \\
 	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \\
 	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \\
@@ -380,7 +380,8 @@ controller_manager_conf(){
 	--master=127.0.0.1:8080 \\
 	--leader-elect=true \\
 	--address=127.0.0.1 \\
-	--service-cluster-ip-range=10.0.0.0/24 \\
+	--service-cluster-ip-range=10.96.0.0/12 \\
+	--cluster-cidr=10.244.0.0/16 \\
 	--cluster-name=kubernetes \\
 	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \\
 	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem \\
@@ -397,7 +398,7 @@ kubelet_conf(){
 	port: 10250
 	readOnlyPort: 10255
 	cgroupDriver: cgroupfs
-	clusterDNS: ["10.0.0.2"]
+	clusterDNS: ["10.96.0.10"]
 	clusterDomain: cluster.local.
 	failSwapOn: false
 	authentication:
@@ -423,10 +424,10 @@ kubelet_conf(){
 proxy_conf(){
 
 	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
-	KUBE_PROXY_OPTS="--logtostderr=true \
-	--v=4 \
-	--hostname-override=${host_name[$i]} \
-	--cluster-cidr=10.0.0.0/24 \
+	KUBE_PROXY_OPTS="--logtostderr=true \\
+	--v=4 \\
+	--hostname-override=${host_name[$i]} \\
+	--cluster-cidr=10.244.0.0/16 \\
 	--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
 	EOF
 }
@@ -469,16 +470,33 @@ master_install_ctl(){
 			--kubeconfig=/root/.kube/config
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
+
 			systemctl start kube-apiserver kube-scheduler kube-controller-manager
 			sleep 10
-			#将kubelet-bootstrap用户绑定到系统集群角色
-			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap \
-			--clusterrole=system:node-bootstrapper \
-			--user=kubelet-bootstrap"
+
+			"
 		fi
 		((i++))
 	done
 
+	local i=0
+	for host in ${host_name[@]};
+	do
+		if [[ "${master_ip[0]}" =~ ${host} ]];then
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			
+			#将kubelet-bootstrap用户绑定到系统集群角色
+			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
+
+
+			#kubectl taint node ${master_ip[@]} node-role.kubernetes.io/master="":NoSched
+			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
+			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			"
+		if
+	done
+	
+	
 }
 
 node_install_ctl(){
@@ -524,8 +542,11 @@ node_install_ctl(){
 			--server=https://${vip}:6443 \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			#设置客户端认证参数
+			TOKEN_PUB=$(openssl rand -hex 3)
+			TOKEN_SECRET=$(openssl rand -hex 8)
+			BOOTSTRAP_TOKEN="${TOKEN_PUB}.${TOKEN_SECRET}"
 			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
-			--token=674c457d4dcf2eefe4920d7dbb6b0ddc \
+			--token=${BOOTSTRAP_TOKEN} \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			#设置上下文参数
 			${k8s_dir}/bin/kubectl config set-context default \
@@ -550,7 +571,6 @@ k8s_bin_install(){
 	down_k8s_file
 	add_system
 	etcd_install_ctl
-	flannel_install_ctl
 	master_install_ctl
 	node_install_ctl
 }
