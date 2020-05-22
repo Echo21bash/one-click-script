@@ -320,14 +320,19 @@ flannel_install_ctl(){
 
 }
 
-master_node_conf(){
-	cat > ${tmp_dir}/conf/token.csv <<-EOF
-	674c457d4dcf2eefe4920d7dbb6b0ddc,kubelet-bootstrap,10001,"system:kubelet-bootstrap"
-	EOF
+all_master_conf(){
+
 	master_num=${#master_ip[@]}
 	if [[ ${master_num} = '1' ]];then
 		vip=${master_ip}
 	fi
+
+}
+
+all_node_conf(){
+	token_pub=$(openssl rand -hex 3)
+	token_secret=$(openssl rand -hex 8)
+	bootstrap_token="${token_pub}.${token_secret}"
 
 }
 
@@ -399,15 +404,15 @@ kubelet_conf(){
 	failSwapOn: false
 	authentication:
 	  anonymous:
-		enabled: true 
+	    enabled: true 
 	  webhook:
-		enabled: false
+	    enabled: false
 	EOF
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=4 \\
 	--hostname-override=${host_name[$i]} \\
-	--config=${k8s_dir}/cfg/kubelet.yml
+	--config=${k8s_dir}/cfg/kubelet.yml \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
 	--cert-dir=${k8s_dir}/ssl \\
@@ -429,7 +434,7 @@ proxy_conf(){
 }
 
 master_install_ctl(){
-	master_node_conf
+	all_master_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -475,27 +480,10 @@ master_install_ctl(){
 		((i++))
 	done
 
-	local i=0
-	for host in ${host_name[@]};
-	do
-		if [[ "${master_ip[0]}" =~ ${host} ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			
-			#将kubelet-bootstrap用户绑定到系统集群角色
-			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
-
-
-			#kubectl taint node ${master_ip[@]} node-role.kubernetes.io/master="":NoSched
-			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
-			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
-			"
-		fi
-	done
-	
-	
 }
 
 node_install_ctl(){
+	all_node_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -515,7 +503,7 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
-			--server=https://${vip}:6443 \
+			--server=https://${vip}:8443 \
 			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials kube-proxy \
@@ -535,14 +523,11 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
-			--server=https://${vip}:6443 \
+			--server=https://${vip}:8443 \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			#设置客户端认证参数
-			TOKEN_PUB=$(openssl rand -hex 3)
-			TOKEN_SECRET=$(openssl rand -hex 8)
-			BOOTSTRAP_TOKEN="${TOKEN_PUB}.${TOKEN_SECRET}"
 			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
-			--token=${BOOTSTRAP_TOKEN} \
+			--token=${bootstrap_token} \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			#设置上下文参数
 			${k8s_dir}/bin/kubectl config set-context default \
@@ -557,6 +542,32 @@ node_install_ctl(){
 		((i++))
 	done
 	
+
+}
+
+culster_conf(){
+	local i=0
+	for host in ${host_name[@]};
+	do
+		if [[ "${master_ip[0]}" =~ ${host} ]];then
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			
+			#将kubelet-bootstrap用户绑定到系统集群角色
+			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
+			${k8s_dir}/bin/kubectl -n kube-system create secret generic bootstrap-token \
+			--type 'bootstrap.kubernetes.io/token' \
+			--from-literal description=\"cluster bootstrap token\" \
+			--from-literal token-id=${token_pub} \
+			--from-literal token-secret=${token_secret} \
+			--from-literal usage-bootstrap-authentication=true \
+			--from-literal usage-bootstrap-signing=true
+
+			#kubectl taint node ${master_ip[@]} node-role.kubernetes.io/master="":NoSched
+			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
+			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			"
+		fi
+	done
 
 }
 
