@@ -366,10 +366,7 @@ scheduler_conf(){
 	cat >${tmp_dir}/conf/kube-scheduler <<-EOF 
 	KUBE_SCHEDULER_OPTS="--logtostderr=true \\
 	--v=4 \\
-	--tls-cert-file=${k8s_dir}/ssl/kube-scheduler.pem \\
-	--tls-private-key-file=${k8s_dir}/ssl/kube-scheduler-key.pem \\
-	--client-ca-file=${k8s_dir}/ssl/ca.pem \\
-	--master=127.0.0.1:8080 \\
+	--kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig \\
 	--leader-elect=true"
 	EOF
 }
@@ -378,37 +375,44 @@ controller_manager_conf(){
 	cat >${tmp_dir}/conf/kube-controller-manager <<-EOF 
 	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \\
 	--v=4 \\
-	--master=127.0.0.1:8080 \\
+	--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
+	--authentication-kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
+	--authorization-kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
+	--bind-address=127.0.0.1 \\
 	--leader-elect=true \\
-	--address=127.0.0.1 \\
 	--service-cluster-ip-range=10.96.0.0/12 \\
 	--cluster-cidr=10.244.0.0/16 \\
-	--cluster-name=kubernetes \\
-	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \\
-	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem \\
-	--root-ca-file=${k8s_dir}/ssl/ca.pem \\
-	--service-account-private-key-file=${k8s_dir}/ssl/ca-key.pem"
+	--use-service-account-credentials=true \\
+	--controllers=*,bootstrapsigner,tokencleaner \\
+	--experimental-cluster-signing-duration=86700h \\
+	--feature-gates=RotateKubeletClientCertificate=true 
 	EOF
 }
 
 kubelet_conf(){
 	cat > ${tmp_dir}/conf/kubelet.yml <<-EOF
-	kind: KubeletConfiguration
+	address: 0.0.0.0
 	apiVersion: kubelet.config.k8s.io/v1beta1
-	address: ${host_name[$i]}
-	port: 10250
-	readOnlyPort: 10255
-	cgroupDriver: cgroupfs
-	clusterDNS: ["10.96.0.10"]
-	clusterDomain: cluster.local.
-	failSwapOn: false
-	serverTLSBootstrap: true
 	authentication:
 	  anonymous:
-	    enabled: false 
-	  webhook:
 	    enabled: false
+	  webhook:
+	    cacheTTL: 2m0s
+	    enabled: true
+	  x509:
+	    clientCAFile: ${k8s_dir}/ssl/ca.pem
+	authorization:
+	  mode: Webhook
+	  webhook:
+	    cacheAuthorizedTTL: 5m0s
+	    cacheUnauthorizedTTL: 30s
+	cgroupDriver: cgroupfs
+	cgroupsPerQOS: true
+	clusterDNS:
+	- 10.96.0.10
+	clusterDomain: cluster.local
 	EOF
+	
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=4 \\
@@ -453,29 +457,75 @@ master_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
-			#创建~/.kube/config
+			#利用证书生成kubectl的kubeconfig
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
 			--server=${api_service_ip} \
 			--kubeconfig=/root/.kube/config
+			
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials admin \
 			--client-certificate=${k8s_dir}/ssl/admin.pem \
 			--client-key=${k8s_dir}/ssl/admin-key.pem \
 			--embed-certs=true \
 			--kubeconfig=/root/.kube/config
+			
 			#设置上下文参数
 			${k8s_dir}/bin/kubectl config set-context kubernetes \
 			--cluster=kubernetes \
 			--user=admin \
 			--kubeconfig=/root/.kube/config
+			
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=/root/.kube/config
-
+			
+			#利用证书生成controller-manager的kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=${api_service_ip} \
+			--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig
+			
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials system:kube-controller-manager \
+			--client-certificate=${k8s_dir}/ssl/kube-controller-manager.pem \
+			--client-key=${k8s_dir}/ssl/kube-controller-manager-key.pem \
+			--embed-certs=true \
+			--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context kubernetes \
+			--cluster=kubernetes \
+			--user=system:kube-controller-manager \
+			--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig
+			
+			#利用证书生成scheduler的kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=${api_service_ip} \
+			--kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig
+			
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials system:kube-scheduler \
+			--client-certificate=${k8s_dir}/ssl/kube-scheduler.pem \
+			--client-key=${k8s_dir}/ssl/kube-scheduler-key.pem \
+			--embed-certs=true \
+			--kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig
+			
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context kubernetes \
+			--cluster=kubernetes \
+			--user=system:kube-scheduler \
+			--kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig
+			
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig
+			
 			systemctl start kube-apiserver kube-scheduler kube-controller-manager
 			sleep 10
-
 			"
 		fi
 		((i++))
@@ -506,17 +556,20 @@ node_install_ctl(){
 			--embed-certs=true \
 			--server=${api_service_ip} \
 			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
 			#设置客户端认证参数
-			${k8s_dir}/bin/kubectl config set-credentials kube-proxy \
+			${k8s_dir}/bin/kubectl config set-credentials system:kube-proxy \
 			--client-certificate=${k8s_dir}/ssl/kube-proxy.pem \
 			--client-key=${k8s_dir}/ssl/kube-proxy-key.pem \
 			--embed-certs=true \
 			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
 			#设置上下文参数
 			${k8s_dir}/bin/kubectl config set-context default \
 			--cluster=kubernetes \
-			--user=kube-proxy \
+			--user=system:kube-proxy \
 			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
 			
@@ -526,17 +579,21 @@ node_install_ctl(){
 			--embed-certs=true \
 			--server=${api_service_ip} \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
 			--token=${bootstrap_token} \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
 			#设置上下文参数
 			${k8s_dir}/bin/kubectl config set-context default \
 			--cluster=kubernetes \
 			--user=kubelet-bootstrap \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
 			systemctl start kube-proxy kubelet
 			"
 		fi
@@ -555,7 +612,7 @@ culster_conf(){
 			
 			#将kubelet-bootstrap用户绑定到系统集群角色
 			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
-			${k8s_dir}/bin/kubectl -n kube-system create secret generic bootstrap-token \
+			${k8s_dir}/bin/kubectl -n kube-system create secret generic bootstrap-token-${token_pub} \
 			--type 'bootstrap.kubernetes.io/token' \
 			--from-literal description=\"cluster bootstrap token\" \
 			--from-literal token-id=${token_pub} \
