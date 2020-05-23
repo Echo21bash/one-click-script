@@ -1,8 +1,6 @@
 {
   "registry-mirrors": [
-    "https://dockerhub.azk8s.cn",
-    "https://docker.mirrors.ustc.edu.cn",
-    "http://hub-mirror.c.163.com"
+    "https://6kx4zyno.mirror.aliyuncs.com"
   ],
   "max-concurrent-downloads": 10,
   "log-driver": "json-file",
