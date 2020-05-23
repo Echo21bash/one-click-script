@@ -68,7 +68,7 @@ install_cfssl(){
 
 }
 
-create_etcd_ca(){
+create_ca(){
 	for ip in ${etcd_ip[*]}
 	do
 		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/etcd-csr.json
@@ -375,22 +375,27 @@ controller_manager_conf(){
 	cat >${tmp_dir}/conf/kube-controller-manager <<-EOF 
 	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \\
 	--v=4 \\
+	--bind-address=127.0.0.1 \\
 	--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
 	--authentication-kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
 	--authorization-kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
-	--bind-address=127.0.0.1 \\
 	--leader-elect=true \\
 	--service-cluster-ip-range=10.96.0.0/12 \\
 	--cluster-cidr=10.244.0.0/16 \\
 	--use-service-account-credentials=true \\
 	--controllers=*,bootstrapsigner,tokencleaner \\
 	--experimental-cluster-signing-duration=86700h \\
-	--feature-gates=RotateKubeletClientCertificate=true 
+	--feature-gates=RotateKubeletClientCertificate=true \\
+	--cluster-signing-cert-file=${k8s_dir}/ssl/ca.pem \\
+	--cluster-signing-key-file=${k8s_dir}/ssl/ca-key.pem  \\
+	--requestheader-client-ca-file=${k8s_dir}/ssl/ca.pem \\
+	--service-account-private-key-file=${k8s_dir}/ssl/ca-key.pem"
 	EOF
 }
 
 kubelet_conf(){
 	cat > ${tmp_dir}/conf/kubelet.yml <<-EOF
+	kind: KubeletConfiguration
 	address: 0.0.0.0
 	apiVersion: kubelet.config.k8s.io/v1beta1
 	authentication:
@@ -420,6 +425,9 @@ kubelet_conf(){
 	--config=${k8s_dir}/cfg/kubelet.yml \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
+	--network-plugin=cni \\
+	--cni-conf-dir=/etc/cni/net.d \\
+	--cni-bin-dir=${k8s_dir}/cni/bin \\
 	--cert-dir=${k8s_dir}/ssl \\
 	--fail-swap-on=false \\
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
@@ -448,10 +456,11 @@ master_install_ctl(){
 			scheduler_conf
 			controller_manager_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
+			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,token.csv}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/auto-approve-node.yml  root@${host}:${k8s_dir}/yml
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
@@ -595,6 +604,7 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
 			systemctl start kube-proxy kubelet
+			sleep 10
 			"
 		fi
 		((i++))
@@ -603,7 +613,7 @@ node_install_ctl(){
 
 }
 
-culster_conf(){
+culster_bootstrap_conf(){
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -612,6 +622,7 @@ culster_conf(){
 			
 			#将kubelet-bootstrap用户绑定到系统集群角色
 			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
+			#创建kubelet-bootstrap 证书
 			${k8s_dir}/bin/kubectl -n kube-system create secret generic bootstrap-token-${token_pub} \
 			--type 'bootstrap.kubernetes.io/token' \
 			--from-literal description=\"cluster bootstrap token\" \
@@ -620,22 +631,32 @@ culster_conf(){
 			--from-literal usage-bootstrap-authentication=true \
 			--from-literal usage-bootstrap-signing=true
 
-			
-			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
-			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			#自动approve csr请求(推荐)分别用于自动 approve client、renew client、renew server 证书
+			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/auto-approve-node.yml
+			sleep 20
+
 			"
 		fi
 	done
 
 }
 
+culster_label_conf(){
+
+	${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
+	${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+
+}
+
 k8s_bin_install(){
 	env_load
 	install_cfssl
-	create_etcd_ca
+	create_ca
 	down_k8s_file
 	add_system
 	etcd_install_ctl
 	master_install_ctl
+	culster_bootstrap_conf
 	node_install_ctl
+	culster_label_conf
 }
