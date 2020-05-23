@@ -326,7 +326,7 @@ all_master_conf(){
 	else
 		api_service_ip="https://${vip}:8443"
 	fi
-
+	sed -i -e "s?192.168.0.0/16?10.244.0.0/16?g" ${workdir}/config/k8s/calico.yaml
 }
 
 all_node_conf(){
@@ -460,7 +460,7 @@ master_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/auto-approve-node.yml  root@${host}:${k8s_dir}/yml
+			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml}  root@${host}:${k8s_dir}/yml
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
@@ -641,8 +641,8 @@ culster_bootstrap_conf(){
 
 }
 
-culster_label_conf(){
-
+culster_other_conf(){
+	${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 	${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 	${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 
