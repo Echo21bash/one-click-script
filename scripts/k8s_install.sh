@@ -325,6 +325,9 @@ all_master_conf(){
 	master_num=${#master_ip[@]}
 	if [[ ${master_num} = '1' ]];then
 		vip=${master_ip}
+		api_service_ip="https://${vip}:6443"
+	else
+		api_service_ip="https://${vip}:8443"
 	fi
 
 }
@@ -402,9 +405,10 @@ kubelet_conf(){
 	clusterDNS: ["10.96.0.10"]
 	clusterDomain: cluster.local.
 	failSwapOn: false
+	serverTLSBootstrap: true
 	authentication:
 	  anonymous:
-	    enabled: true 
+	    enabled: false 
 	  webhook:
 	    enabled: false
 	EOF
@@ -456,7 +460,7 @@ master_install_ctl(){
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
-			--server=https://${vip}:6443 \
+			--server=${api_service_ip} \
 			--kubeconfig=/root/.kube/config
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials admin \
@@ -503,7 +507,7 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
-			--server=https://${vip}:8443 \
+			--server=${api_service_ip} \
 			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials kube-proxy \
@@ -523,7 +527,7 @@ node_install_ctl(){
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
 			--certificate-authority=${k8s_dir}/ssl/ca.pem \
 			--embed-certs=true \
-			--server=https://${vip}:8443 \
+			--server=${api_service_ip} \
 			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			#设置客户端认证参数
 			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
@@ -562,7 +566,7 @@ culster_conf(){
 			--from-literal usage-bootstrap-authentication=true \
 			--from-literal usage-bootstrap-signing=true
 
-			#kubectl taint node ${master_ip[@]} node-role.kubernetes.io/master="":NoSched
+			
 			kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 			kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 			"
