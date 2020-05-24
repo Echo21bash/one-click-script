@@ -111,61 +111,33 @@ down_k8s_file(){
 
 etcd_conf(){
 	
-	etcd_num=${#etcd_ip[@]}
-	if [[ ${etcd_num} = '1' ]];then
-		cat >${tmp_dir}/conf/etcd.yml <<-EOF
-		#[Member]
-		name: "etcd-$j"
-		data-dir: "${etcd_data_dir}"
-		listen-peer-urls: "https://${host_name[$i]}:2380"
-		listen-client-urls: "https://${host_name[$i]}:2379"
-		peer-transport-security:
-		 cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		client-transport-security:
-		 cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		EOF
-	fi
-
-
-	if [[ ${etcd_num} > '1' ]];then
-		cat >${tmp_dir}/conf/etcd.yml <<-EOF
-		#[Member]
-		name: "etcd-$j"
-		data-dir: "${etcd_data_dir}"
-		listen-peer-urls: "https://${host_name[$i]}:2380"
-		listen-client-urls: "https://${host_name[$i]}:2379"
-		#[Clustering]
-		initial-advertise-peer-urls: "https://${host_name[$i]}:2380"
-		advertise-client-urls: "https://${host_name[$i]}:2379"
-		initial-cluster: "${etcd_cluster_ip}"
-		initial-cluster-token: "etcd-cluster"
-		initial-cluster-state: "new"
-		peer-transport-security:
-		 cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		client-transport-security:
-		 cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
-		 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
-		 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
-		EOF
-	fi
+	cat >${tmp_dir}/conf/etcd.yml <<-EOF
+	#[Member]
+	name: "etcd-$j"
+	data-dir: "${etcd_data_dir}"
+	listen-peer-urls: "https://${host_name[$i]}:2380"
+	listen-client-urls: "https://${host_name[$i]}:2379"
+	#[Clustering]
+	initial-advertise-peer-urls: "https://${host_name[$i]}:2380"
+	advertise-client-urls: "https://${host_name[$i]}:2379,http://127.0.0.1:2379"
+	initial-cluster: "${etcd_cluster_ip}"
+	initial-cluster-token: "etcd-cluster"
+	initial-cluster-state: "new"
+	peer-transport-security:
+	 cert-file: "${etcd_dir}/ssl/etcd.pem"
+	 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+	 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+	 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+	 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+	 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+	client-transport-security:
+	 cert-file: "${etcd_dir}/ssl/etcd.pem"
+	 key-file: "${etcd_dir}/ssl/etcd-key.pem"
+	 peer-cert-file: "${etcd_dir}/ssl/etcd.pem"
+	 peer-key-file: "${etcd_dir}/ssl/etcd-key.pem"
+	 trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+	 peer-trusted-ca-file: "${etcd_dir}/ssl/ca.pem"
+	EOF
 
 }
 
@@ -190,10 +162,6 @@ etcd_check(){
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			if /opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health;then
 				echo etcd集群可用
-				#${etcd_dir}/bin/etcdctl \
-				--ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem \
-				--endpoints="${etcd_endpoints}" \
-				set /coreos.com/network/config  '{ \"Network\": \"172.17.0.0/16\", \"Backend\": {\"Type\": \"vxlan\"}}'
 			else
 				echo etcd集群不可用
 				exit
@@ -613,6 +581,21 @@ node_install_ctl(){
 
 }
 
+master_node_check(){
+	local i=0
+	for host in ${host_name[@]};
+	do
+		if [[ "${master_ip[i]}" =~ ${host} ]];then
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error"
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
+			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error"
+		fi
+	done
+}
+
 culster_bootstrap_conf(){
 	local i=0
 	for host in ${host_name[@]};
@@ -643,6 +626,7 @@ culster_bootstrap_conf(){
 
 culster_other_conf(){
 	${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
+	${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
 	${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 	${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 
