@@ -545,8 +545,8 @@ master_install_ctl(){
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
-			systemctl start kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
-			systemctl start kube-proxy kubelet && systemctl enable kube-proxy kubelet
+			systemctl restart kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
+			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			sleep 10
 			"
 		fi
@@ -616,7 +616,7 @@ node_install_ctl(){
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
-			systemctl start kube-proxy kubelet && systemctl enable kube-proxy kubelet
+			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			sleep 10
 			"
 		fi
@@ -694,6 +694,7 @@ k8s_bin_install(){
 	add_system
 	etcd_install_ctl
 	master_install_ctl
+	master_node_check
 	culster_bootstrap_conf
 	node_install_ctl
 	culster_other_conf
