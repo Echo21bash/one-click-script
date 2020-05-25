@@ -287,7 +287,7 @@ flannel_install_ctl(){
 
 }
 
-all_master_conf(){
+install_before_conf(){
 
 	master_num=${#master_ip[@]}
 	if [[ ${master_num} = '1' ]];then
@@ -297,13 +297,9 @@ all_master_conf(){
 		api_service_ip="https://${vip}:8443"
 	fi
 	sed -i -e "s?192.168.0.0/16?10.244.0.0/16?g" ${workdir}/config/k8s/calico.yaml
-}
-
-all_node_conf(){
 	token_pub=$(openssl rand -hex 3)
 	token_secret=$(openssl rand -hex 8)
 	bootstrap_token="${token_pub}.${token_secret}"
-
 }
 
 apiserver_conf(){
@@ -417,7 +413,7 @@ proxy_conf(){
 }
 
 master_install_ctl(){
-	all_master_conf
+	install_before_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -560,7 +556,7 @@ master_install_ctl(){
 }
 
 node_install_ctl(){
-	all_node_conf
+	install_before_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -674,11 +670,18 @@ culster_bootstrap_conf(){
 }
 
 culster_other_conf(){
-	${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
-	${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
-	${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
-	${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
-
+	local i=0
+	for host in ${host_name[@]};
+	do
+		if [[ "${master_ip[0]}" =~ ${host} ]];then
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
+			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
+			${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
+			${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			"
+		fi
+	done
 }
 
 k8s_bin_install(){
@@ -691,5 +694,5 @@ k8s_bin_install(){
 	master_install_ctl
 	culster_bootstrap_conf
 	node_install_ctl
-	culster_label_conf
+	culster_other_conf
 }
