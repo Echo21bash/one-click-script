@@ -49,11 +49,12 @@ env_load(){
 	local j=0
 	for host in ${host_name[@]};
 	do
-		if [[ ${host} = "${node_ip[$j]}" ]];then
+		if [[ ${host} = "${node_ip[$j]}" || ${host} = "${master_ip[$j]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			curl -Ls -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 			yum install -y docker-ce && mkdir /etc/docker"
-			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker
+			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker/daemon.json
+			ssh ${host_name[$i]} -p ${ssh_port[$i]} "systemctl start docker && systemctl enable docker"
 			((j++))
 		fi
 		((i++))
@@ -159,13 +160,13 @@ etcd_check(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			if /opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health;then
-				echo etcd集群可用
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep healthy | wc -l`
+			if [[ ${healthy} = '1' ]];then
+				diy_echo "etcd集群状态正常" "${info}"
 			else
-				echo etcd集群不可用
-				exit
-			fi"
+				diy_echo "etcd集群状态不正常，请检查！！" "${red}" "${error}"
+				exit 1
+			fi
 		fi
 		((i++))
 	done
@@ -245,7 +246,8 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
-			systemctl daemon-reload"
+			systemctl daemon-reload
+			systemctl enable etcd"
 			((j++))
 		fi
 		((i++))
@@ -425,13 +427,15 @@ master_install_ctl(){
 			controller_manager_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl} root@${host}:${k8s_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem}  root@${host}:${k8s_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager}  root@${host}:${k8s_dir}/cfg
+			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml}  root@${host}:${k8s_dir}/yml
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#利用证书生成kubectl的kubeconfig
@@ -501,7 +505,52 @@ master_install_ctl(){
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context kubernetes --kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig
 			
-			systemctl start kube-apiserver kube-scheduler kube-controller-manager
+			#创建kube-proxy.kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=${api_service_ip} \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials system:kube-proxy \
+			--client-certificate=${k8s_dir}/ssl/kube-proxy.pem \
+			--client-key=${k8s_dir}/ssl/kube-proxy-key.pem \
+			--embed-certs=true \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context default \
+			--cluster=kubernetes \
+			--user=system:kube-proxy \
+			--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig
+			
+			#创建bootstrap.kubeconfig
+			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
+			--certificate-authority=${k8s_dir}/ssl/ca.pem \
+			--embed-certs=true \
+			--server=${api_service_ip} \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
+			#设置客户端认证参数
+			${k8s_dir}/bin/kubectl config set-credentials kubelet-bootstrap \
+			--token=${bootstrap_token} \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
+			#设置上下文参数
+			${k8s_dir}/bin/kubectl config set-context default \
+			--cluster=kubernetes \
+			--user=kubelet-bootstrap \
+			--kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
+			#设置默认上下文
+			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
+			
+			systemctl start kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
+			systemctl start kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			sleep 10
 			"
 		fi
@@ -571,7 +620,7 @@ node_install_ctl(){
 			#设置默认上下文
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
-			systemctl start kube-proxy kubelet
+			systemctl start kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			sleep 10
 			"
 		fi

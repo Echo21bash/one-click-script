@@ -1,13 +1,17 @@
 {
-  "registry-mirrors": [
-    "https://6kx4zyno.mirror.aliyuncs.com"
-  ],
-  "max-concurrent-downloads": 10,
-  "log-driver": "json-file",
-  "log-level": "warn",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-    },
-  "data-root": "/var/lib/docker"
-  }
+	"log-driver": "json-file",
+	"exec-opts": ["native.cgroupdriver=cgroupfs"],
+	"log-opts": {
+		"max-size": "100m",
+		"max-file": "3"
+	},
+	"live-restore": true,
+	"max-concurrent-downloads": 10,
+	"max-concurrent-uploads": 10,
+	"registry-mirrors": ["https://2lefsjdg.mirror.aliyuncs.com"],
+	"storage-driver": "overlay2",
+	"storage-opts": [
+		"overlay2.override_kernel_check=true"
+	],
+	"data-root": "/var/lib/docker"
+}

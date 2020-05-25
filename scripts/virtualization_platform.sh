@@ -2,7 +2,7 @@
 
 docker_install(){
 
-	[[ -n `which docker 2>/dev/null` ]] && diy_echo "检测到可能已经安装docker请检查..." "${yellow}" "${warning}" && exit 1
+	[[ -n `which dockerd 2>/dev/null` ]] && diy_echo "检测到可能已经安装docker请检查..." "${yellow}" "${warning}" && exit 1
 	diy_echo "正在安装docker..." "" "${info}"
 	system_optimize_yum
 	if [[ ${os_release} < "7" ]];then
