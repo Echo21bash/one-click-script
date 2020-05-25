@@ -393,7 +393,7 @@ kubelet_conf(){
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
 	--network-plugin=cni \\
 	--cni-conf-dir=/etc/cni/net.d \\
-	--cni-bin-dir=${k8s_dir}/cni/bin \\
+	--cni-bin-dir=/opt/cni/bin \\
 	--cert-dir=${k8s_dir}/ssl \\
 	--fail-swap-on=false \\
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
