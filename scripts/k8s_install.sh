@@ -421,6 +421,8 @@ master_install_ctl(){
 			apiserver_conf
 			scheduler_conf
 			controller_manager_conf
+			kubelet_conf
+			proxy_conf
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
