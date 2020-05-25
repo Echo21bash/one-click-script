@@ -117,10 +117,10 @@ etcd_conf(){
 	name: "etcd-$j"
 	data-dir: "${etcd_data_dir}"
 	listen-peer-urls: "https://${host_name[$i]}:2380"
-	listen-client-urls: "https://${host_name[$i]}:2379"
+	listen-client-urls: "https://${host_name[$i]}:2379,http://127.0.0.1:2379"
 	#[Clustering]
 	initial-advertise-peer-urls: "https://${host_name[$i]}:2380"
-	advertise-client-urls: "https://${host_name[$i]}:2379,http://127.0.0.1:2379"
+	advertise-client-urls: "https://${host_name[$i]}:2379"
 	initial-cluster: "${etcd_cluster_ip}"
 	initial-cluster-token: "etcd-cluster"
 	initial-cluster-state: "new"
@@ -160,7 +160,7 @@ etcd_check(){
 	for host in ${host_name[@]};
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep healthy | wc -l`
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
 			if [[ ${healthy} = '1' ]];then
 				diy_echo "etcd集群状态正常" "${info}"
 			else
