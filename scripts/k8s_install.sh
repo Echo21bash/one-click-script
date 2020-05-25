@@ -632,11 +632,11 @@ master_node_check(){
 	for host in ${host_name[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error"
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
+			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error"
 		fi
 		((i++))
