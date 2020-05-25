@@ -413,7 +413,7 @@ proxy_conf(){
 }
 
 master_install_ctl(){
-	install_before_conf
+	
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -426,7 +426,7 @@ master_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml}  root@${host}:${k8s_dir}/yml
+			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml,corends.yaml}  root@${host}:${k8s_dir}/yml
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
@@ -556,7 +556,6 @@ master_install_ctl(){
 }
 
 node_install_ctl(){
-	install_before_conf
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -630,7 +629,7 @@ master_node_check(){
 	local i=0
 	for host in ${host_name[@]};
 	do
-		if [[ "${master_ip[i]}" =~ ${host} ]];then
+		if [[ "${master_ip[*]}" =~ ${host} ]];then
 			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
 			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
@@ -693,6 +692,7 @@ k8s_bin_install(){
 	down_k8s_file
 	add_system
 	etcd_install_ctl
+	install_before_conf
 	master_install_ctl
 	master_node_check
 	culster_bootstrap_conf
