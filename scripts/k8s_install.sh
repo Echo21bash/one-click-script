@@ -638,6 +638,7 @@ master_node_check(){
 			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error"
 		fi
+		((i++))
 	done
 }
 
@@ -662,9 +663,9 @@ culster_bootstrap_conf(){
 			#自动approve csr请求(推荐)分别用于自动 approve client、renew client、renew server 证书
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/auto-approve-node.yml
 			sleep 20
-
 			"
 		fi
+		((i++))
 	done
 
 }
@@ -677,10 +678,11 @@ culster_other_conf(){
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
-			${k8s_dir}/binkubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
-			${k8s_dir}/binkubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
+			${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 			"
 		fi
+		((i++))
 	done
 }
 
