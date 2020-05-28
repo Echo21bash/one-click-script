@@ -105,10 +105,6 @@ online_version(){
 			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
 			cat /tmp/tmp_version | grep -Eio "v${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
 		;;
-		node)
-			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
-			cat /tmp/tmp_version | grep -Eio "v${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
-		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
 				curl -Ls -o /tmp/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
