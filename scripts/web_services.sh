@@ -139,6 +139,7 @@ nginx_compile(){
 		
 		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master/src"
 		#sed -i 's///'
+	fi
 	if [[ ${add_module[*]} =~ '2' ]];then
 		wget https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz -O nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
 		patch -p1 < ${tar_dir}/${add_module_value}-master/check.patch
