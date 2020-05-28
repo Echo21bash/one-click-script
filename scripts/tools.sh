@@ -15,7 +15,7 @@ down_file(){
 
 		if [[ ! -f ${file_name} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
-			if [[ -n `echo $down_url | grep -Eio 'https://github.com'` ]];then
+			if [[ -n `echo $down_url | grep -Eio 'https://github.com'` && ${mirror_status} = 'It works' ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${file_name}
 			else
 				axel -n 16 -a ${down_url} -o ${file_name}
