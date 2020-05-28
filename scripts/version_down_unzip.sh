@@ -64,7 +64,7 @@ online_url(){
 	mysql_url='http://mirrors.163.com/mysql/Downloads'
 	mysql_galera_url='http://releases.galeracluster.com'
 	mongodb_url="https://www.mongodb.org/dl/linux"
-	nginx_url="http://nginx.org/download"
+	nginx_url="https://mirrors.huaweicloud.com/nginx"
 	php_url="http://mirror.cogentco.com/pub/php"
 	php_url="http://mirrors.sohu.com/php/"
 	
