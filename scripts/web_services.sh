@@ -100,7 +100,7 @@ nginx_install_set(){
 	add=${input_value}
 	yes_or_no ${add}
 	if [[ $? = '0' ]];then
-		output_option '选择要添加的模块' 'fastdfs-nginx-module' 'add_module'
+		output_option '选择要添加的模块' 'fastdfs-nginx-module nginx_upstream_check_module' 'add_module'
 		add_module_value=${output_value}
 	fi
 }
@@ -120,10 +120,10 @@ nginx_install(){
 
 nginx_compile(){
 	cd ${tar_dir}
-	if [[ x${add_module} = 'x' ]];then
-		./configure --prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module
+	if [[ x${add_module[*]} = 'x' ]];then
+		configure_arg="--prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module"
 	fi
-	if [[ x${add_module} = 'x1' ]];then
+	if [[ ${add_module[*]} =~ '1' ]];then
 		diy_echo "请确保正确配置/etc/fdfs/mod_fastdfs.conf并启动fsatdfs,否则会无法访问文件！" "${yellow}" "${warning}"
 		axel -n 24 -a https://codeload.github.com/happyfish100/libfastcommon/tar.gz/master -o libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
 		cd libfastcommon-master
@@ -136,9 +136,15 @@ nginx_compile(){
 			exit
 		fi
 		wget https://codeload.github.com/happyfish100/fastdfs-nginx-module/zip/master -O fastdfs-nginx-module-master.zip && unzip -o fastdfs-nginx-module-master.zip
-		./configure --prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module --add-module=${tar_dir}/${add_module_value}-master/src
+		
+		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master/src"
 		#sed -i 's///'
+	if [[ ${add_module[*]} =~ '2' ]];then
+		wget https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz -O nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
+		patch -p1 < ${tar_dir}/${add_module_value}-master/check.patch
+		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master"
 	fi
+	./configure ${configure_arg}
 	make && make install
 	if [ $? = "0" ];then
 		echo -e "${info} nginx安装成功."
