@@ -1,13 +1,26 @@
 #!/bin/bash
 
 down_file(){
+	github_mirror=https://download.fastgit.org
 	#$1下载链接、$2保存路径及名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		file_name=$2
+		if [[ -n `echo $down_url | grep -Eio 'https://github.com'` ]];then
+			mirror_status=`curl ${github_mirror}`
+			if [[ ${mirror_status} = 'It works' ]];then
+				mirror_down_url="${github_mirror}/${down_url#*github.com/}"
+			fi
+		fi
+
 		if [[ ! -f ${file_name} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
-			axel -n 16 -a ${down_url} -o ${file_name}
+			if [[ -n `echo $down_url | grep -Eio 'https://github.com'` ]];then
+				axel -n 16 -a ${mirror_down_url} -o ${file_name}
+			else
+				axel -n 16 -a ${down_url} -o ${file_name}
+			fi
+			
 			if [[ $? = '0' ]];then
 				diy_echo "${file_name}下载完成" "${info}"
 			else

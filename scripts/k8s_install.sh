@@ -101,7 +101,6 @@ down_k8s_file(){
 	down_file https://mirrors.huaweicloud.com/etcd/v${etcd_ver}/etcd-v${etcd_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64.tar.gz
 	down_file https://storage.googleapis.com/kubernetes-release/release/v${k8s_ver}/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
 	down_file https://github.com/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
-	down_file https://download.fastgit.org/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
 
 	cd ${tmp_dir}/soft
 	tar -zxf etcd-v${etcd_ver}-linux-amd64.tar.gz
