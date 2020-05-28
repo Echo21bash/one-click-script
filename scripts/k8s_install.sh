@@ -72,16 +72,16 @@ install_cfssl(){
 create_ca(){
 	for ip in ${etcd_ip[*]}
 	do
-		sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/etcd-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/etcd-csr.json` ]] && sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/etcd-csr.json
 	done
 	
 	for ip in ${master_ip[*]}
 	do
-		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-		sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-		sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	done
-	sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+	[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	
 	cd ${tmp_dir}/ssl
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
