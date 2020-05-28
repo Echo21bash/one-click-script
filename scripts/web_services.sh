@@ -120,9 +120,7 @@ nginx_install(){
 
 nginx_compile(){
 	cd ${tar_dir}
-	if [[ x${add_module[*]} = 'x' ]];then
-		configure_arg="--prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module"
-	fi
+	configure_arg="--prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module"
 	if [[ ${add_module[*]} =~ '1' ]];then
 		diy_echo "请确保正确配置/etc/fdfs/mod_fastdfs.conf并启动fsatdfs,否则会无法访问文件！" "${yellow}" "${warning}"
 		axel -n 24 -a https://codeload.github.com/happyfish100/libfastcommon/tar.gz/master -o libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
@@ -141,7 +139,7 @@ nginx_compile(){
 		#sed -i 's///'
 	fi
 	if [[ ${add_module[*]} =~ '2' ]];then
-		wget https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz -O nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
+		down_file https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
 		patch -p1 < ${tar_dir}/${add_module_value}-master/check.patch
 		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master"
 	fi
