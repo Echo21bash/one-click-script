@@ -5,14 +5,12 @@ install_version(){
 		soft_name="$1"
 	fi
 	version='_version'
-	java_version=('7' '8')
-	node_version=('9' '10')
-	ruby_version=('2.3' '2.4')
+
 	tomcat_version=('7' '8')
 	mysql_version=('5.5' '5.6' '5.7')
 	mongodb_version=('3.4' '3.6' '4.0')
 	nginx_version=('1.14' '1.15' '1.16')
-	php_version=('5.6' '7.0' '7.1')
+
 	redis_version=('3.2' '4.0' '5.0')
 	memcached_version=('1.4' '1.5')
 	zookeeper_version=('3.4')
