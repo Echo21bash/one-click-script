@@ -222,6 +222,7 @@ online_down(){
 			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.linux-amd64.tar.gz"
 		;;
 	esac
+	[[ -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
 	down_file ${down_url} ${tmp_dir}/${file_name}
 
 }
@@ -263,13 +264,11 @@ download_unzip(){
 		file_name="${soft_name}.tar.gz"
 	fi
 	
-	if [ ${install_mode} = 1 ];then
-		online_url
-		online_version
-		online_down
-	elif [ ${install_mode} = 2 ];then
-		local_install
-	fi
+
+	online_url
+	online_version
+	online_down
+
 	#获取文件类型
 	file_type=$(file -b ${tmp_dir}/${file_name} | grep -ioEw "gzip|zip|executable|text" | tr [A-Z] [a-z])
 	#获取文件目录
