@@ -52,18 +52,20 @@ esac
 
 web_services(){
 
-output_option '请选择要安装的软件' 'Nginx Tomcat' 'num'
+output_option '请选择要安装的软件' 'Nginx Openresty Tomcat' 'num'
 case "$num" in
 	1)nginx_install_ctl
 	;;
-	2)tomcat_install_ctl
+	2)openresty_install_ctl
+	;;
+	3)tomcat_install_ctl
 	;;
 esac
 }
 
 database_services(){
 
-output_option '请选择要安装的软件' 'MySQL mongodb Redis Memcached' 'num'
+output_option '请选择要安装的软件' 'MySQL Mongodb Redis Memcached' 'num'
 case "$num" in
 	1)mysql_install_ctl
 	;;
