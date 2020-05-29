@@ -25,7 +25,7 @@ down_file(){
 				diy_echo "${down_url}下载完成" "${info}"
 			else
 				diy_echo "${down_url}下载失败,正在重试" "${red}" "${error}"
-				rm -rf ${path_file}
+				[[ -f ${path_file} ]] && rm -rf ${path_file}
 				axel -n 16 -a ${down_url} -o ${path_file}
 				if [[ $? = '0' ]];then
 					diy_echo "${down_url}下载完成" "${info}"
@@ -35,7 +35,7 @@ down_file(){
 				fi
 			fi
 		else
-			diy_echo "已经存在文件${file_name}" "${info}"
+			diy_echo "已经存在文件${path_file}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
