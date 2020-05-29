@@ -1,49 +1,9 @@
 #!/bin/bash
 
-check_java(){
-	#检查旧版本
-	echo -e "${info} 正在检查预装openjava..."
-	j=`rpm -qa | grep  java | awk 'END{print NR}'`
-	#卸载旧版
-	if [ $j -gt 0 ];then
-		echo -e "${info} java卸载清单:"
-		for ((i=1;i<=j;i++));
-		do		
-			a1=`rpm -qa | grep java | awk '{if(NR == 1 ) print $0}'`
-			echo $a1
-			rpm -e --nodeps $a1
-		done
-		if [ $? = 0 ];then
-			echo -e "${info} 卸载openjava完成."
-		else
-			echo -e "${error} 卸载openjava失败，请尝试手动卸载."
-			exit 1
-		fi
-	else
-		echo -e "${info} 该系统没有预装openjava."
-	fi
-}
-
-install_java(){
-	check_java
-	mv ${tar_dir}/* ${home_dir}
-	add_sys_env "JAVA_HOME=${home_dir} JAVA_BIN=\$JAVA_HOME/bin JAVA_LIB=\$JAVA_HOME/lib CLASSPATH=.:\$JAVA_LIB/tools.jar:\$JAVA_LIB/dt.jar PATH=\$JAVA_HOME/bin:\$PATH"
-	java -version
-	if [ $? = 0 ];then
-		echo -e "${info} JDK环境搭建成功."
-	else
-		echo -e "${error} JDK环境搭建失败."
-		exit 1
-	fi
-}
-
-java_install_ctl(){
-	install_version java
-	install_selcet
-	install_dir_set
-	download_unzip
-	install_java
-	clear_install
+env_load(){
+	tmp_dir=/tmp/php_tmp
+	soft_name=php
+	program_version=('5.6' '7.0' '7.1')
 }
 
 php_install_set(){
@@ -75,7 +35,7 @@ php_install(){
 	extra_conf_dir=${home_dir}/etc.d
 	mkdir -p ${home_dir}/{etc,etc.d}
 	#必要函数库
-	wget https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install && cd ..
+	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ./libiconv-1.15.tar.gz && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install && cd ..
 	if [ $? = "0" ];then
 		diy_echo "libiconv库编译及编译安装成功..." "" "${info}"
 	else
@@ -193,69 +153,9 @@ php_config(){
 }
 
 php_install_ctl(){
-	install_version php
-	install_selcet
-	php_install_set
-	install_dir_set
-	download_unzip
+	env_load
+	install_set
 	php_install_depend
 	php_install
-	clear_install
-}
-
-ruby_install_set(){
-	output_option "请选择安装方式" "编译安装 RVM安装" "install_method"
-}
-
-ruby_install(){
-	if [[ ${install_method} = '1' ]];then
-		install -y zlib-devel openssl-devel
-		cd ${tar_dir}
-		./configure --prefix=${home_dir}  --disable-install-rdoc
-		make && make install
-		add_sys_env "PATH=${home_dir}/bin:\$PATH"
-
-	else
-		gpg2 --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-		curl -L get.rvm.io | bash -s stable
-		source /etc/profile.d/rvm.sh
-		rvm install ${version_number}
-		rvm use ${version_number} --default
-	fi
-	gem sources --add http://gems.ruby-china.com/ --remove http://rubygems.org/
-	ruby -v
-	if [ $? = 0 ];then
-		echo -e "${info} ruby环境搭建成功."
-	else
-		echo -e "${error} ruby环境搭建失败."
-		exit 1
-	fi
-}
-
-ruby_install_ctl(){
-	install_version ruby
-	ruby_install_set
-	if [[ ${install_method} = '1' ]];then
-		install_selcet
-		install_dir_set
-		download_unzip
-	fi
-	ruby_install
-	clear_install
-}
-
-node_install(){
-
-	mv ${tar_dir}/* ${home_dir}
-	add_sys_env "NODE_HOME=${home_dir} PATH=\${NODE_HOME}/bin:\$PATH"
-	${home_dir}/bin/npm config set registry https://registry.npm.taobao.org
-}
-
-node_install_ctl(){
-	install_version node
-	install_selcet
-	install_dir_set
-	download_unzip
-	node_install
 	clear_install
 }

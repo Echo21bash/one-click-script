@@ -1,7 +1,9 @@
 #!/bin/bash
 install_version(){
 	#需要传参$1软件名称
-	soft_name="$1"
+	if [[ -z ${soft_name} ]];then
+		soft_name="$1"
+	fi
 	version='_version'
 	java_version=('7' '8')
 	node_version=('9' '10')
@@ -24,30 +26,11 @@ install_version(){
 	kibana_version=('5.6' '6.1' '6.2')
 	filebeat_version=('5.6' '6.1' '6.2')
 	k8s_version=('1.11' '1.12' '1.13' '1.14')
-	program_version=`eval echo '$'{$soft_name$version[@]}`
-	output_option "请选择${soft_name}版本" "${program_version[@]}" "version_number"
+	if [[ -z ${program_version} ]];then
+		program_version=`eval echo '$'{$soft_name$version[@]}`
+	fi
+	output_option "请选择${soft_name}版本" "${program_version[*]}" "version_number"
 	version_number=${output_value}
-}
-
-install_selcet(){
-	output_option "请选择安装方式版本" "在线安装 本地安装" "install_mode"
-}
-
-local_install(){
-
-	while true
-	do
-		[ ${os_bit} = 64 ] && echo -e "${info} 请输入${soft_name}64位安装包路径(如:/opt/xxx-x64.tar.gz)"
-		[ ${os_bit} = 32 ] && echo -e "${info} 请输入${soft_name}32位安装包路径(如:/opt/xxx-i586.tar.gz)"
-
-		stty erase '^H' && read user_inpt
-		if [  -f "$user_inpt" ];then
-			cd ${install_dir}
-			echo -e "${info} Copying compressed package, please wait" && \cp  ${user_inpt}  ${install_dir}/${file_name} && break
-		else
-			echo -e "${error} File does not exist, please enter the correct path"
-		fi
-	done
 }
 
 online_url(){
@@ -57,9 +40,9 @@ online_url(){
 	ruby_url="http://mirrors.ustc.edu.cn/ruby"
 	ruby_url="http://cache.ruby-china.com/pub/ruby"
 	node_url="http://mirrors.ustc.edu.cn/node"
-	#tomcat_url="http://archive.apache.org/dist/tomcat"
+	
 	tomcat_url="http://mirrors.ustc.edu.cn/apache/tomcat"
-
+	openresty_url="https://mirrors.huaweicloud.com/openresty"
 	#mysql_url=('http://mirrors.ustc.edu.cn/mysql-ftp/Downloads' 'http://mirrors.163.com/mysql/Downloads')
 	mysql_url='http://mirrors.163.com/mysql/Downloads'
 	mysql_galera_url='http://releases.galeracluster.com'
@@ -239,14 +222,8 @@ online_down(){
 			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.linux-amd64.tar.gz"
 		;;
 	esac
+	down_file ${down_url} ${tmp_dir}/${file_name}
 
-	cd ${install_dir} && axel -n 24 -a ${down_url} -o ${file_name} || curl -sL ${down_url} -o ${file_name}
-  if [ $? = '0' ];then
-		diy_echo "${online_select_version}下载完成..." "" "${info}"
-	else
-		diy_echo "${online_select_version}下载失败..." "${red}" "${error}"
-		exit 1
-	fi
 }
 
 install_dir_set(){
@@ -294,12 +271,12 @@ download_unzip(){
 		local_install
 	fi
 	#获取文件类型
-	file_type=$(file -b ${install_dir}/${file_name} | grep -ioEw "gzip|zip|executable|text" | tr [A-Z] [a-z])
+	file_type=$(file -b ${tmp_dir}/${file_name} | grep -ioEw "gzip|zip|executable|text" | tr [A-Z] [a-z])
 	#获取文件目录
 	if [[	${file_type} = 'gzip' ]];then
-		dir_name=$(tar -tf ${install_dir}/${file_name}  | awk 'NR==1' | awk -F '/' '{print $1}' | sed 's#/##')
+		dir_name=$(tar -tf ${tmp_dir}/${file_name}  | awk 'NR==1' | awk -F '/' '{print $1}' | sed 's#/##')
 	elif [[ ${file_type} = 'zip' ]];then
-		dir_name=$(unzip -v ${install_dir}/${file_name} | awk '{print $8}'| awk 'NR==4' | sed 's#/##')
+		dir_name=$(unzip -v ${tmp_dir}/${file_name} | awk '{print $8}'| awk 'NR==4' | sed 's#/##')
 	elif [[ ${file_type} = 'executable' ]];then
 		dir_name=${soft_name}
 	fi
@@ -307,17 +284,23 @@ download_unzip(){
 	#解压文件
 	diy_echo "Unpacking the file,please wait..." "" "${info}"
 	if [[	${file_type} = 'gzip' ]];then
-		tar -zxf ${install_dir}/${file_name} -C ${install_dir}
+		tar -zxf ${tmp_dir}/${file_name} -C ${tmp_dir}
 	elif [[ ${file_type} = 'zip' ]];then
-		unzip -q ${install_dir}/${file_name} -d ${install_dir}
+		unzip -q ${tmp_dir}/${file_name} -d ${tmp_dir}
 	fi
 	
 	if [[ $? = '0' ]];then
 		diy_echo "Unpacking the file success." "" "${info}"
-		tar_dir=${install_dir}/${dir_name}
+		tar_dir=${tmp_dir}/${dir_name}
 	else
 		diy_echo "Unpacking the file failed!" "" "${error}"
 		exit 1
 	fi
 
+}
+
+install_set(){
+	install_version
+	install_dir_set
+	download_unzip
 }
