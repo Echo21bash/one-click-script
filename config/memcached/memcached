@@ -1,0 +1,6 @@
+USER="root"
+PORT="11211"
+MAXCONN="1024"
+CACHESIZE="64"
+LOG="-vv >>/var/log/memcached.log 2>&1"
+OPTIONS=""

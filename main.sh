@@ -14,7 +14,7 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/system_optimize.sh
 . ${workdir}/scripts/basic_env/*.sh
 . ${workdir}/scripts/web_server/*.sh
-. ${workdir}/scripts/database_services.sh
+. ${workdir}/scripts/db_server/*.sh
 . ${workdir}/scripts/middleware_services.sh
 . ${workdir}/scripts/storage_service.sh
 . ${workdir}/scripts/operation_platform.sh
