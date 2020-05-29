@@ -222,7 +222,7 @@ online_down(){
 			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.linux-amd64.tar.gz"
 		;;
 	esac
-	[[ -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
+	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
 	down_file ${down_url} ${tmp_dir}/${file_name}
 
 }
