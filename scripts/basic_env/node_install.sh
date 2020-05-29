@@ -7,7 +7,7 @@ node_env_load(){
 }
 node_install(){
 
-	cp ${tar_dir}/* ${home_dir}
+	cp -rp ${tar_dir}/* ${home_dir}
 	add_sys_env "NODE_HOME=${home_dir} PATH=\${NODE_HOME}/bin:\$PATH"
 	${home_dir}/bin/npm config set registry https://registry.npm.taobao.org
 }

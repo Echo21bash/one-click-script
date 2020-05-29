@@ -31,7 +31,7 @@ check_java(){
 
 install_java(){
 	check_java
-	cp ${tar_dir}/* ${home_dir}
+	cp -rp ${tar_dir}/* ${home_dir}
 	add_sys_env "JAVA_HOME=${home_dir} JAVA_BIN=\$JAVA_HOME/bin JAVA_LIB=\$JAVA_HOME/lib CLASSPATH=.:\$JAVA_LIB/tools.jar:\$JAVA_LIB/dt.jar PATH=\$JAVA_HOME/bin:\$PATH"
 	java -version
 	if [ $? = 0 ];then
