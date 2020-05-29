@@ -1,6 +1,6 @@
 #!/bin/bash
 
-env_load(){
+php_env_load(){
 	tmp_dir=/tmp/php_tmp
 	soft_name=php
 	program_version=('5.6' '7.0' '7.1')
@@ -153,7 +153,7 @@ php_config(){
 }
 
 php_install_ctl(){
-	env_load
+	php_env_load
 	install_set
 	php_install_depend
 	php_install

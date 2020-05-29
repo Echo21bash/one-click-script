@@ -1,6 +1,6 @@
 #!/bin/bash
 
-env_load(){
+node_env_load(){
 	tmp_dir=/tmp/node_tmp
 	soft_name=node
 	program_version=('9' '10')
@@ -13,7 +13,7 @@ node_install(){
 }
 
 node_install_ctl(){
-	env_load
+	node_env_load
 	install_set
 	node_inclear_installstall
 	

@@ -1,5 +1,5 @@
 #!/bin/bash
-env_load(){
+java_env_load(){
 	tmp_dir=/tmp/java_tmp
 	soft_name=java
 	program_version=('7' '8')
@@ -43,7 +43,7 @@ install_java(){
 }
 
 java_install_ctl(){
-	env_load
+	java_env_load
 	install_set
 	install_java
 	clear_install

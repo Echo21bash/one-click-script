@@ -1,4 +1,4 @@
-env_load(){
+ruby_env_load(){
 	tmp_dir=/tmp/ruby_tmp
 	soft_name=ruby
 	program_version=('2.3' '2.4')
@@ -35,7 +35,7 @@ ruby_install(){
 }
 
 ruby_install_ctl(){
-	env_load
+	ruby_env_load
 	ruby_install_set
 	if [[ ${install_method} = '1' ]];then
 		install_set

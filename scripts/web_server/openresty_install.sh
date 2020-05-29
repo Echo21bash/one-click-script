@@ -1,6 +1,6 @@
 #!/bin/bash
 
-env_load(){
+openresty_env_load(){
 	tmp_dir=/tmp/openresty_tmp
 	soft_name=openresty
 	program_version=(1.13 1.14 1.15)
@@ -52,7 +52,7 @@ add_openresty_service(){
 }
 
 openresty_install_ctl(){
-	env_load
+	openresty_env_load
 	install_set
 	dependent_install
 	openresty_compile
