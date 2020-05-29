@@ -5,7 +5,7 @@ down_file(){
 	#$1下载链接、$2保存路径及名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
-		file_name=$2
+		path_file=$2
 		if [[ -n `echo $down_url | grep -Eio 'https://github.com'` ]];then
 			mirror_status=`curl ${github_mirror}`
 			if [[ ${mirror_status} = 'It works' ]];then
@@ -13,23 +13,23 @@ down_file(){
 			fi
 		fi
 
-		if [[ ! -f ${file_name} ]];then
+		if [[ ! -f ${path_file} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n `echo $down_url | grep -Eio 'https://github.com'` && ${mirror_status} = 'It works' ]];then
-				axel -n 16 -a ${mirror_down_url} -o ${file_name}
+				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 			else
-				axel -n 16 -a ${down_url} -o ${file_name}
+				axel -n 16 -a ${down_url} -o ${path_file}
 			fi
 			
 			if [[ $? = '0' ]];then
-				diy_echo "${file_name}下载完成" "${info}"
+				diy_echo "${down_url}下载完成" "${info}"
 			else
-				diy_echo "${file_name}下载失败,正在重试" "${red}" "${error}"
-				axel -n 16 -a ${down_url} -o ${file_name}
+				diy_echo "${down_url}下载失败,正在重试" "${red}" "${error}"
+				axel -n 16 -a ${down_url} -o ${path_file}
 				if [[ $? = '0' ]];then
-					diy_echo "${file_name}下载完成" "${info}"
+					diy_echo "${down_url}下载完成" "${info}"
 				else
-					diy_echo "${file_name}下载失败请检查" "${red}" "${error}"
+					diy_echo "${down_url}下载失败请检查" "${red}" "${error}"
 					exit
 				fi
 			fi
