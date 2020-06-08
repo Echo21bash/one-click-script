@@ -3,7 +3,7 @@
 node_env_load(){
 	tmp_dir=/tmp/node_tmp
 	soft_name=node
-	program_version=('9' '10')
+	program_version=('10' '11' '12')
 }
 node_install(){
 
