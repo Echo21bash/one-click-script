@@ -12,14 +12,17 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/system_set.sh
 . ${workdir}/scripts/tools.sh
 . ${workdir}/scripts/system_optimize.sh
-. ${workdir}/scripts/basic_env/*.sh
-. ${workdir}/scripts/web_server/*.sh
-. ${workdir}/scripts/db_server/*.sh
 . ${workdir}/scripts/middleware_services.sh
 . ${workdir}/scripts/storage_service.sh
 . ${workdir}/scripts/operation_platform.sh
 . ${workdir}/scripts/virtualization_platform.sh
 . ${workdir}/scripts/k8s_install.sh
+
+for i in ${workdir}/scripts/*/*.sh; do
+	if [ -r "$i" ]; then    
+	. "$i"
+	fi
+done
 
 chmod -R +x ${workdir}/bin
 export PATH=${workdir}/bin:$PATH
