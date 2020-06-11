@@ -22,25 +22,17 @@ all_version_other(){
 
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				curl -Ls -o /tmp/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
+				curl -Ls -o ${tmp_dir}/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
 
 			else
-				curl -Ls -o /tmp/tmp_version ${mysql_galera_url} >/dev/null 2>&1
+				curl -Ls -o ${tmp_dir}/tmp_version ${mysql_galera_url} >/dev/null 2>&1
 
 			fi
 
 		;;
 		mongodb)
-			curl -sL -o /tmp/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			curl -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 
-		;;
-		java)
-			curl -sL -o /tmp/tmp_version ${url}/md5sum.txt >/dev/null 2>&1
-			if [[ ${os_bit} = '64' ]];then
-				cat /tmp/tmp_version | grep -Eio "jdk-${version_number}u.*x64" | sort -u >/tmp/all_version
-			else
-				cat /tmp/tmp_version  | grep -Eio "jdk-${version_number}u.*i586" | sort -u >/tmp/all_version
-			fi
 		;;
 
 	esac
@@ -50,7 +42,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		fastdfs)
-			curl -sL -o /tmp/all_version ${url}/tags >/dev/null 2>&1
+			curl -sL -o ${tmp_dir}/all_version ${url}/tags >/dev/null 2>&1
 		;;
 	esac
 	
@@ -60,10 +52,10 @@ ver_rule_general(){
 	
 	case "$soft_name" in
 		java)
-			cat /tmp/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >/tmp/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >/tmp/all_version
 		;;
 		*)
-			cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}|${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}|${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 		;;
 	esac
 
