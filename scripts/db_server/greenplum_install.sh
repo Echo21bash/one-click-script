@@ -31,7 +31,7 @@ greenplum_install_env(){
 
 greenplum_install_set(){
 
-
+echo
 
 }
 
