@@ -1,6 +1,6 @@
 #!/bin/bash
 unpacking_file(){
-	file_name=${down_fiel##*/}
+	file_name=${down_url##*/}
 	#获取文件类型
 	file_type=$(file -b ${tmp_dir}/${file_name} | grep -ioEw "gzip|zip|executable|text|bin" | tr [A-Z] [a-z])
 	#获取文件目录
