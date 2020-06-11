@@ -6,13 +6,6 @@ install_version(){
 	fi
 	version='_version'
 
-	tomcat_version=('7' '8')
-	mysql_version=('5.5' '5.6' '5.7')
-	mongodb_version=('3.4' '3.6' '4.0')
-	nginx_version=('1.14' '1.15' '1.16')
-
-	redis_version=('3.2' '4.0' '5.0')
-	memcached_version=('1.4' '1.5')
 	zookeeper_version=('3.4')
 	kafka_version=('2.2')
 	activemq_version=('5.13' '5.14' '5.15')
@@ -75,17 +68,20 @@ online_version(){
 		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
 		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 	}
+	
 	all_version_general1(){
 		curl -Ls -o /tmp/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
 		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 	}
 	
+	all_version_general2(){
+		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
+		cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+	}
+	
 	all_version_other(){
 	case "$soft_name" in
-		node)
-			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
-			cat /tmp/tmp_version | grep -Eio "v${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
-		;;
+
 		mysql)
 			if [[ ${branch} = '1' ]];then
 				curl -Ls -o /tmp/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
@@ -103,7 +99,7 @@ online_version(){
 
 		;;
 		mongodb)
-			curl -sL -o /tmp/tmp_version ${url} >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}x86_64-${version_number} >/dev/null 2>&1
 		;;
 		java)
 			curl -sL -o /tmp/tmp_version ${url}/md5sum.txt >/dev/null 2>&1
@@ -145,7 +141,10 @@ online_version(){
 		ruby)
 			all_version_general1
 		;;
-		node|mysql|mongodb|tomcat|java|k8s)
+		node)
+			all_version_general2
+		;;
+		mysql|mongodb|tomcat|java|k8s)
 			all_version_other
 		;;
 		fastdfs)
@@ -156,7 +155,7 @@ online_version(){
 
 	ver_rule_general
 	output_option '请选择在线版本号' "${option}" 'online_select_version'
-	[ -z ${online_select_version} ] && diy_echo "镜像站没有该版本" "$red" "$error" && exit 1
+
 	online_select_version=(${output_value[@]})
 	diy_echo "按任意键继续" "${yellow}" "${info}"
 	read
@@ -180,7 +179,7 @@ online_down(){
 			fi
 		;;
 		node)
-			down_url="${url}/${online_select_version}/node-${online_select_version}-linux-x64.tar.gz"
+			down_url="${url}/v${online_select_version}/node-v${online_select_version}-linux-x64.tar.gz"
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
@@ -254,8 +253,6 @@ download_unzip(){
 
 	if [[ ${soft_name} = 'rocketmq' ]];then
 		file_name="${soft_name}.zip"
-	elif [[ ${soft_name} = 'mongodb' ]];then
-		file_name="${soft_name}.tgz"
 	elif [[ ${soft_name} = 'minio' ]];then
 		file_name="${soft_name}-release"
 	else

@@ -138,7 +138,9 @@ system_optimize_kernel(){
 	[[ -z `grep -E '^net.ipv4.route.gc_timeout' /etc/sysctl.conf` ]] && echo 'net.ipv4.route.gc_timeout = 100'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.core.netdev_max_backlog' /etc/sysctl.conf` ]] && echo 'net.core.netdev_max_backlog = 16384'>>/etc/sysctl.conf
 	[[ -z `grep -E '^vm.max_map_count' /etc/sysctl.conf` ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf
-	[[ -z `grep -E '^vm.swappiness' /etc/sysctl.conf` ]] && echo 'vm.swappiness = 0'>>/etc/sysctl.conf
+	[[ -z `grep -E '^vm.swappiness' /etc/sysctl.conf` ]] && echo 'vm.swappiness = 10'>>/etc/sysctl.conf
+	[[ -z `grep -E '^vm.dirty_background_ratio' /etc/sysctl.conf` ]] && echo 'vm.zone_reclaim_mode = 5'>>/etc/sysctl.conf
+	[[ -z `grep -E '^vm.dirty_ratio' /etc/sysctl.conf` ]] && echo 'vm.dirty_ratio = 20'>>/etc/sysctl.conf
 
 	sysctl -p>/dev/null 2>&1
 	diy_echo "完成内核参数调整" "" "${info}"
