@@ -1,7 +1,9 @@
 #!/bin/bash
 install_dir_set(){
-	#需要传参$1软件名称
-	[[ -z ${soft_name} ]] && soft_name="$1"
+	if [[ -z ${soft_name} ]];then
+		diy_echo "函数install_dir_set缺少soft_name变量" "${error}"
+		exit 1
+	fi
 	input_option "请输入安装路径" "/opt" "install_dir"
 	install_dir=${input_value}
 	pdir=$(dirname ${install_dir}) && bdir=$(basename ${install_dir})

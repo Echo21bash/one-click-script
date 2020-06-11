@@ -52,18 +52,19 @@ ver_rule_general(){
 	
 	case "$soft_name" in
 		java)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >/tmp/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
 		;;
 		*)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}|${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}|${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 	esac
 
-	option=$(cat /tmp/all_version)
+	option=$(cat ${tmp_dir}/all_version)
 }
 
 
 online_version(){
+	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
 	diy_echo "正在获取在线版本..." "" "${info}"
 	#所有可用版本
 	case "$soft_name" in
