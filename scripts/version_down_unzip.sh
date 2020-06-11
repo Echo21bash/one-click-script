@@ -99,7 +99,7 @@ online_version(){
 
 		;;
 		mongodb)
-			curl -sL -o /tmp/all_version ${url}x86_64-${version_number} >/dev/null 2>&1
+			curl -sL -o /tmp/all_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 		;;
 		java)
 			curl -sL -o /tmp/tmp_version ${url}/md5sum.txt >/dev/null 2>&1
