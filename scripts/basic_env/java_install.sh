@@ -3,6 +3,9 @@ java_env_load(){
 	tmp_dir=/tmp/java_tmp
 	soft_name=java
 	program_version=('7' '8')
+	url='https://repo.huaweicloud.com/java/jdk'
+	down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
+
 }
 
 check_java(){
@@ -44,7 +47,11 @@ install_java(){
 
 java_install_ctl(){
 	java_env_load
-	install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down
+	unpacking_file
 	install_java
 	clear_install
 }

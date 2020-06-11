@@ -58,26 +58,24 @@ online_url(){
 	filebeat_url='https://mirrors.huaweicloud.com/filebeat'
 	zabbix_url='https://sourceforge.mirrorservice.org/z/za/zabbix/ZABBIX%20Latest%20Stable'
 	grafana_url='https://mirrors.huaweicloud.com/grafana'
-	#url=($(eval echo '$'{${soft_name}_url[@]}))
 	url=$(eval echo '$'{${soft_name}_url})
 }
 
 online_version(){
 
-	all_version_general(){
-		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
-		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
-	}
-	
 	all_version_general1(){
+		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
+	}
+
+	all_version_general2(){
 		curl -Ls -o /tmp/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
-		cat /tmp/tmp_version | grep -Eio "${soft_name}-${version_number}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 	}
 	
-	all_version_general2(){
-		curl -Ls -o /tmp/tmp_version ${url} >/dev/null 2>&1
-		cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
+	all_version_general3(){
+		curl -sL -o /tmp/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+
 	}
+	
 	
 	all_version_other(){
 	case "$soft_name" in
@@ -85,21 +83,16 @@ online_version(){
 		mysql)
 			if [[ ${branch} = '1' ]];then
 				curl -Ls -o /tmp/tmp_version ${mysql_url}/MySQL-${version_number} >/dev/null 2>&1
-				if [[ ${os_bit} = '64' ]];then
-					cat /tmp/tmp_version | grep -Eio "mysql-${version_number}\.[0-9]{1,2}-linux-glibc2.12-x86_64" | sort -u >/tmp/all_version
-				else
-					cat /tmp/tmp_version | grep -Eio "mysql-${version_number}\.[0-9]{1,2}-linux-glibc2.12-i686" | sort -u >/tmp/all_version
-				fi
+
 			else
 				curl -Ls -o /tmp/tmp_version ${mysql_galera_url} >/dev/null 2>&1
-				if [[ ${os_bit} = '64' ]];then
-					cat /tmp/tmp_version | grep -Eio "mysql-wsrep-${version_number}\.[0-9]{1,2}-[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
-				fi
+
 			fi
 
 		;;
 		mongodb)
-			curl -sL -o /tmp/all_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			curl -sL -o /tmp/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+
 		;;
 		java)
 			curl -sL -o /tmp/tmp_version ${url}/md5sum.txt >/dev/null 2>&1
@@ -109,13 +102,7 @@ online_version(){
 				cat /tmp/tmp_version  | grep -Eio "jdk-${version_number}u.*i586" | sort -u >/tmp/all_version
 			fi
 		;;
-		tomcat)
-			curl -sL -o /tmp/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
-			cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" >/tmp/all_version
-		;;
-		k8s)
-			yum list --showduplicates kubeadm | awk  '{print $2}' | grep -v "[a-z:]" | grep -Eio "${version_number}">/tmp/all_version
-		;;
+
 	esac
 	}
 
@@ -129,21 +116,20 @@ online_version(){
 	}
 
 	ver_rule_general(){
+		cat /tmp/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}|${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >/tmp/all_version
 		option=$(cat /tmp/all_version)
 	}
 
 	diy_echo "正在获取在线版本..." "" "${info}"
 	#所有可用版本
 	case "$soft_name" in
-		nginx|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
-			all_version_general
-		;;
-		ruby)
+		nginx|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
 			all_version_general1
 		;;
-		node)
+		ruby)
 			all_version_general2
 		;;
+
 		mysql|mongodb|tomcat|java|k8s)
 			all_version_other
 		;;
@@ -152,11 +138,11 @@ online_version(){
 		;;
 	esac
 
-
 	ver_rule_general
-	output_option '请选择在线版本号' "${option}" 'online_select_version'
+	
+	output_option '请选择在线版本号' "${option}" 'select_version'
 
-	online_select_version=(${output_value[@]})
+	select_version=(${output_value[@]})
 	diy_echo "按任意键继续" "${yellow}" "${info}"
 	read
 }
@@ -165,46 +151,46 @@ online_down(){
 	#拼接下载链接
 	case "$soft_name" in
 		java|nginx|redis|memcached|php|ruby)
-			down_url="${url}/${online_select_version}.tar.gz"
+			down_url="${url}/${select_version}.tar.gz"
 		;;
 
 		elasticsearch|logstash)
-			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.tar.gz"
+			down_url="${url}/${select_version}/${soft_name}-${select_version}.tar.gz"
 		;;
 		kibana|filebeat)
 			if [[ ${os_bit} = '64' ]];then
-				down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}-linux-x86_64.tar.gz"
+				down_url="${url}/${select_version}/${soft_name}-${select_version}-linux-x86_64.tar.gz"
 			else
-				down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}-linux-x86.tar.gz"
+				down_url="${url}/${select_version}/${soft_name}-${select_version}-linux-x86.tar.gz"
 			fi
 		;;
 		node)
-			down_url="${url}/v${online_select_version}/node-v${online_select_version}-linux-x64.tar.gz"
+			down_url="${url}/v${select_version}/node-v${select_version}-linux-x64.tar.gz"
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				down_url="${url}/MySQL-${version_number}/${online_select_version}.tar.gz"
+				down_url="${url}/MySQL-${version_number}/${select_version}.tar.gz"
 			else
-				down_url="${mysql_galera_url}/${online_select_version}/binary/${online_select_version}-linux-x86_64.tar.gz"
+				down_url="${mysql_galera_url}/${select_version}/binary/${select_version}-linux-x86_64.tar.gz"
 			fi
 		;;
 		mongodb)
-			down_url="http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${online_select_version}.tgz"
+			down_url="http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${select_version}.tgz"
 		;;
 		tomcat)
-			down_url="${url}/tomcat-${version_number}/v${online_select_version}/bin/apache-tomcat-${online_select_version}.tar.gz"
+			down_url="${url}/tomcat-${version_number}/v${select_version}/bin/apache-tomcat-${select_version}.tar.gz"
 		;;
 		zookeeper)
-			down_url="${url}/zookeeper-${online_select_version}/zookeeper-${online_select_version}.tar.gz"
+			down_url="${url}/zookeeper-${select_version}/zookeeper-${select_version}.tar.gz"
 		;;
 		kafka)
-			down_url="${url}/${online_select_version}/kafka_2.11-${online_select_version}.tgz"
+			down_url="${url}/${select_version}/kafka_2.11-${select_version}.tgz"
 		;;
 		activemq)
-			down_url="${url}/${online_select_version}/apache-activemq-${online_select_version}-bin.tar.gz"
+			down_url="${url}/${select_version}/apache-activemq-${select_version}-bin.tar.gz"
 		;;
 		rocketmq)
-			down_url="${url}/${online_select_version}/rocketmq-all-${online_select_version}-bin-release.zip"
+			down_url="${url}/${select_version}/rocketmq-all-${select_version}-bin-release.zip"
 		;;
 		fastdfs)
 			down_url="${url}/archive/master.tar.gz"
@@ -213,10 +199,10 @@ online_down(){
 			down_url="${url}"
 		;;
 		zabbix)
-			down_url="${url}/${online_select_version}/zabbix-${online_select_version}.tar.gz"
+			down_url="${url}/${select_version}/zabbix-${select_version}.tar.gz"
 		;;
 		grafana)
-			down_url="${url}/${online_select_version}/${soft_name}-${online_select_version}.linux-amd64.tar.gz"
+			down_url="${url}/${select_version}/${soft_name}-${select_version}.linux-amd64.tar.gz"
 		;;
 	esac
 	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
