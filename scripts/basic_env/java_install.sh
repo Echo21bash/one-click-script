@@ -1,7 +1,6 @@
 #!/bin/bash
 java_env_load(){
 	tmp_dir=/tmp/java_tmp
-	mkdir -p ${tmp_dir}
 	soft_name=java
 	program_version=('7' '8')
 	url='https://repo.huaweicloud.com/java/jdk'

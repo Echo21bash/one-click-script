@@ -4,6 +4,13 @@ node_env_load(){
 	tmp_dir=/tmp/node_tmp
 	soft_name=node
 	program_version=('10' '11' '12')
+	url="http://mirrors.ustc.edu.cn/node"
+	select_version
+	install_dir_set
+	online_version
+	down_url="${url}/v${detail_version_number}/node-v${detail_version_number}-linux-x64.tar.gz"
+	online_down_file
+	unpacking_file
 }
 node_install(){
 
@@ -14,7 +21,6 @@ node_install(){
 
 node_install_ctl(){
 	node_env_load
-	install_set
 	node_install
 	install_clear
 
