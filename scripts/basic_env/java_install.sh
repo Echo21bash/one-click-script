@@ -8,9 +8,9 @@ java_env_load(){
 	select_version
 	install_dir_set
 	online_version
+	down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
 	online_down_file
 	unpacking_file
-	down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
 
 }
 
