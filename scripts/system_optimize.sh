@@ -85,7 +85,7 @@ system_optimize_Limits(){
 system_optimize_sshd(){
 
 	[ ! -f /etc/ssh/sshd_config.bakup ] && cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bakup
-	sed -i 's/#Port 22/Port 52233/g' /etc/ssh/sshd_config
+	#sed -i 's/#Port 22/Port 52233/g' /etc/ssh/sshd_config
 	sed -i 's/^#LogLevel INFO/LogLevel INFO/g' /etc/ssh/sshd_config
 	sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
 	#sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
