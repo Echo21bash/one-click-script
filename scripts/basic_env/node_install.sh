@@ -4,7 +4,7 @@ node_env_load(){
 	tmp_dir=/tmp/node_tmp
 	soft_name=node
 	program_version=('10' '11' '12')
-	url="http://mirrors.ustc.edu.cn/node"
+	url="https://mirrors.huaweicloud.com/nodejs"
 	select_version
 	install_dir_set
 	online_version
@@ -12,6 +12,7 @@ node_env_load(){
 	online_down_file
 	unpacking_file
 }
+
 node_install(){
 
 	cp -rp ${tar_dir}/* ${home_dir}
@@ -22,6 +23,6 @@ node_install(){
 node_install_ctl(){
 	node_env_load
 	node_install
-	install_clear
+	clear_install
 
 }

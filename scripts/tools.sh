@@ -174,7 +174,6 @@ update_kernel(){
 
 clear_install(){
 	if [[ -n ${install_dir} ]];then
-		rm -rf ${install_dir}/${file_name}
 		rm -rf ${tar_dir}
 	fi
 }
