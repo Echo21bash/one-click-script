@@ -4,7 +4,8 @@ node_env_load(){
 	tmp_dir=/tmp/node_tmp
 	soft_name=node
 	program_version=('10' '11' '12')
-	url="https://mirrors.huaweicloud.com/nodejs"
+	url="http://mirrors.ustc.edu.cn/node"
+	url="http://npm.taobao.org/mirrors/node"
 	select_version
 	install_dir_set
 	online_version
