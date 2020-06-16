@@ -6,7 +6,7 @@ node_env_load(){
 	program_version=('10' '11' '12')
 	url="http://mirrors.ustc.edu.cn/node"
 	url="http://npm.taobao.org/mirrors/node"
-	down_url="${url}/v${detail_version_number}/node-v${detail_version_number}-linux-x64.tar.gz"
+	down_url="${url}/v\${detail_version_number}/node-v\${detail_version_number}-linux-x64.tar.gz"
 
 }
 
