@@ -4,6 +4,13 @@ ruby_env_load(){
 	tmp_dir=/tmp/ruby_tmp
 	soft_name=ruby
 	program_version=('2.3' '2.4')
+	url="http://cache.ruby-china.com/pub/ruby/"
+	select_version
+	install_dir_set
+	online_version
+	down_url="${url}/ruby-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file	
 }
 
 
