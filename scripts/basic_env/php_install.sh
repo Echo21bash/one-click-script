@@ -6,7 +6,7 @@ php_env_load(){
 	soft_name=php
 	program_version=('5.6' '7.0' '7.1')
 	url="http://mirrors.sohu.com/php/"
-	down_url="${url}/php-\${detail_version_number}.tar.gz"
+	down_url='${url}/php-${detail_version_number}.tar.gz'
 
 }
 

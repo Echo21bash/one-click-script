@@ -4,7 +4,7 @@ java_env_load(){
 	soft_name=java
 	program_version=('7' '8')
 	url='https://repo.huaweicloud.com/java/jdk'
-	down_url="${url}/\${detail_version_number}/jdk-\${detail_version_number%-*}-linux-x64.tar.gz"
+	down_url='${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz'
 
 }
 

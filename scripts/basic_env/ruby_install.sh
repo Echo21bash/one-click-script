@@ -5,8 +5,7 @@ ruby_env_load(){
 	soft_name=ruby
 	program_version=('2.3' '2.4')
 	url="http://cache.ruby-china.com/pub/ruby/"
-
-	down_url="${url}/ruby-\${detail_version_number}.tar.gz"
+	down_url='${url}/ruby-${detail_version_number}.tar.gz'
 
 }
 
