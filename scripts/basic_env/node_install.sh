@@ -6,12 +6,8 @@ node_env_load(){
 	program_version=('10' '11' '12')
 	url="http://mirrors.ustc.edu.cn/node"
 	url="http://npm.taobao.org/mirrors/node"
-	select_version
-	install_dir_set
-	online_version
 	down_url="${url}/v${detail_version_number}/node-v${detail_version_number}-linux-x64.tar.gz"
-	online_down_file
-	unpacking_file
+
 }
 
 node_install(){
@@ -23,6 +19,11 @@ node_install(){
 
 node_install_ctl(){
 	node_env_load
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	node_install
 	clear_install
 

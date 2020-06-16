@@ -5,12 +5,8 @@ php_env_load(){
 	soft_name=php
 	program_version=('5.6' '7.0' '7.1')
 	url="http://mirrors.sohu.com/php/"
-	select_version
-	install_dir_set
-	online_version
 	down_url="${url}/php-${detail_version_number}.tar.gz"
-	online_down_file
-	unpacking_file
+
 }
 
 php_install_set(){
@@ -161,7 +157,12 @@ php_config(){
 
 php_install_ctl(){
 	php_env_load
-	install_set
+	php_install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	php_install_depend
 	php_install
 	clear_install

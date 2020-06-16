@@ -5,12 +5,9 @@ ruby_env_load(){
 	soft_name=ruby
 	program_version=('2.3' '2.4')
 	url="http://cache.ruby-china.com/pub/ruby/"
-	select_version
-	install_dir_set
-	online_version
+
 	down_url="${url}/ruby-${detail_version_number}.tar.gz"
-	online_down_file
-	unpacking_file	
+
 }
 
 
@@ -47,7 +44,11 @@ ruby_install_ctl(){
 	ruby_env_load
 	ruby_install_set
 	if [[ ${install_method} = '1' ]];then
-		install_set
+		select_version
+		install_dir_set
+		online_version
+		online_down_file
+		unpacking_file	
 	fi
 	ruby_install
 	clear_install
