@@ -4,6 +4,12 @@ mysql_env_load(){
 	tmp_dir=/tmp/mysql_tmp
 	soft_name=mysql
 	program_version=('5.5' '5.6' '5.7')
+	url='http://mirrors.163.com/mysql/Downloads'
+	if [[ ${os_bit} = '64' ]];then
+		down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz'
+	else
+		down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz'
+	fi
 }
 
 mysql_install_set(){
@@ -191,7 +197,11 @@ mysql_first_password_set(){
 mysql_install_ctl(){
 	mysql_env_load
 	mysql_install_set
-	install_set 
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	mysql_install
 	clear_install
 }
