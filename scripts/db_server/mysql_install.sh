@@ -111,6 +111,21 @@ mysql_config(){
 	sed -i "s#socket  = /usr/local/mysql/data#socket  = ${mysql_data_dir}#" ${home_dir}/my.cnf
 	sed -i "s#basedir = /usr/local/mysql#basedir = ${home_dir}#" ${home_dir}/my.cnf
 	sed -i "s#datadir = /usr/local/mysql/data#datadir = ${mysql_data_dir}#" ${home_dir}/my.cnf
+	if [[ ${total_mem} -le 1024 && ${total_mem} -gt 0 ]];then
+		sed -i 's/innodb_buffer_pool_size/innodb_buffer_pool_size=256M/' ${home_dir}/my.cnf
+	fi
+	if [[ ${total_mem} -le 2048 && ${total_mem} -gt 1024 ]];then
+		sed -i 's/innodb_buffer_pool_size=.*/innodb_buffer_pool_size=512M/' ${home_dir}/my.cnf
+	fi
+	if [[ ${total_mem} -le 4096 && ${total_mem} -gt 2048 ]];then
+		sed -i 's/innodb_buffer_pool_size=.*/innodb_buffer_pool_size=1G/' ${home_dir}/my.cnf
+	fi
+	if [[ ${total_mem} -le 8192 && ${total_mem} -gt 4096 ]];then
+		sed -i 's/innodb_buffer_pool_size=.*/innodb_buffer_pool_size=2G/' ${home_dir}/my.cnf
+	fi
+	if [[ ${total_mem} -gt 8192 ]];then
+		sed -i 's/innodb_buffer_pool_size=.*/innodb_buffer_pool_size=4G/' ${home_dir}/my.cnf
+	fi
 	#版本区别配置
 	if [[ ${version_number} > '5.6' ]];then
 		sed -i "s/#log_timestamps = SYSTEM/log_timestamps = SYSTEM/" ${home_dir}/my.cnf
