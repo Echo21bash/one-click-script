@@ -4,6 +4,8 @@ openresty_env_load(){
 	tmp_dir=/tmp/openresty_tmp
 	soft_name=openresty
 	program_version=(1.13 1.14 1.15)
+	url="https://mirrors.huaweicloud.com/openresty"
+	down_url='${url}/v${detail_version_number}/v${detail_version_number}.tar.gz'
 }
 
 dependent_install(){
@@ -53,7 +55,11 @@ add_openresty_service(){
 
 openresty_install_ctl(){
 	openresty_env_load
-	install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	dependent_install
 	openresty_compile
 	openresty_config

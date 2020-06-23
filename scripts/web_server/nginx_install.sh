@@ -4,6 +4,8 @@ nginx_env_load(){
 	tmp_dir=/tmp/nginx_tmp
 	soft_name=nginx
 	program_version=('1.14' '1.15' '1.16')
+	url="https://mirrors.huaweicloud.com/nginx"
+	down_url='${url}/nginx-${detail_version_number}.tar.gz'
 }
 
 nginx_install_set(){
@@ -87,7 +89,11 @@ add_nginx_service(){
 nginx_install_ctl(){
 	nginx_env_load
 	nginx_install_set
-	install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	nginx_install
 	nginx_compile
 	nginx_config

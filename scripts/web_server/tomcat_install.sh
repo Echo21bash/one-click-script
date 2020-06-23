@@ -4,6 +4,8 @@ tomcat_env_load(){
 	tmp_dir=/tmp/tomcat_tmp
 	soft_name=tomcat
 	program_version=('7' '8')
+	url="http://mirrors.ustc.edu.cn/apache/tomcat"
+	down_url='${url}/tomcat-${version_number}/v${detail_version_number}/bin/apache-tomcat-${detail_version_number}.tar.gz'
 }
 
 tomcat_set(){
@@ -94,7 +96,11 @@ add_tomcat_service(){
 tomcat_install_ctl(){
 	tomcat_env_load
 	tomcat_set
-	install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	tomcat_install
 	clear_install
 }
