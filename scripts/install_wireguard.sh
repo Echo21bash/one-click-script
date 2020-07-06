@@ -7,18 +7,7 @@ wireguard_install(){
 	fi
 
 	system_optimize_yum
-	cat > /etc/yum.repos.d/wireguard.repo <<-EOF
-	[jdoss-wireguard]
-	name=Copr repo for wireguard owned by jdoss
-	baseurl=https://copr-be.cloud.fedoraproject.org/results/jdoss/wireguard/epel-7-$basearch/
-	type=rpm-md
-	skip_if_unavailable=True
-	gpgcheck=1
-	gpgkey=https://copr-be.cloud.fedoraproject.org/results/jdoss/wireguard/pubkey.gpg
-	repo_gpgcheck=0
-	enabled=1
-	enabled_metadata=1
-	EOF
+	curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
 	yum install -y dkms gcc-c++ gcc-gfortran glibc-headers glibc-devel libquadmath-devel libtool systemtap systemtap-devel iptables-services wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
 		echo -e "${info} wireguard安装成功"
