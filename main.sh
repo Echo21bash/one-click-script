@@ -18,7 +18,7 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/k8s_install.sh
 
 for i in ${workdir}/scripts/*/*.sh; do
-	if [ -r "$i" ]; then    
+	if [ -r "$i" ]; then
 	. "$i"
 	fi
 done
