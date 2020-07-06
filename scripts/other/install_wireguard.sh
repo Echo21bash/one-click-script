@@ -80,8 +80,11 @@ wireguard_config(){
 	fi
 }
 
+wireguard_install_ctl(){
 
-wireguard_install
-wireguard_config
-service_control wg-quick@wg0
+	wireguard_install
+	wireguard_config
+	service_control wg-quick@wg0
+}
+
 

@@ -148,7 +148,7 @@ case "$tool" in
 	;;
 	4)add_sysuser && add_sysuser_sudo
 	;;
-	5)wireguard_order
+	5)wireguard_install_ctl
 	;;
 	6)multi_function_backup_script_set
 	;;
