@@ -9,10 +9,10 @@ greenplum_env_load(){
 	program_version=('6')
 	url='https://github.com/greenplum-db/gpdb'
 	if [[ ${os_release} = '6' ]];then
-		down_url='${greenplum_url}/releases/${detail_version_number}/greenplum-db-${detail_version_number}-rhel6-x86_64.rpm'
+		down_url='${url}/releases/${detail_version_number}/greenplum-db-${detail_version_number}-rhel6-x86_64.rpm'
 	fi
 	if [[ ${os_release} = '7' ]];then
-		down_url='${greenplum_url}/releases/${detail_version_number}/greenplum-db-${detail_version_number}-rhel7-x86_64.rpm'
+		down_url='${url}/releases/${detail_version_number}/greenplum-db-${detail_version_number}-rhel7-x86_64.rpm'
 	fi
 }
 
