@@ -55,7 +55,7 @@ auto_ssh_keygen(){
 	expect_dir=`which expect 2>/dev/null`
 	[ -z ${expect_dir} ] && yum install expect -y
 	
-	if [[ ${user} != 'root' ]]
+	if [[ ${user} != 'root' ]];then
 		su ${user}
 	else
 		cd ~
