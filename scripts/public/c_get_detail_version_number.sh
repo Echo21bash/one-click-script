@@ -41,7 +41,7 @@ all_version_other(){
 all_version_github(){
 
 	case "$soft_name" in
-		fastdfs)
+		fastdfs|greenplum)
 			curl -sL -o ${tmp_dir}/all_version ${url}/tags >/dev/null 2>&1
 		;;
 	esac

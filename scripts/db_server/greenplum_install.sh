@@ -8,8 +8,12 @@ greenplum_env_load(){
 	soft_name=greenplum
 	program_version=('6')
 	url='https://github.com/greenplum-db/gpdb'
-	down_url="${greenplum_url}/releases/${online_select_version}/greenplum-db-${online_select_version}-rhel6-x86_64.rpm"
-	curl -sL -o /tmp/all_version ${url}/tags
+	if [[ ${os_release} = '6' ]];then
+		down_url='${greenplum_url}/releases/${online_select_version}/greenplum-db-${online_select_version}-rhel6-x86_64.rpm'
+	fi
+	if [[ ${os_release} = '7' ]];then
+		down_url='${greenplum_url}/releases/${online_select_version}/greenplum-db-${online_select_version}-rhel7-x86_64.rpm'
+	fi
 }
 
 
@@ -41,7 +45,7 @@ greenplum_install(){
 	for host in ${host_name[@]};
 	do
 	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
-	ssh ${host_name[$i]} -p ${ssh_port[$i]} "yum install greenplum-db-6.7.0-rhel7-x86_64.rpm"
+	ssh ${host_name[$i]} -p ${ssh_port[$i]} "yum install -y greenplum-db*"
 	((i++))
 	done
 }

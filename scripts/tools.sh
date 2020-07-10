@@ -44,18 +44,27 @@ down_file(){
 }
 
 auto_ssh_keygen(){
-	#host_name主机名，ssh_port ssh端口,passwd 密码
-	if [[ -z ${host_name} ]];then
-		input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_name"
-		host_name=(${input_value[@]})
+	#host_ip主机地址，ssh_port ssh端口,passwd 密码 user用户
+	if [[ -z ${user} ]];then
+		user=root
+	fi
+	if [[ -z ${host_ip} ]];then
+		input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_ip"
+		host_ip=(${input_value[@]})
 	fi
 	expect_dir=`which expect 2>/dev/null`
 	[ -z ${expect_dir} ] && yum install expect -y
 	
-	[ ! -f /root/.ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
+	if [[ ${user} != 'root' ]]
+		su ${user}
+	else
+		cd ~
+	fi
+	
+	[ ! -f .ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f .ssh/id_rsa -q
 	local i
 	i=0
-	for host in ${host_name[@]}
+	for host in ${host_ip[@]}
 	do
 		if [[ -z ${ssh_port[$i]} ]];then
 			input_option "请输入root的SSH端口号" "22" "ssh_port"
@@ -68,7 +77,7 @@ auto_ssh_keygen(){
 
 		expect <<-EOF
 		set timeout -1
-		spawn ssh-copy-id -i /root/.ssh/id_rsa.pub root@${host} -p ${ssh_port[$i]}
+		spawn ssh-copy-id -i .ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
 		expect {
 			"*yes/no" { send "yes\r";exp_continue}
 			"*password:" { send "${passwd[$i]}\r";exp_continue}
