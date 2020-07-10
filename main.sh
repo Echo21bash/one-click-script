@@ -67,7 +67,7 @@ esac
 
 database_services(){
 
-output_option '请选择要安装的软件' 'MySQL Mongodb Redis Memcached' 'num'
+output_option '请选择要安装的软件' 'MySQL Mongodb Redis Memcached Greenplum' 'num'
 case "$num" in
 	1)mysql_install_ctl
 	;;
@@ -76,6 +76,8 @@ case "$num" in
 	3)redis_install_ctl
 	;;
 	4)memcached_inistall_ctl
+	;;
+	5)greenplum_install_ctl
 	;;
 esac
 }
