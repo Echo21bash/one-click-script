@@ -61,7 +61,7 @@ auto_ssh_keygen(){
 		cd ~
 	fi
 	
-	[ ! -f .ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f .ssh/id_rsa -q
+	[ ! -f ~/.ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f .ssh/id_rsa -q
 	local i
 	i=0
 	for host in ${host_ip[@]}
