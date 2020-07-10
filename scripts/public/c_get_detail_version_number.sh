@@ -59,6 +59,9 @@ ver_rule_general(){
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		
+		greenplum)
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+		;;
 		*|node|openresty)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
