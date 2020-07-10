@@ -41,7 +41,7 @@ all_version_other(){
 all_version_github(){
 
 	case "$soft_name" in
-		fastdfs|greenplum)
+		*)
 			curl -sL -o ${tmp_dir}/all_version ${url}/tags >/dev/null 2>&1
 		;;
 	esac
@@ -83,7 +83,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		fastdfs)
+		fastdfs|greenplum)
 			all_version_github
 		;;
 	esac
