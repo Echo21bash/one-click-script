@@ -1,20 +1,23 @@
 #!/bin/bash
 
 down_file(){
-	github_mirror=https://download.fastgit.org
+	github_mirror=(https://download.fastgit.org https://github.com.cnpmjs.org https://github.wuyanzheshui.workers.dev)
 	#$1下载链接、$2保存路径及名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		path_file=$2
-
-		if [[ -n `echo $down_url | grep -Eio 'https://github.com'` ]];then
-			mirror_status=`curl ${github_mirror}`
-			mirror_down_url="${github_mirror}/${down_url#*github.com/}"
-		fi
-
+		for mirror in ${github_mirror[@]};
+		do
+			mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
+			if [[ ${mirror_status} = '200' ]];then
+				mirror_down_url="${mirror}/${down_url#*github.com/}"
+				break
+			fi
+		done
+		
 		if [[ ! -f ${path_file} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
-			if [[ -n ${mirror_down_url} && ${mirror_status} = 'It works' ]];then
+			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
