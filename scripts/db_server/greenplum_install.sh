@@ -53,12 +53,13 @@ greenplum_install(){
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		yum install -y ${file_name}
 		hostnamectl set-hostname ${host_name[$i]}
+		cp /usr/local/greenplum-db/greenplum_path.sh /etc/profile.d/
+		chmod +x /etc/profile.d/greenplum_path.sh
 		"
 	((i++))
 	done
 	
-
-	for ((i=0,i<${host_num},i++));
+	for ((i=0;i<${host_num};i++));
 	do
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		i=0
@@ -68,7 +69,13 @@ greenplum_install(){
 }
 
 greenplum_config(){
-	echo
+
+	sed -i "s#declare -a DATA_DIRECTORY=.*#declare -a DATA_DIRECTORY=(${data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
+	sed -i "s#MASTER_DIRECTORY=.*#MASTER_DIRECTORY=${master_data_dir[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
+	sed -i "s#MIRROR_DATA_DIRECTORY=.*#MIRROR_DATA_DIRECTORY=(${mirror_data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
+	sed -i "s#MASTER_HOSTNAME=.*#MASTER_HOSTNAME=${master_name[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
+
+	su gpadmin
 }
 
 

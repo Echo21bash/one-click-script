@@ -56,13 +56,8 @@ auto_ssh_keygen(){
 	expect_dir=`which expect 2>/dev/null`
 	[ -z ${expect_dir} ] && yum install expect -y
 	
-	if [[ ${user} != 'root' ]];then
-		su ${user}
-	else
-		cd ~
-	fi
-	
-	[ ! -f ~/.ssh/id_rsa ] && ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q
+	su ${user} -c "if [[ ! -f ~/.ssh/id_rsa ]];then ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q;fi"
+
 	local i
 	i=0
 	for host in ${host_ip[@]}
