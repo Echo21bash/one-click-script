@@ -69,13 +69,30 @@ greenplum_install(){
 }
 
 greenplum_config(){
-
+	
 	sed -i "s#declare -a DATA_DIRECTORY=.*#declare -a DATA_DIRECTORY=(${data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MASTER_DIRECTORY=.*#MASTER_DIRECTORY=${master_data_dir[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MIRROR_DATA_DIRECTORY=.*#MIRROR_DATA_DIRECTORY=(${mirror_data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MASTER_HOSTNAME=.*#MASTER_HOSTNAME=${master_name[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
+	cp ${workdir}/config/greenplum/gpinitsystem_config /home/gpadmin/gpconfigs/
+	
+	for host in ${data_name[@]};
+	do 
+		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}"
+	done
+	
 
-	su gpadmin
+	ssh ${master_name} "mkdir -p ${master_data_dir[@]}"
+	ssh gpadmin@${master_name} "
+	mkdir gpconfigs
+	> ./gpconfigs/hostfile_exkeys
+	> ./gpconfigs/hostfile_gpinitsystem
+	for host in ${host_name[@]};do echo ${host}>>./gpconfigs/hostfile_exkeys;done
+	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done
+	"
+	ssh gpadmin@${master_name} "gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
+	ssh gpadmin@${master_name} "gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
+
 }
 
 
@@ -88,5 +105,6 @@ greenplum_install_ctl(){
 	greenplum_install_env
 	greenplum_install_set
 	greenplum_install
+	greenplum_config
 	clear_install
 }
