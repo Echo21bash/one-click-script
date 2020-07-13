@@ -1,7 +1,7 @@
 #!/bin/bash
 
 down_file(){
-	github_mirror=(https://download.fastgit.org https://hub.fastgit.org https://github.wuyanzheshui.workers.dev https://github.com.cnpmjs.org)
+	github_mirror=(https://download.fastgit.org https://github.wuyanzheshui.workers.dev https://hub.fastgit.org https://github.com.cnpmjs.org)
 	#$1下载链接、$2保存路径及名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
