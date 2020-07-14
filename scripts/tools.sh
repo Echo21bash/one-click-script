@@ -2,10 +2,11 @@
 
 down_file(){
 	github_mirror=(https://download.fastgit.org https://github.wuyanzheshui.workers.dev https://hub.fastgit.org https://github.com.cnpmjs.org)
-	#$1下载链接、$2保存路径及名称
+	#$1下载链接、$2保存已存在的路径或路径+名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		path_file=$2
+		#对github连接尝试使用镜像地址
 		for mirror in ${github_mirror[@]};
 		do
 			mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
@@ -14,32 +15,29 @@ down_file(){
 				break
 			fi
 		done
-		
-		if [[ ! -f ${path_file} ]];then
+		#获取下载完成路径及文件名
+		if [[ -d ${path_file} ]];then
+			full_path_file=${path_file}/${down_filename}
+		else
+			full_path_file=${path_file}
+		fi
+		#开始下载	
+		if [[ ! -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
-				
 			fi
-			
-			if [[ $? = '0' ]];then
-				diy_echo "${down_url}下载完成" "${info}"
+		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
+			diy_echo "正在断点续传下载${down_url}" "${info}"
+			if [[ -n ${mirror_down_url} ]];then
+				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 			else
-				diy_echo "${down_url}下载失败,正在重试" "${red}" "${error}"
-				[[ -f ${path_file} ]] && rm -rf ${path_file}
 				axel -n 16 -a ${down_url} -o ${path_file}
-				if [[ $? = '0' ]];then
-					diy_echo "${down_url}下载完成" "${info}"
-
-				else
-					diy_echo "${down_url}下载失败请检查" "${red}" "${error}"
-					exit
-				fi
 			fi
-		else
-			diy_echo "已经存在文件${path_file}" "${info}"
+		elif [[ -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
+			diy_echo "已经存在文件${path_file}/${down_filename}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
