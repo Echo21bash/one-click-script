@@ -62,8 +62,8 @@ greenplum_install(){
 		scp -P ${ssh_port[i]} ${tmp_dir}/hosts root@${host}:/tmp
 
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
-		host1=`tail -n 1 /etc/hosts`
-		host2=`tail -n 1 /tmp/hosts`
+		host1=`tail -n 1 /etc/hosts | awk '{print $2}'`
+		host2=`tail -n 1 /tmp/hosts | awk '{print $2}'`
 		[[ ${host1} ! = ${host2} ]] && cat /tmp/hosts >>/etc/hosts
 		yum install -y ${file_name}
 		hostnamectl set-hostname ${host_name[$i]}
