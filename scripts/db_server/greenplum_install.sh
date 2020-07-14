@@ -47,9 +47,9 @@ greenplum_install(){
 	
 	#创建主机hosts文件
 	local i=0
+	>${tmp_dir}/hosts
 	for host in ${host_ip[@]};
 	do
-		>${tmp_dir}/hosts
 		echo "${host_ip[$i]} ${host_name[$i]}">>${tmp_dir}/hosts
 		((i++))
 	done
