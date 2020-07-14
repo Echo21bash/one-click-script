@@ -26,7 +26,7 @@ greenplum_install_env(){
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		. /root/public.sh
 		. /root/system_optimize.sh
-		conf=(1 2 4 5 6 7)
+		conf=(2 4 5 6 7)
 		system_optimize_set
 		rm -rf /root/public.sh /root/system_optimize.sh
 		useradd gpadmin
@@ -44,31 +44,36 @@ echo
 greenplum_install(){
 	
 	host_num="${#host_ip[@]}"
+	
+	#创建主机hosts文件
+	local i=0
+	for host in ${host_ip[@]};
+	do
+		>${tmp_dir}/hosts
+		echo "${host_ip[$i]} ${host_name[$i]}">>${tmp_dir}/hosts
+		((i++))
+	done
+	
+	#发送安装包并安装
 	local i=0
 	for host in ${host_ip[@]};
 	do
 		scp -P ${ssh_port[i]} ${tmp_dir}/${file_name} root@${host}:/root
+		scp -P ${ssh_port[i]} ${tmp_dir}/hosts root@${host}:/tmp
+
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+		host1=`tail -n 1 /etc/hosts`
+		host2=`tail -n 1 /tmp/hosts`
+		[[ ${host1} ! = ${host2} ]] && cat /tmp/hosts >>/etc/hosts
 		yum install -y ${file_name}
 		hostnamectl set-hostname ${host_name[$i]}
 		cp /usr/local/greenplum-db/greenplum_path.sh /etc/profile.d/
 		chmod +x /etc/profile.d/greenplum_path.sh
 		"
-	((i++))
+		((i++))
 	done
 	
-	for ((i=0;i<${host_num};i++));
-	do
-		ssh ${host_ip[$i]} -p ${ssh_port[$i]} -c "
-		i=0
-		for ip in ${host_ip[@]};
-		do
-			j=$(grep "${ip} ${host_name[$i]}" /etc/hosts)
-			[[ -z ${j} ]] && echo "${ip} ${host_name[$i]}">>/etc/hosts
-			((i++))
-		done
-		"
-	done
+
 	#配置主机免密
 	host_ip=(${host_name[@]})
 	user=gpadmin
@@ -86,7 +91,8 @@ greenplum_config(){
 	
 	for host in ${data_name[@]};
 	do 
-		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}"
+		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}
+		"
 	done
 	
 
