@@ -33,9 +33,7 @@ greenplum_install_env(){
 		echo 'gpadmin' | passwd --stdin gpadmin"
 		((i++))
 	done
-	user=gpadmin
-	passwd=('gpadmin' 'gpadmin' 'gpadmin')
-	auto_ssh_keygen
+
 }
 
 greenplum_install_set(){
@@ -63,9 +61,19 @@ greenplum_install(){
 	do
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		i=0
-		for ip in ${host_ip[@]};do [[ -z $(grep "${ip} ${host_name[$i]}" /etc/hosts) ]] && echo "${ip} ${host_name[$i]}">>/etc/hosts ((i++));done
+		for ip in ${host_ip[@]};
+		do
+			j=$(grep "${ip} ${host_name[$i]}" /etc/hosts)
+			[[ -z ${j} ]] && echo "${ip} ${host_name[$i]}">>/etc/hosts
+			((i++))
+		done
 		"
 	done
+	#配置主机免密
+	host_ip=(${host_name[@]})
+	user=gpadmin
+	passwd=('gpadmin' 'gpadmin' 'gpadmin')
+	auto_ssh_keygen
 }
 
 greenplum_config(){
