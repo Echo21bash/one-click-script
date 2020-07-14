@@ -47,7 +47,7 @@ down_file(){
 
 auto_ssh_keygen(){
 	#host_ip主机地址，ssh_port ssh端口,passwd 密码 user用户
-	if [[ -z ${user} ]];then
+	if [[ -z ${user} || ${user} = 'root' ]];then
 		user=root
 		key_dir=/root
 	else
