@@ -91,24 +91,33 @@ greenplum_config(){
 	
 	for host in ${data_name[@]};
 	do 
-		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}"
+		ssh ${host} <<-EOF
+		su - gpadmin
+		mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}
+		EOF
 	done
 	
-
-	ssh ${master_name} "mkdir -p ${master_data_dir[@]}"
 	
-	ssh ${master_name} su - gpadmin -c "
+	ssh ${master_name}  <<-EOF
+	su - gpadmin
+	mkdir -p ${master_data_dir[@]}
 	mkdir gpconfigs
 	> ./gpconfigs/hostfile_exkeys
 	> ./gpconfigs/hostfile_gpinitsystem
-	for host in ${host_name[@]};do echo ${host}>>./gpconfigs/hostfile_exkeys;done
-	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done"
-	
-	ssh ${master_name} su - gpadmin -c "
-	gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
+	for host in ${host_name[@]};do echo \${host}>>./gpconfigs/hostfile_exkeys;done
+	for host in ${data_name[@]};do echo \${host}>>./gpconfigs/hostfile_gpinitsystem;done
+	EOF
+
+	ssh ${master_name} <<-EOF
+	su - gpadmin
+	gpssh-exkeys -f ./gpconfigs/hostfile_exkeys
+	EOF
 	scp -P ${workdir}/config/greenplum/gpinitsystem_config gpadmin@${master_name}:/home/gpadmin/gpconfigs
-	ssh ${master_name} su - gpadmin -c "
-	gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
+	
+	ssh ${master_name} <<-EOF
+	su - gpadmin
+	gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
+	EOF
 	
 }
 
