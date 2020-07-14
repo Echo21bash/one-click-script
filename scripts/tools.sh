@@ -83,7 +83,7 @@ auto_ssh_keygen(){
 			"*password:" { send "${passwd[$i]}\r";exp_continue}
         }
 		EOF
-		ssh ${user}@${host} -p ${ssh_port[$i]} "echo"
+		su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'"
 		if [[ $? = 0 ]];then
 			diy_echo "主机${host}免密登录配置完成" "${green}" "${info}"
 		else
