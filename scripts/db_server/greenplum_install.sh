@@ -64,7 +64,7 @@ greenplum_install(){
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		host1=`tail -n 1 /etc/hosts | awk '{print $2}'`
 		host2=`tail -n 1 /tmp/hosts | awk '{print $2}'`
-		[[ \${host1} ! = \${host2} ]] && cat /tmp/hosts >>/etc/hosts
+		[[ \${host1} != \${host2} ]] && cat /tmp/hosts >>/etc/hosts
 		yum install -y ${file_name}
 		hostnamectl set-hostname ${host_name[$i]}
 		cp /usr/local/greenplum-db/greenplum_path.sh /etc/profile.d/
@@ -91,23 +91,23 @@ greenplum_config(){
 	
 	for host in ${data_name[@]};
 	do 
-		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}
-		"
+		ssh ${host} "mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}"
 	done
 	
 
 	ssh ${master_name} "mkdir -p ${master_data_dir[@]}"
-	ssh gpadmin@${master_name} "
+	su gpadmin -c "ssh gpadmin@${master_name} 
 	mkdir gpconfigs
 	> ./gpconfigs/hostfile_exkeys
 	> ./gpconfigs/hostfile_gpinitsystem
 	for host in ${host_name[@]};do echo ${host}>>./gpconfigs/hostfile_exkeys;done
-	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done
-	"
+	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done"
 	
-	ssh gpadmin@${master_name} "gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
+	su gpadmin -c "ssh gpadmin@${master_name}
+	gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
 	scp -P ${workdir}/config/greenplum/gpinitsystem_config gpadmin@${master_name}:/home/gpadmin/gpconfigs
-	ssh gpadmin@${master_name} "gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
+	su gpadmin -c "ssh gpadmin@${master_name}
+	gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
 	
 }
 
