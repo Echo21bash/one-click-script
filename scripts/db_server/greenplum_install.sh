@@ -73,12 +73,15 @@ greenplum_install(){
 		((i++))
 	done
 	
-
+	#配置主机名免密
+	host_ip=(${host_name[@]})
+	auto_ssh_keygen
 	#配置主机免密
 	host_ip=(${host_name[@]})
 	user=gpadmin
 	passwd=('gpadmin' 'gpadmin' 'gpadmin')
 	auto_ssh_keygen
+
 }
 
 greenplum_config(){
@@ -92,15 +95,17 @@ greenplum_config(){
 	for host in ${data_name[@]};
 	do 
 		ssh ${host} <<-EOF
-		su - gpadmin
 		mkdir -p ${data_dir[@]} ${mirror_data_dir[@]}
+		chown -R gpadmin.gpadmin ${data_dir[@]}
+		chown -R gpadmin.gpadmin ${mirror_data_dir[@]
 		EOF
 	done
 	
 	
 	ssh ${master_name}  <<-EOF
-	su - gpadmin
 	mkdir -p ${master_data_dir[@]}
+	chown -R gpadmin.gpadmin ${master_data_dir[@]}
+	su - gpadmin
 	mkdir gpconfigs
 	> ./gpconfigs/hostfile_exkeys
 	> ./gpconfigs/hostfile_gpinitsystem
