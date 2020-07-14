@@ -49,6 +49,9 @@ auto_ssh_keygen(){
 	#host_ip主机地址，ssh_port ssh端口,passwd 密码 user用户
 	if [[ -z ${user} ]];then
 		user=root
+		key_dir=/root
+	else
+		key_dir=/home/${user}
 	fi
 	if [[ -z ${host_ip} ]];then
 		input_option "请输入ssh互信主机的主机名(多个空格隔开)" "localhost" "host_ip"
@@ -74,7 +77,7 @@ auto_ssh_keygen(){
 
 		expect <<-EOF
 		set timeout -1
-		spawn ssh-copy-id -i ~/.ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
+		spawn ssh-copy-id -i ${key_dir}/.ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
 		expect {
 			"*yes/no" { send "yes\r";exp_continue}
 			"*password:" { send "${passwd[$i]}\r";exp_continue}
