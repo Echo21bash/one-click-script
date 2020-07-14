@@ -63,7 +63,7 @@ greenplum_install(){
 	do
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		i=0
-		for ip in ${host_ip[@]};do [[ -z `grep "${ip} ${host_name[$i]}" /etc/hosts` ]] && echo "${ip} ${host_name[$i]}">>/etc/hosts ((i++));done
+		for ip in ${host_ip[@]};do [[ -z $(grep "${ip} ${host_name[$i]}" /etc/hosts) ]] && echo "${ip} ${host_name[$i]}">>/etc/hosts ((i++));done
 		"
 	done
 }
@@ -74,7 +74,7 @@ greenplum_config(){
 	sed -i "s#MASTER_DIRECTORY=.*#MASTER_DIRECTORY=${master_data_dir[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MIRROR_DATA_DIRECTORY=.*#MIRROR_DATA_DIRECTORY=(${mirror_data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MASTER_HOSTNAME=.*#MASTER_HOSTNAME=${master_name[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
-	cp ${workdir}/config/greenplum/gpinitsystem_config /home/gpadmin/gpconfigs/
+
 	
 	for host in ${data_name[@]};
 	do 
@@ -90,9 +90,11 @@ greenplum_config(){
 	for host in ${host_name[@]};do echo ${host}>>./gpconfigs/hostfile_exkeys;done
 	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done
 	"
+	
 	ssh gpadmin@${master_name} "gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
+	scp -P ${workdir}/config/greenplum/gpinitsystem_config gpadmin@${master_name}:/home/gpadmin/gpconfigs
 	ssh gpadmin@${master_name} "gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
-
+	
 }
 
 
