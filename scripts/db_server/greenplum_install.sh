@@ -98,7 +98,7 @@ greenplum_config(){
 		mkdir -p ${data_dir[@]}
 		mkdir -p ${mirror_data_dir[@]}
 		chown -R gpadmin.gpadmin ${data_dir[@]}
-		chown -R gpadmin.gpadmin ${mirror_data_dir[@]
+		chown -R gpadmin.gpadmin ${mirror_data_dir[@]}
 		EOF
 	done
 	
