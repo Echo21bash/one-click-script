@@ -96,17 +96,18 @@ greenplum_config(){
 	
 
 	ssh ${master_name} "mkdir -p ${master_data_dir[@]}"
-	su gpadmin -c "ssh gpadmin@${master_name} 
+	
+	ssh ${master_name} su - gpadmin -c "
 	mkdir gpconfigs
 	> ./gpconfigs/hostfile_exkeys
 	> ./gpconfigs/hostfile_gpinitsystem
 	for host in ${host_name[@]};do echo ${host}>>./gpconfigs/hostfile_exkeys;done
 	for host in ${data_name[@]};do echo ${host}>>./gpconfigs/hostfile_gpinitsystem;done"
 	
-	su gpadmin -c "ssh gpadmin@${master_name}
+	ssh ${master_name} su - gpadmin -c "
 	gpssh-exkeys -f ./gpconfigs/hostfile_exkeys"
 	scp -P ${workdir}/config/greenplum/gpinitsystem_config gpadmin@${master_name}:/home/gpadmin/gpconfigs
-	su gpadmin -c "ssh gpadmin@${master_name}
+	ssh ${master_name} su - gpadmin -c "
 	gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem"
 	
 }
