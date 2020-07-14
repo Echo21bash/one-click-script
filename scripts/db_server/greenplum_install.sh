@@ -59,7 +59,7 @@ greenplum_install(){
 	
 	for ((i=0;i<${host_num};i++));
 	do
-		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+		ssh ${host_ip[$i]} -p ${ssh_port[$i]} -c "
 		i=0
 		for ip in ${host_ip[@]};
 		do
