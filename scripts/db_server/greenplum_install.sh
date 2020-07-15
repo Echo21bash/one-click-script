@@ -136,7 +136,7 @@ greenplum_config(){
 	MASTER_DATA_DIRECTORY="${master_data_dir}`ssh ${master_name} "ls ${master_data_dir}"`"
 	ssh ${master_name} <<-EOF
 	su - gpadmin
-	[[ x\$MASTER_DATA_DIRECTORY = x ]] && echo "export MASTER_DATA_DIRECTORY=\$MASTER_DATA_DIRECTORY" >>.bashrc
+	[[ x\$MASTER_DATA_DIRECTORY = x ]] && echo "export MASTER_DATA_DIRECTORY=$MASTER_DATA_DIRECTORY" >>.bashrc
 	EOF
 
 }
