@@ -127,7 +127,8 @@ greenplum_config(){
 	#su - gpadmin
 	#gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
 	#EOF
-	if [[ $? = '0' ]];then
+	gpstatus=`su - gpadmin -c "psql -q -d postgres  -c 'select current_database();' | awk 'NR==3'"`
+	if [[ ${gpstatus} = 'postgres' ]];then
 		diy_echo "完成初始化Greenplum集群..." "${info}"
 	else
 		diy_echo "初始化Greenplum集群失败!!!" "${red}" "${error}"
