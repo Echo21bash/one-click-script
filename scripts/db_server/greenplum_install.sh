@@ -38,7 +38,7 @@ greenplum_install_env(){
 
 greenplum_install_set(){
 
-echo
+	vi ${workdir}/config/greenplum/greenplum.conf
 }
 
 greenplum_install(){
@@ -91,9 +91,9 @@ greenplum_config(){
 	sed -i "s#MIRROR_DATA_DIRECTORY=.*#MIRROR_DATA_DIRECTORY=(${mirror_data_dir[@]})#" ${workdir}/config/greenplum/gpinitsystem_config
 	sed -i "s#MASTER_HOSTNAME=.*#MASTER_HOSTNAME=${master_name[@]}#" ${workdir}/config/greenplum/gpinitsystem_config
 
-	
+
 	for host in ${data_name[@]};
-	do 
+	do
 		ssh ${host} <<-EOF
 		mkdir -p ${data_dir[@]}
 		mkdir -p ${mirror_data_dir[@]}
@@ -120,11 +120,25 @@ greenplum_config(){
 	EOF
 	scp ${workdir}/config/greenplum/gpinitsystem_config root@${master_name}:/home/gpadmin/gpconfigs
 	
+	diy_echo "正在初始化Greenplum集群...根据提示输入Y继续" "${info}"
+	
+	su gpadmin -c "ssh ${master_name} 'gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem'"
+	#ssh ${master_name} <<-EOF
+	#su - gpadmin
+	#gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
+	#EOF
+	if [[ $? = '0' ]];then
+		diy_echo "完成初始化Greenplum集群..." "${info}"
+	else
+		diy_echo "初始化Greenplum集群失败!!!" "${red}" "${error}"
+		exit
+	fi
+	MASTER_DATA_DIRECTORY="${master_data_dir}`ssh ${master_name} "ls ${master_data_dir}"`"
 	ssh ${master_name} <<-EOF
 	su - gpadmin
-	gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
+	[[ x$MASTER_DATA_DIRECTORY = x ]] && echo "export MASTER_DATA_DIRECTORY=$MASTER_DATA_DIRECTORY" >>.bashrc
 	EOF
-	
+
 }
 
 
