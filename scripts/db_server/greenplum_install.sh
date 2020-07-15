@@ -1,7 +1,6 @@
 #!/bin/bash
 
 greenplum_env_load(){
-	. ${workdir}/config/greenplum/greenplum.conf
 	
 	tmp_dir=/tmp/greenplum_tmp
 	mkdir -p ${tmp_dir}
@@ -16,6 +15,11 @@ greenplum_env_load(){
 	fi
 }
 
+greenplum_install_set(){
+	vi ${workdir}/config/greenplum/greenplum.conf
+	. ${workdir}/config/greenplum/greenplum.conf
+
+}
 
 greenplum_install_env(){
 	auto_ssh_keygen
@@ -34,11 +38,6 @@ greenplum_install_env(){
 		((i++))
 	done
 
-}
-
-greenplum_install_set(){
-
-	vi ${workdir}/config/greenplum/greenplum.conf
 }
 
 greenplum_install(){
@@ -149,8 +148,8 @@ greenplum_install_ctl(){
 	online_version
 	online_down_file
 	unpacking_file
-	greenplum_install_env
 	greenplum_install_set
+	greenplum_install_env
 	greenplum_install
 	greenplum_config
 	clear_install
