@@ -78,7 +78,7 @@ greenplum_install(){
 	#配置主机免密
 	host_ip=(${host_name[@]})
 	user=gpadmin
-	passwd=('gpadmin' 'gpadmin' 'gpadmin')
+	passwd=('gpadmin' 'gpadmin' 'gpadmin' 'gpadmin' 'gpadmin')
 	auto_ssh_keygen
 
 }
@@ -121,7 +121,7 @@ greenplum_config(){
 	
 	diy_echo "正在初始化Greenplum集群...根据提示输入Y继续" "${info}"
 	
-	su gpadmin -c "ssh ${master_name} 'gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem'"
+	su gpadmin -c "ssh ${master_name} 'gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem --mirror-mode=group'"
 	#ssh ${master_name} <<-EOF
 	#su - gpadmin
 	#gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
