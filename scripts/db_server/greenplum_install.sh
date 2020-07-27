@@ -119,9 +119,7 @@ greenplum_config(){
 	EOF
 	scp ${workdir}/config/greenplum/gpinitsystem_config root@${master_name}:/home/gpadmin/gpconfigs
 	
-	diy_echo "正在初始化Greenplum集群...根据提示输入Y继续" "${info}"
-	
-	su gpadmin -c "ssh ${master_name} 'gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem --mirror-mode=group'"
+	su gpadmin -c "ssh ${master_name} 'gpinitsystem -a -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem --mirror-mode=group'"
 	#ssh ${master_name} <<-EOF
 	#su - gpadmin
 	#gpinitsystem -c gpconfigs/gpinitsystem_config -h gpconfigs/hostfile_gpinitsystem
@@ -133,7 +131,7 @@ greenplum_config(){
 		diy_echo "初始化Greenplum集群失败!!!" "${red}" "${error}"
 		exit
 	fi
-	MASTER_DATA_DIRECTORY="${master_data_dir}`ssh ${master_name} "ls ${master_data_dir}"`"
+	MASTER_DATA_DIRECTORY="${master_data_dir}/`ssh ${master_name} "ls ${master_data_dir}"`"
 	ssh ${master_name} <<-EOF
 	su - gpadmin
 	[[ x\$MASTER_DATA_DIRECTORY = x ]] && echo "export MASTER_DATA_DIRECTORY=$MASTER_DATA_DIRECTORY" >>.bashrc
