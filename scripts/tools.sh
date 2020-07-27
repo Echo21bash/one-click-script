@@ -6,15 +6,17 @@ down_file(){
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		path_file=$2
-		#对github连接尝试使用镜像地址
-		for mirror in ${github_mirror[@]};
-		do
-			mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
-			if [[ ${mirror_status} = '200' ]];then
-				mirror_down_url="${mirror}/${down_url#*github.com/}"
-				break
-			fi
-		done
+		if [[ x`echo ${down_url} | grep -o github` = 'xgithub' ]];then
+			#对github连接尝试使用镜像地址
+			for mirror in ${github_mirror[@]};
+			do
+				mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
+				if [[ ${mirror_status} = '200' ]];then
+					mirror_down_url="${mirror}/${down_url#*github.com/}"
+					break
+				fi
+			done
+		fi
 		#获取下载完成路径及文件名
 		if [[ -d ${path_file} ]];then
 			full_path_file=${path_file}/${down_filename}
