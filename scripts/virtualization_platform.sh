@@ -12,7 +12,7 @@ docker_install(){
 		yum install -y docker-ce
 	fi
 	mkdir /etc/docker
-	\cp ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker
+	\cp ${workdir}/config/k8s/daemon.json /etc/docker
 }
 
 
