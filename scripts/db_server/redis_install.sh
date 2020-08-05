@@ -189,6 +189,7 @@ redis_install_ctl(){
 	redis_env_load
 	redis_install_set
 	select_version
+	install_dir_set
 	online_version
 	online_down_file
 	unpacking_file

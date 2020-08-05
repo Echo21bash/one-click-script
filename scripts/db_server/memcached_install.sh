@@ -92,8 +92,11 @@ add_memcached_service(){
 memcached_inistall_ctl(){
 	memcached_env_load
 	memcached_inistall_set
-	install_set
+	select_version
+	install_dir_set
+	online_version
+	online_down_file
+	unpacking_file
 	memcached_install
-	service_control
 	clear_install
 }

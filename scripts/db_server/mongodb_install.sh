@@ -51,10 +51,10 @@ mongodb_inistall_ctl(){
 	mongodb_env_load
 	mongodb_install_set
 	select_version
+	install_dir_set
 	online_version
 	online_down_file
 	unpacking_file
-	install_set
 	mongodb_install
 	clear_install
 }
