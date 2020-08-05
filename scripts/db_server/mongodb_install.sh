@@ -8,7 +8,7 @@ mongodb_env_load(){
 		diy_echo "mongodb不支持32位系统" "${red}" "${error}"
 		exit 1
 	fi
-	down_url='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${select_version}.tgz'
+	down_url='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${detail_version_number}.tgz'
 }
 
 mongodb_install_set(){
@@ -49,11 +49,11 @@ add_mongodb_service(){
 
 mongodb_inistall_ctl(){
 	mongodb_env_load
+	mongodb_install_set
 	select_version
 	online_version
 	online_down_file
 	unpacking_file
-	mongodb_install_set
 	install_set
 	mongodb_install
 	clear_install
