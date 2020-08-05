@@ -5,7 +5,7 @@ redis_env_load(){
 	soft_name=redis
 	program_version=('3.2' '4.0' '5.0')
 	url="https://mirrors.huaweicloud.com/redis"
-	down_url='${url}/${detail_version_number}.tar.gz'
+	down_url='${url}/redis-${detail_version_number}.tar.gz'
 }
 
 redis_install_set(){
