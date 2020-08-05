@@ -30,7 +30,7 @@ mongodb_install(){
 
 mongodb_config(){
 	conf_dir=${home_dir}/etc
-	cp ${workdir}/config/mongodb.conf ${conf_dir}/mongodb.conf
+	cp ${workdir}/config/mongodb/mongodb.conf ${conf_dir}/mongodb.conf
 
 	sed -i "s#port.*#port = ${mongodb_port}#" ${conf_dir}/mongodb.conf
 	sed -i "s#dbpath.*#dbpath = ${mongodb_data_dir}#" ${conf_dir}/mongodb.conf
@@ -44,7 +44,7 @@ add_mongodb_service(){
 	ExecStop="${home_dir}/bin/mongod -f ${home_dir}/etc/mongodb.conf"
 	conf_system_service
 	add_sys_env "PATH=${home_dir}/bin:\$PATH"
-	add_system_service mongodb ${home_dir}/mongodb_init
+	add_system_service mongodb ${home_dir}/init
 }
 
 mongodb_inistall_ctl(){
