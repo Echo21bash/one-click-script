@@ -3,13 +3,16 @@ mongodb_env_load(){
 	tmp_dir=/tmp/mongodb_tmp
 	soft_name=mongodb
 	program_version=('3.4' '3.6' '4.0')
+	url='https://www.mongodb.org/dl/linux'
+	if [[ ${os_bit} = '32' ]];then
+		diy_echo "mongodb不支持32位系统" "${red}" "${error}"
+		exit 1
+	fi
+	down_url='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${select_version}.tgz'
 }
 
 mongodb_install_set(){
-	if [[ ${os_bit} = '32' ]];then
-		diy_echo "该版本不支持32位系统" "${red}" "${error}"
-		exit 1
-	fi
+
 	output_option '请选择安装模式' '单机模式 集群模式' 'deploy_mode'
 	input_option '请输入本机部署个数' '1' 'deploy_num'
 	input_option '请输入起始端口号' '27017' 'mongodb_port'
@@ -46,6 +49,10 @@ add_mongodb_service(){
 
 mongodb_inistall_ctl(){
 	mongodb_env_load
+	select_version
+	online_version
+	online_down_file
+	unpacking_file
 	mongodb_install_set
 	install_set
 	mongodb_install
