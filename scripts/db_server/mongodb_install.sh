@@ -22,7 +22,7 @@ mongodb_install_set(){
 
 mongodb_install(){
 	cp -rp ${tar_dir}/* ${home_dir}
-	mkdir -p ${home_dir}/etc
+	mkdir -p ${home_dir}/{etc,logs}
 	mkdir -p ${mongodb_data_dir}
 	mongodb_config
 	add_mongodb_service
