@@ -65,6 +65,7 @@ greenplum_install(){
 		host2=\`tail -n 1 /tmp/hosts | awk '{print \$2}'\`
 		[[ \${host1} != \${host2} ]] && cat /tmp/hosts >>/etc/hosts
 		yum install -y ${file_name}
+		chown -R gpadmin.gpadmin /usr/local/greenplum-db*
 		hostnamectl set-hostname ${host_name[$i]}
 		greenplum_bin="\`grep -o 'greenplum_path' /home/gpadmin/.bashrc\`"
 		[[ x\${greenplum_bin} = x ]] && echo 'source /usr/local/greenplum-db/greenplum_path.sh' >>/home/gpadmin/.bashrc
