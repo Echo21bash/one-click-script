@@ -76,7 +76,7 @@ auto_ssh_keygen(){
 			input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
 			passwd[$i]=${input_value}
 		fi
-		su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'"
+		timeout 5 su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'" >/dev/null 2>&1
 		if [[ $? = 0 ]];then
 			diy_echo "主机${host}已经可以免密登录无需配置" "${green}" "${info}"
 		else
