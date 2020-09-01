@@ -41,7 +41,9 @@ fastdfs_install(){
 	yum install gcc -y
 	cd ${tar_dir}
 	diy_echo "正在安装相关依赖..." "" "${info}"
-	down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz ${tmp_dir}/libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
+	down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz ${tmp_dir}/libfastcommon-master.tar.gz
+	cd ${tmp_dir}
+	tar -zxf libfastcommon-master.tar.gz
 	cd ${tmp_dir}/libfastcommon-master
 	#libfastcommon安装目录配置
 	sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
@@ -76,8 +78,10 @@ fastdfs_install(){
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib64/libfdfsclient.so
 	
 	if [[ ${install_fastdht} = 'y' ]];then
-		down_file https://github.com/hebaodanroot/fastdht/archive/patch-1.tar.gz ${tmp_dir}/fastdht-patch-1.tar.gz && tar -zxf fastdht-patch-1.tar.gz
-		cd fastdht-patch-1
+		down_file https://github.com/hebaodanroot/fastdht/archive/patch-1.tar.gz ${tmp_dir}/fastdht-patch-1.tar.gz
+		cd ${tmp_dir}
+		tar -zxf fastdht-patch-1.tar.gz
+		cd ${tmp_dir}/fastdht-patch-1
 		#fastdht安装目录配置
 		sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
 		sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh
