@@ -104,7 +104,7 @@ fastdfs_config(){
 	cp ${home_dir}/etc/client.conf.sample ${home_dir}/etc/client.conf
 	cp ${tar_dir}/conf/http.conf ${home_dir}/etc
 	cp ${tar_dir}/conf/mime.types ${home_dir}/etc
-	cp ${workdir}/conf/fastdfs_start.sh ${home_dir}/bin/start.sh && chmod +x ${home_dir}/bin/start.sh
+	cp ${workdir}/config/fastdfs/fastdfs_start.sh ${home_dir}/bin/start.sh && chmod +x ${home_dir}/bin/start.sh
 	get_ip
 
 	sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/client.conf
@@ -139,6 +139,7 @@ fastdfs_config(){
 	fi
 
 	if [[ ${install_fastdht} = 'y' ]];then
+		cp ${tmp_dir}/fastdht-patch-1/conf/fdhtd.conf ${home_dir}/etc/fdhtd.conf
 		sed -i "s#^port.*#port=${fastdht_port}#" ${home_dir}/etc/fdhtd.conf
 		sed -i "s#^base_path.*#base_path=${file_dir}#" ${home_dir}/etc/fdhtd.conf
 	fi
