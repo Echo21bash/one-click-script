@@ -38,9 +38,9 @@ fastdfs_install_set(){
 }
 
 fastdfs_install(){
-	yum install gcc make -y
 	cd ${tar_dir}
 	diy_echo "正在安装相关依赖..." "" "${info}"
+	yum install gcc make -y
 	down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz ${tmp_dir}/libfastcommon-master.tar.gz
 	cd ${tmp_dir}
 	tar -zxf libfastcommon-master.tar.gz
@@ -78,6 +78,7 @@ fastdfs_install(){
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib64/libfdfsclient.so
 	
 	if [[ ${install_fastdht} = 'y' ]];then
+		yum install libdb-devel -y
 		down_file https://github.com/hebaodanroot/fastdht/archive/patch-1.tar.gz ${tmp_dir}/fastdht-patch-1.tar.gz
 		cd ${tmp_dir}
 		tar -zxf fastdht-patch-1.tar.gz
