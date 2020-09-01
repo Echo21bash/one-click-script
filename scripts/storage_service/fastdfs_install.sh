@@ -38,7 +38,7 @@ fastdfs_install_set(){
 }
 
 fastdfs_install(){
-	yum install gcc -y
+	yum install gcc make -y
 	cd ${tar_dir}
 	diy_echo "正在安装相关依赖..." "" "${info}"
 	down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz ${tmp_dir}/libfastcommon-master.tar.gz
