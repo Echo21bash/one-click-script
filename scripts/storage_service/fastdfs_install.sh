@@ -5,7 +5,7 @@ fastdfs_env_load(){
 	soft_name=fastdfs
 	tmp_dir=/tmp/fastdfs_tmp
 	url='https://github.com/happyfish100/fastdfs'
-	down_url='${url}/archive/master.tar.gz'
+	down_url="${url}/archive/master.tar.gz"
 
 }
 
@@ -42,7 +42,7 @@ fastdfs_install(){
 	cd ${tar_dir}
 	diy_echo "正在安装相关依赖..." "" "${info}"
 	down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz ${tmp_dir}/libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
-	cd libfastcommon-master
+	cd ${tmp_dir}/libfastcommon-master
 	#libfastcommon安装目录配置
 	sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
 	sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh

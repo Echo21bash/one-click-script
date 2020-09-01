@@ -11,7 +11,10 @@ online_down_file(){
 	down_url=`eval echo ${down_url}`
 	
 	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
-	down_filename=${down_url##*/}
-	down_file ${down_url} ${tmp_dir}
+	
+	if [[ -z ${down_filename} ]];then
+		down_filename=${down_url##*/}
+	fi
+	down_file ${down_url} ${tmp_dir}/${down_filename}
 
 }
