@@ -12,7 +12,6 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/tools.sh
 . ${workdir}/scripts/system_optimize.sh
 . ${workdir}/scripts/middleware_services.sh
-. ${workdir}/scripts/storage_service.sh
 . ${workdir}/scripts/operation_platform.sh
 . ${workdir}/scripts/virtualization_platform.sh
 . ${workdir}/scripts/k8s_install.sh
