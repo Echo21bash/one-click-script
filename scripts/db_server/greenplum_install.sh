@@ -34,7 +34,7 @@ greenplum_install_env(){
 		system_optimize_set
 		rm -rf /root/public.sh /root/system_optimize.sh
 		useradd gpadmin
-		echo 'gpadmin' | passwd --stdin gpadmin"
+		echo 'passw0ord!@#123' | passwd --stdin gpadmin"
 		((i++))
 	done
 
