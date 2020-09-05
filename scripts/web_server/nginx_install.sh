@@ -72,7 +72,9 @@ nginx_compile(){
 nginx_config(){
 	conf_dir=${home_dir}/conf
 	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
-	\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
+	if [[ ${add_module[*]} =~ '1' ]];then
+		\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
+	fi
 	add_log_cut nginx ${home_dir}/logs/*.log
 }
 
