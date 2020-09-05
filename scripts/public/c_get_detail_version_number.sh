@@ -93,9 +93,13 @@ online_version(){
 
 	ver_rule_general
 	
-	output_option '请选择在线版本号' "${option}" 'detail_version_number'
+	output_option '请选择在线版本号' "${option} 自定义版本" 'detail_version_number'
 
 	detail_version_number=(${output_value[@]})
+	
+	if [[ ${detail_version_number} = '自定义版本' ]];then
+		input_option '请输入版本号' '0.0.0' 'detail_version_number' 
+	fi
 	diy_echo "按任意键继续" "${yellow}" "${info}"
 	read
 }
