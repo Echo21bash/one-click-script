@@ -98,7 +98,8 @@ online_version(){
 	detail_version_number=(${output_value[@]})
 	
 	if [[ ${detail_version_number} = '自定义版本' ]];then
-		input_option '请输入版本号' '0.0.0' 'detail_version_number' 
+		input_option '请输入版本号' '0.0.0' 'detail_version_number'
+		detail_version_number=${input_value}
 	fi
 	diy_echo "按任意键继续" "${yellow}" "${info}"
 	read

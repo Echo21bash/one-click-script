@@ -28,15 +28,27 @@ down_file(){
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
+				if [[ $? -ne '0' ]];then
+					diy_echo "下载失败" "${red}"
+				fi
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
+				if [[ $? -ne '0' ]];then
+					diy_echo "下载失败" "${red}"
+				fi
 			fi
 		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
 			diy_echo "正在断点续传下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
+				if [[ $? -ne '0' ]];then
+					diy_echo "下载失败" "${red}"
+				fi
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
+				if [[ $? -ne '0' ]];then
+					diy_echo "下载失败" "${red}"
+				fi
 			fi
 		elif [[ -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
 			diy_echo "已经存在文件${path_file}/${down_filename}" "${info}"
