@@ -29,13 +29,13 @@ down_file(){
 			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}"
+					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}"
+					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			fi
@@ -44,13 +44,13 @@ down_file(){
 			if [[ -n ${mirror_down_url} ]];then
 				axel -n 16 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}"
+					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
 				axel -n 16 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}"
+					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			fi
