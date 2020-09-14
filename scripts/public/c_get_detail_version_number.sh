@@ -25,7 +25,7 @@ all_version_other(){
 				curl -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
 
 			else
-				curl -Ls -o ${tmp_dir}/tmp_version ${galera_url} >/dev/null 2>&1
+				curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 			fi
 
