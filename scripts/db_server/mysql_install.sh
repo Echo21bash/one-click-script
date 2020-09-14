@@ -13,8 +13,12 @@ mysql_env_load(){
 			down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz'
 		fi
 	else
+		if [[ ${os_bit} = '32' ]];then
+			diy_echo "不支持32位系统建议换成64系统" "${red}" "${error}"
+			exit 1
+		fi
 		url='http://releases.galeracluster.com'
-		down_url='${url}/${detail_version_number}/binary/mysql-wsrep-${detail_version_number}-linux-x86_64.tar.gz'
+		down_url='${url}/mysql-wsrep-${detail_version_number}/binary/mysql-wsrep-${detail_version_number}-linux-x86_64.tar.gz'
 	fi
 	
 	
