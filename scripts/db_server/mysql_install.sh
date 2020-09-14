@@ -4,16 +4,25 @@ mysql_env_load(){
 	tmp_dir=/tmp/mysql_tmp
 	soft_name=mysql
 	program_version=('5.5' '5.6' '5.7')
-	url='http://mirrors.163.com/mysql/Downloads'
-	if [[ ${os_bit} = '64' ]];then
-		down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz'
+	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
+	if [[ ${branch} = '1' ]];then
+		url='http://mirrors.163.com/mysql/Downloads'
+		if [[ ${os_bit} = '64' ]];then
+			down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz'
+		else
+			down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz'
+		fi
 	else
-		down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz'
+		url='http://releases.galeracluster.com'
+		down_url='${url}/${select_version}/binary/${select_version}-linux-x86_64.tar.gz'
 	fi
+	
+	
+
 }
 
 mysql_install_set(){
-	output_option '请选择mysql版本' 'mysql普通版 galera版(wsrep补丁)' 'branch'
+
 	output_option '请选择安装模式' '单机单实例 单机多实例(mysqld_multi)' 'deploy_mode'
 	if [[ ${deploy_mode} = '1' ]];then
 		input_option '请输入MySQL端口' '3306' 'mysql_port'
