@@ -14,7 +14,7 @@ mysql_env_load(){
 		fi
 	else
 		url='http://releases.galeracluster.com'
-		down_url='${url}/${select_version}/binary/${select_version}-linux-x86_64.tar.gz'
+		down_url='${url}/${detail_version_number}/binary/${detail_version_number}-linux-x86_64.tar.gz'
 	fi
 	
 	
