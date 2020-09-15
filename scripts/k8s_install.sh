@@ -289,7 +289,7 @@ install_before_conf(){
 
 	master_num=${#master_ip[@]}
 	if [[ -n ${vip} ]];then
-		api_service_ip="https://${vip}"
+		api_service_ip="https://${vip}:${vip_port}"
 	else
 		api_service_ip="https://${master_ip}:6443"
 	fi
