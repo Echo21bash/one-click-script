@@ -46,7 +46,7 @@ system_optimize_yum(){
 		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
 		yum clean all >/dev/null 2>&1
 	fi
-	yum -y install bash-completion wget chrony vim >/dev/null 2>&1
+	yum -y install bash-completion wget chrony vim sysstat>/dev/null 2>&1
 	if [[ $? = 0 ]];then
 		diy_echo "完成yum源优化,并安装必要的命令..." "" "${info}"
 	else
@@ -171,13 +171,13 @@ system_optimize_service(){
 		do
 			chkconfig $A off
 		done
-		for A in rsyslog network sshd crond chronyd;do chkconfig $A on;done
+		for A in sysstat rsyslog network sshd crond chronyd;do chkconfig $A on;done
 	else
 		for A in `systemctl list-unit-files|grep enabled |awk '{print $1}'`
 		do
 			systemctl disable $A >/dev/null
 		done
-		for A in rsyslog network sshd crond chronyd;do systemctl enable $A;done
+		for A in sysstat rsyslog network sshd crond chronyd;do systemctl enable $A;done
 	fi
 	diy_echo "精简开机自启动完成" "" "${info}"
 }

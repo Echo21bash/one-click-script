@@ -41,7 +41,7 @@ env_load(){
 	. /root/system_optimize.sh
 	conf=(1 2 4 5 6 7)
 	system_optimize_set
-	yum install ipvsadm ipset jq sysstat conntrack libseccomp conntrack-tools socat -y
+	yum install ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
 	rm -rf /root/public.sh /root/system_optimize.sh"
 	((i++))
 	done
@@ -290,11 +290,10 @@ flannel_install_ctl(){
 install_before_conf(){
 
 	master_num=${#master_ip[@]}
-	if [[ ${master_num} = '1' ]];then
-		vip=${master_ip}
-		api_service_ip="https://${vip}:6443"
+	if [[ -n ${vip} ]];then
+		api_service_ip="https://${vip}"
 	else
-		api_service_ip="https://${vip}:8443"
+		api_service_ip="https://${master_ip}:6443"
 	fi
 	sed -i -e "s?192.168.0.0/16?10.244.0.0/16?g" ${workdir}/config/k8s/calico.yaml
 	token_pub=$(openssl rand -hex 3)
@@ -633,11 +632,11 @@ master_node_check(){
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
 			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
+			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
 			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error"
+			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
 			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error"
+			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
 		fi
 		((i++))
 	done
