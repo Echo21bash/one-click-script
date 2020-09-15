@@ -1,6 +1,7 @@
 #!/bin/bash
 
 env_load(){
+	vi ${workdir}/config/k8s/k8s.conf
 	. ${workdir}/config/k8s/k8s.conf
 	auto_ssh_keygen
 	tmp_dir=/tmp/install_tmp
