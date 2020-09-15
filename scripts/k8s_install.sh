@@ -4,7 +4,7 @@ env_load(){
 	vi ${workdir}/config/k8s/k8s.conf
 	. ${workdir}/config/k8s/k8s.conf
 	auto_ssh_keygen
-	tmp_dir=/tmp/install_tmp
+	tmp_dir=/tmp/k8s_install_tmp
 	mkdir -p ${tmp_dir}/{soft,ssl,conf}
 	cd ${tmp_dir}
 	
@@ -102,7 +102,7 @@ down_k8s_file(){
 	down_file https://mirrors.huaweicloud.com/etcd/v${etcd_ver}/etcd-v${etcd_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64.tar.gz
 	down_file https://storage.googleapis.com/kubernetes-release/release/v${k8s_ver}/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
 	down_file https://github.com/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
-
+	diy_echo "正在解压文件中..." "${info}"
 	cd ${tmp_dir}/soft
 	tar -zxf etcd-v${etcd_ver}-linux-amd64.tar.gz
 	tar -zxf kubernetes-server-linux-amd64.tar.gz
