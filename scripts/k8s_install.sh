@@ -412,7 +412,7 @@ proxy_conf(){
 	EOF
 }
 
-master_install_ctl(){
+master_node_install_ctl(){
 	
 	local i=0
 	for host in ${host_name[@]};
@@ -557,7 +557,7 @@ master_install_ctl(){
 
 }
 
-node_install_ctl(){
+work_node_install_ctl(){
 	local i=0
 	for host in ${host_name[@]};
 	do
@@ -695,9 +695,9 @@ k8s_bin_install(){
 	add_system
 	etcd_install_ctl
 	install_before_conf
-	master_install_ctl
+	master_node_install_ctl
 	master_node_check
 	culster_bootstrap_conf
-	node_install_ctl
+	work_node_install_ctl
 	culster_other_conf
 }
