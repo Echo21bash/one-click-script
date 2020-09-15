@@ -47,16 +47,14 @@ env_load(){
 	done
 	
 	local i=0
-	local j=0
 	for host in ${host_ip[@]};
 	do
-		if [[ ${host} = "${node_ip[$j]}" || ${host} = "${master_ip[$j]}" ]];then
+		if [[ "${node_ip[@]}" =~ ${host} || "${master_ip[@]}" =~ ${host} ]];then
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			curl -Ls -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 			yum install -y docker-ce && mkdir /etc/docker"
 			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker/daemon.json
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl start docker && systemctl enable docker"
-			((j++))
 		fi
 		((i++))
 	done
@@ -305,7 +303,7 @@ apiserver_conf(){
 	cat >${tmp_dir}/conf/kube-apiserver <<-EOF 
 	
 	KUBE_APISERVER_OPTS="--logtostderr=true \\
-	--v=4 \\
+	--v=2 \\
 	--etcd-servers=${etcd_endpoints} \\
 	--bind-address=${host_ip[$i]} \\
 	--secure-port=6443 \\
@@ -330,7 +328,7 @@ apiserver_conf(){
 scheduler_conf(){
 	cat >${tmp_dir}/conf/kube-scheduler <<-EOF 
 	KUBE_SCHEDULER_OPTS="--logtostderr=true \\
-	--v=4 \\
+	--v=2 \\
 	--kubeconfig=${k8s_dir}/cfg/scheduler.kubeconfig \\
 	--leader-elect=true"
 	EOF
@@ -339,7 +337,7 @@ scheduler_conf(){
 controller_manager_conf(){
 	cat >${tmp_dir}/conf/kube-controller-manager <<-EOF 
 	KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=true \\
-	--v=4 \\
+	--v=2 \\
 	--bind-address=127.0.0.1 \\
 	--kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
 	--authentication-kubeconfig=${k8s_dir}/cfg/controller-manager.kubeconfig \\
@@ -385,7 +383,7 @@ kubelet_conf(){
 	
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
-	--v=4 \\
+	--v=2 \\
 	--hostname-override=${host_ip[$i]} \\
 	--config=${k8s_dir}/cfg/kubelet.yml \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
@@ -404,7 +402,7 @@ proxy_conf(){
 
 	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \\
-	--v=4 \\
+	--v=2 \\
 	--hostname-override=${host_ip[$i]} \\
 	--cluster-cidr=10.244.0.0/16 \\
 	--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
