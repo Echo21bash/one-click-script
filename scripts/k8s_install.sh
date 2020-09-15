@@ -9,7 +9,7 @@ env_load(){
 	cd ${tmp_dir}
 	
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
 	ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -48,7 +48,7 @@ env_load(){
 	
 	local i=0
 	local j=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ ${host} = "${node_ip[$j]}" || ${host} = "${master_ip[$j]}" ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -144,7 +144,7 @@ etcd_conf(){
 
 etcd_start(){
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${etcd_ip[@]}" =~ ${host} ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -157,7 +157,7 @@ etcd_start(){
 etcd_check(){
 	sleep 5
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
 			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
@@ -175,7 +175,7 @@ etcd_check(){
 get_etcd_cluster_ip(){
 	local i=0
 	local j=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_cluster_ip=${etcd_cluster_ip}etcd-$j=https://${host_name[$i]}:2380,
@@ -235,7 +235,7 @@ etcd_install_ctl(){
 	get_etcd_cluster_ip
 	local i=0
 	local j=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_conf
@@ -266,7 +266,7 @@ flannel_conf(){
 flannel_install_ctl(){
 	
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			flannel_conf
@@ -415,7 +415,7 @@ proxy_conf(){
 master_node_install_ctl(){
 	
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[@]}" =~ ${host} ]];then
 			apiserver_conf
@@ -559,7 +559,7 @@ master_node_install_ctl(){
 
 work_node_install_ctl(){
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			kubelet_conf
@@ -629,7 +629,7 @@ work_node_install_ctl(){
 
 master_node_check(){
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
 			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
@@ -645,7 +645,7 @@ master_node_check(){
 
 culster_bootstrap_conf(){
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
@@ -673,7 +673,7 @@ culster_bootstrap_conf(){
 
 culster_other_conf(){
 	local i=0
-	for host in ${host_name[@]};
+	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
 			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
