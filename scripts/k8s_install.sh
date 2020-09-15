@@ -83,9 +83,9 @@ create_ca(){
 	[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 	
 	cd ${tmp_dir}/ssl
+	diy_echo "创建所需证书..." "${info}"
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/flanneld-csr.json | cfssljson -bare flanneld
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/admin-csr.json | cfssljson -bare admin
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kubernetes-csr.json | cfssljson -bare kubernetes
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
@@ -254,37 +254,6 @@ etcd_install_ctl(){
 	etcd_check
 }
 
-flannel_conf(){
-
-	cat >${tmp_dir}/conf/flannel <<-EOF
-	FLANNEL_OPTIONS="--etcd-endpoints=${etcd_endpoints} -etcd-cafile=${flannel_dir}/ssl/ca.pem -etcd-certfile=${flannel_dir}/ssl/flanneld.pem -etcd-keyfile=${flannel_dir}/ssl/flanneld-key.pem"
-	EOF
-}
-
-flannel_install_ctl(){
-	
-	local i=0
-	for host in ${host_ip[@]};
-	do
-		if [[ "${node_ip[@]}" =~ ${host} ]];then
-			flannel_conf
-			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
-			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
-			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/flannel/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/flannel root@${host}:${flannel_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
-			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "			
-			[[ `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` = '' ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
-			sed -i 's#ExecStart.*#ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock $DOCKER_NETWORK_OPTIONS#' /usr/lib/systemd/system/docker.service
-			systemctl daemon-reload
-			systemctl start flanneld docker.service"
-		fi
-		((i++))
-	done
-
-}
-
 install_before_conf(){
 
 	master_num=${#master_ip[@]}
@@ -422,6 +391,7 @@ master_node_install_ctl(){
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
+			
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -645,6 +615,8 @@ culster_bootstrap_conf(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
+		
+			diy_echo "配置集群自动授权更新node节点证书" "${info}"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			
 			#将kubelet-bootstrap用户绑定到系统集群角色
@@ -673,6 +645,7 @@ culster_other_conf(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
+			diy_echo "部署网络插件打标签..." "${info}"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
