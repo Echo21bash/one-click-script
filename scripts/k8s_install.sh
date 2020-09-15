@@ -12,7 +12,7 @@ env_load(){
 	for host in ${host_ip[@]};
 	do
 	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
-	ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
 	br_netfilter
 	ip_vs
@@ -51,11 +51,11 @@ env_load(){
 	for host in ${host_ip[@]};
 	do
 		if [[ ${host} = "${node_ip[$j]}" || ${host} = "${master_ip[$j]}" ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			curl -Ls -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 			yum install -y docker-ce && mkdir /etc/docker"
 			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker/daemon.json
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "systemctl start docker && systemctl enable docker"
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl start docker && systemctl enable docker"
 			((j++))
 		fi
 		((i++))
@@ -116,11 +116,11 @@ etcd_conf(){
 	#[Member]
 	name: "etcd-$j"
 	data-dir: "${etcd_data_dir}"
-	listen-peer-urls: "https://${host_name[$i]}:2380"
-	listen-client-urls: "https://${host_name[$i]}:2379,http://127.0.0.1:2379"
+	listen-peer-urls: "https://${host_ip[$i]}:2380"
+	listen-client-urls: "https://${host_ip[$i]}:2379,http://127.0.0.1:2379"
 	#[Clustering]
-	initial-advertise-peer-urls: "https://${host_name[$i]}:2380"
-	advertise-client-urls: "https://${host_name[$i]}:2379"
+	initial-advertise-peer-urls: "https://${host_ip[$i]}:2380"
+	advertise-client-urls: "https://${host_ip[$i]}:2379"
 	initial-cluster: "${etcd_cluster_ip}"
 	initial-cluster-token: "etcd-cluster"
 	initial-cluster-state: "new"
@@ -147,7 +147,7 @@ etcd_start(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${etcd_ip[@]}" =~ ${host} ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl restart etcd.service" &
 		fi
 		((i++))
@@ -160,7 +160,7 @@ etcd_check(){
 	for host in ${host_ip[@]};
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
+			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
 			if [[ ${healthy} = '1' ]];then
 				diy_echo "etcd集群状态正常" "${info}"
 			else
@@ -178,8 +178,8 @@ get_etcd_cluster_ip(){
 	for host in ${host_ip[@]};
 	do
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
-			etcd_cluster_ip=${etcd_cluster_ip}etcd-$j=https://${host_name[$i]}:2380,
-			etcd_endpoints=${etcd_endpoints}https://${host_name[$i]}:2379,
+			etcd_cluster_ip=${etcd_cluster_ip}etcd-$j=https://${host_ip[$i]}:2380,
+			etcd_endpoints=${etcd_endpoints}https://${host_ip[$i]}:2379,
 			((j++))
 		fi
 		((i++))
@@ -239,13 +239,13 @@ etcd_install_ctl(){
 	do
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_conf
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			systemctl enable etcd"
 			((j++))
@@ -270,13 +270,13 @@ flannel_install_ctl(){
 	do
 		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			flannel_conf
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${flannel_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/flannel/{flanneld,mk-docker-opts.sh} root@${host}:${flannel_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,flanneld.pem,flanneld-key.pem} root@${host}:${flannel_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/flannel root@${host}:${flannel_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/flannel_init root@${host}:/etc/systemd/system/flanneld.service
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "			
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "			
 			[[ `grep EnvironmentFile=/run/flannel/docker /usr/lib/systemd/system/docker.service` = '' ]] && sed -i '/Type/a EnvironmentFile=\/run/flannel\/docker' /usr/lib/systemd/system/docker.service
 			sed -i 's#ExecStart.*#ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock $DOCKER_NETWORK_OPTIONS#' /usr/lib/systemd/system/docker.service
 			systemctl daemon-reload
@@ -308,9 +308,9 @@ apiserver_conf(){
 	KUBE_APISERVER_OPTS="--logtostderr=true \\
 	--v=4 \\
 	--etcd-servers=${etcd_endpoints} \\
-	--bind-address=${host_name[$i]} \\
+	--bind-address=${host_ip[$i]} \\
 	--secure-port=6443 \\
-	--advertise-address=${host_name[$i]} \\
+	--advertise-address=${host_ip[$i]} \\
 	--allow-privileged=true \\
 	--service-cluster-ip-range=10.96.0.0/12 \\
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \\
@@ -387,7 +387,7 @@ kubelet_conf(){
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=4 \\
-	--hostname-override=${host_name[$i]} \\
+	--hostname-override=${host_ip[$i]} \\
 	--config=${k8s_dir}/cfg/kubelet.yml \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
@@ -406,7 +406,7 @@ proxy_conf(){
 	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 	KUBE_PROXY_OPTS="--logtostderr=true \\
 	--v=4 \\
-	--hostname-override=${host_name[$i]} \\
+	--hostname-override=${host_ip[$i]} \\
 	--cluster-cidr=10.244.0.0/16 \\
 	--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
 	EOF
@@ -423,7 +423,7 @@ master_node_install_ctl(){
 			controller_manager_conf
 			kubelet_conf
 			proxy_conf
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
@@ -434,7 +434,7 @@ master_node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#利用证书生成kubectl的kubeconfig
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
@@ -564,14 +564,14 @@ work_node_install_ctl(){
 		if [[ "${node_ip[@]}" =~ ${host} ]];then
 			kubelet_conf
 			proxy_conf
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#创建kube-proxy.kubeconfig
 			${k8s_dir}/bin/kubectl config set-cluster kubernetes \
@@ -632,11 +632,11 @@ master_node_check(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_name[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error"
-			healthy=`ssh ${host_name[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
+			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error"
+			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error"
+			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
 			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error"
 		fi
 		((i++))
@@ -648,7 +648,7 @@ culster_bootstrap_conf(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			
 			#将kubelet-bootstrap用户绑定到系统集群角色
 			${k8s_dir}/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
@@ -676,7 +676,7 @@ culster_other_conf(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
-			ssh ${host_name[$i]} -p ${ssh_port[$i]} "
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
 			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
