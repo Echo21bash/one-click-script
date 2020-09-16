@@ -289,7 +289,9 @@ apiserver_conf(){
 	--service-account-key-file=${k8s_dir}/ssl/ca-key.pem \\
 	--etcd-cafile=${k8s_dir}/ssl/ca.pem \\
 	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \\
-	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem"
+	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem \\
+	--kubelet-client-certificate=${k8s_dir}/kubernetes.pem \\
+	--kubelet-client-key=${k8s_dir}/kubernetes-key.pem "
 	EOF
 
 }
@@ -645,8 +647,10 @@ culster_other_conf(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[0]}" =~ ${host} ]];then
-			diy_echo "部署网络插件打标签..." "${info}"
+			diy_echo "部署网络插件打标签...以及其他配置" "${info}"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			#授权 apiserver 调用 kubelet API
+			${k8s_dir}/bin/kubectl create clusterrolebinding kube-apiserver:kubelet-apis --clusterrole=system:kubelet-api-admin --user kubernetes
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
 			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
