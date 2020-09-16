@@ -227,6 +227,7 @@ add_system(){
 	EnvironmentFile="${k8s_dir}/cfg/kubelet"
 	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
 	conf_system_service
+
 }
 
 etcd_install_ctl(){
@@ -643,6 +644,7 @@ culster_bootstrap_conf(){
 }
 
 culster_other_conf(){
+
 	local i=0
 	for host in ${host_ip[@]};
 	do
@@ -655,6 +657,17 @@ culster_other_conf(){
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
 			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 			${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			"
+		fi
+		((i++))
+	done
+	
+	local i=0
+	for host in ${host_ip[@]};
+	do
+		if [[ "${node_ip[@]}" =~ ${host} || "${master_ip[@]}" =~ ${host} ]];then
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			ln -sf ${k8s_dir}/bin/* /usr/local/bin/
 			"
 		fi
 		((i++))
