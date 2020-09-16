@@ -229,7 +229,7 @@ k8s_apply(){
 }
 
 k8s_install_ctl(){
-	install_version k8s
+
 	k8s_install_set
 	if [[ ${install_method} = '1' ]];then
 		k8s_set
