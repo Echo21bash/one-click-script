@@ -79,8 +79,16 @@ create_ca(){
 		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
 		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
 		[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+		
+		if [[ -n ${vip} ]];then
+			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+			[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+		fi
+
 	done
-	[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+
+	
 	
 	cd ${tmp_dir}/ssl
 	diy_echo "创建所需证书..." "${info}"
