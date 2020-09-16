@@ -665,6 +665,8 @@ culster_other_conf(){
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
 			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 			${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			#配置master节点禁止部署
+			${k8s_dir}/bin/kubectl taint nodes ${master_ip[@]} node-role.kubernetes.io/master=:NoExecute
 			"
 		fi
 		((i++))
