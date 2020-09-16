@@ -13,8 +13,6 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/system_optimize.sh
 . ${workdir}/scripts/middleware_services.sh
 . ${workdir}/scripts/operation_platform.sh
-. ${workdir}/scripts/virtualization_platform.sh
-. ${workdir}/scripts/k8s_install.sh
 
 for i in ${workdir}/scripts/*/*.sh; do
 	if [ -r "$i" ]; then
