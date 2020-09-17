@@ -11,7 +11,6 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/system_set.sh
 . ${workdir}/scripts/tools.sh
 . ${workdir}/scripts/system_optimize.sh
-. ${workdir}/scripts/middleware_services.sh
 . ${workdir}/scripts/operation_platform.sh
 
 for i in ${workdir}/scripts/*/*.sh; do
