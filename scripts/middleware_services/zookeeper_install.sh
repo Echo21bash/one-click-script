@@ -42,7 +42,7 @@ zookeeper_install_set(){
 zookeeper_install(){
 	
 	if [[ ${deploy_mode} = '1' ]];then
-		mv ${tar_dir} ${home_dir}
+		mv ${tar_dir}/* ${home_dir}
 		zookeeper_config
 		add_zookeeper_service
 	fi

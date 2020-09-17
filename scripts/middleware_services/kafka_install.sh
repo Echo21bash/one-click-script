@@ -29,7 +29,7 @@ kafka_install_set(){
 kafka_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		mv ${tar_dir} ${home_dir}
+		mv ${tar_dir}/* ${home_dir}
 		kafka_config
 		add_kafka_service
 	fi
