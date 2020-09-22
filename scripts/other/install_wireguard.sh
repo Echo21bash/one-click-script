@@ -19,7 +19,7 @@ wireguard_install(){
 	enabled=1
 	enabled_metadata=1
 	EOF
-	yum install -y dkms gcc-c++ gcc-gfortran glibc-headers glibc-devel libquadmath-devel libtool systemtap systemtap-devel iptables-services wireguard-dkms wireguard-tools
+	yum install -y dkms glibc-headers glibc-devel libquadmath-devel libtool systemtap systemtap-devel iptables-services wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
 		echo -e "${info} wireguard安装成功"
 	else
@@ -70,7 +70,7 @@ wireguard_config(){
 	ip_forward=$(cat /etc/sysctl.conf | grep 'net.ipv4.ip_forward = 1')
 	if [[ -z ${ip_forward} ]];then
 		echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-		sysctl.conf -p > /dev/null
+		sysctl -p > /dev/null
 	fi
 	systemctl start wg-quick@wg0
 	if [[ -n $(ip a | grep -Eo '^wg0') ]];then
