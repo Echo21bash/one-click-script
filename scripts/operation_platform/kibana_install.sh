@@ -1,4 +1,15 @@
 #!/bin/bash
+kibana_env_load(){
+	tmp_dir=/tmp/kibana_tmp
+	soft_name=kibana
+	program_version=('5.6' '6.1' '6.2')
+	url='https://mirrors.huaweicloud.com/kibana'
+	if [[ ${os_bit} = '64' ]];then
+		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz'
+	else
+		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86.tar.gz'
+	fi
+}
 
 kibana_install_set(){
 	input_option "输入http端口号" "5601" "kibana_port"
@@ -30,11 +41,13 @@ add_kibana_service(){
 }
 
 kibana_install_ctl(){
-	install_version kibana
-	install_selcet
+	kibana_env_load
 	kibana_install_set
+	select_version
 	install_dir_set
-	download_unzip
+	online_version
+	online_down_file
+	unpacking_file
 	kibana_install
 	clear_install
 }

@@ -1,5 +1,17 @@
 #!/bin/bash
 
+filebeat_env_load(){
+	tmp_dir=/tmp/filebeat_tmp
+	soft_name=filebeat
+	program_version=('5.6' '6.1' '6.2')
+	url='https://mirrors.huaweicloud.com/filebeat'
+	if [[ ${os_bit} = '64' ]];then
+		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz'
+	else
+		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86.tar.gz'
+	fi
+}
+
 filebeat_install(){
 	mv ${tar_dir}/* ${home_dir}
 	filebeat_conf
@@ -18,11 +30,12 @@ add_filebeat_service(){
 }
 
 filebeat_install_ctl(){
-	install_version filebeat
-	install_selcet
-	#filebeat_install_set
+	filebeat_env_load
+	select_version
 	install_dir_set
-	download_unzip
+	online_version
+	online_down_file
+	unpacking_file
 	filebeat_install
 	clear_install
 }

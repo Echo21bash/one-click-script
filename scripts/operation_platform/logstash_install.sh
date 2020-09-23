@@ -1,5 +1,15 @@
 #!/bin/bash
 
+logstash_env_load(){
+	tmp_dir=/tmp/logstash_tmp
+	soft_name=logstash
+	program_version=('5.6' '6.1' '6.2')
+	url='https://mirrors.huaweicloud.com/logstash'
+	down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz'
+
+}
+
+
 logstash_install_set(){
 echo
 }
@@ -31,11 +41,13 @@ add_logstash_service(){
 }
 
 logstash_install_ctl(){
-	install_version logstash
-	install_selcet
+	logstash_env_load
 	logstash_install_set
+	select_version
 	install_dir_set
-	download_unzip
+	online_version
+	online_down_file
+	unpacking_file
 	logstash_install
 	clear_install
 }
