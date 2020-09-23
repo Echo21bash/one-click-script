@@ -5,7 +5,11 @@ wireguard_install(){
 		echo -e "${error} wireguard只支持Centos7"
 		exit 1
 	fi
-
+	if [[ `modprobe wireguard` ]];then
+		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
+	else
+		diy_echo "缺少wireguard内核模块，请先升级高版本内核" "${red}" "${error}"
+	fi
 	system_optimize_yum
 	cat > /etc/yum.repos.d/wireguard.repo <<-EOF
 	[jdoss-wireguard]
@@ -19,7 +23,7 @@ wireguard_install(){
 	enabled=1
 	enabled_metadata=1
 	EOF
-	yum install -y dkms glibc-headers glibc-devel libquadmath-devel libtool systemtap systemtap-devel iptables-services wireguard-dkms wireguard-tools
+	yum install -y dkms iptables-services wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
 		echo -e "${info} wireguard安装成功"
 	else
