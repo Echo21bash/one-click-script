@@ -37,7 +37,7 @@ add_kibana_service(){
 	Type=simple
 	ExecStart="${home_dir}/bin/kibana"
 	conf_system_service 
-	add_system_service kibana ${home_dir}/kibana_init
+	add_system_service kibana ${home_dir}/init
 }
 
 kibana_install_ctl(){
