@@ -23,6 +23,12 @@ rancher_install_ctl(){
 	if [[ ${http_code} = '200' ]];then
 		info_log "通过Docker部署完成，可通过https://${local_ip}:${port}访问"
 	else
-		error_log "容器启动失败,请通过docker logs rancher命令查看启动日志"
+		sleep 25
+		http_code=`curl -sILk -w %{http_code} -o /dev/null https://${local_ip}:${port}`
+		if [[ ${http_code} = '200' ]];then
+			info_log "通过Docker部署完成，可通过https://${local_ip}:${port}访问"
+		else
+			error_log "容器启动失败,请通过docker logs rancher命令查看启动日志"
+		fi
 	fi
 }
