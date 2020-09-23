@@ -126,11 +126,11 @@ esac
 virtualization_platform(){
 output_option '请选择要安装的平台' 'Docker K8S系统 Rancher平台(k8s集群管理)' 'platform'
 case "$platform" in
-	1)docker_install
+	1)docker_install_ctl
 	;;
 	2)k8s_install_ctl
 	;;
-	3)zabbix_install_ctl
+	3)rancher_install_ctl
 	;;
 esac
 }
