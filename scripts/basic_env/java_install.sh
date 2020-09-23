@@ -10,7 +10,7 @@ java_env_load(){
 
 check_java(){
 	#检查旧版本
-	diy_echo "正在检查预装openjava..." "${info}"
+	info_log "正在检查预装openjava..."
 	j=`rpm -qa | grep  java | awk 'END{print NR}'`
 	#卸载旧版
 	if [ $j -gt 0 ];then

@@ -18,6 +18,22 @@ colour_keyword(){
 	error="[${red}error${plain}]"
 }
 
+info_log(){
+	echo -e "[${green}INFO${plain}]➜ $@"
+}
+
+error_log(){
+	echo -e "[${red}ERROR${plain}]✖ $@"
+}
+
+warning_log(){
+	echo -e "[${red}WARNING${plain}]⚠ $@"
+}
+
+success_log(){
+	echo -e "[${red}SUCCESS${plain}]✔ $@"
+}
+
 diy_echo(){
 	#$1内容 $2颜色(非必须) $3前缀关键字(非必须)
 	if [[ $# = '3' ]];then
