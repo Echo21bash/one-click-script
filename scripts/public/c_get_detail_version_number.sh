@@ -79,7 +79,7 @@ ver_rule_general(){
 
 online_version(){
 	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
-	diy_echo "正在获取在线版本..." "" "${info}"
+	diy_echo "正在获取在线版本..." "${info}"
 	#所有可用版本
 	case "$soft_name" in
 		java|nginx|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
