@@ -19,19 +19,19 @@ colour_keyword(){
 }
 
 info_log(){
-	echo -e "[${green}INFO${plain}]➜ $@"
+	echo -e "[${green}INFO${plain}] ${green} ➜ $@ ${plain}"
 }
 
 error_log(){
-	echo -e "[${red}ERROR${plain}]✖ $@"
+	echo -e "[${red}ERROR${plain}] ${red} ✖ $@ ${plain}"
 }
 
 warning_log(){
-	echo -e "[${red}WARNING${plain}]⚠ $@"
+	echo -e "[${yellow}WARNING${plain}] ${yellow} ⚠ $@ ${plain}"
 }
 
 success_log(){
-	echo -e "[${red}SUCCESS${plain}]✔ $@"
+	echo -e "[${green}SUCCESS${plain}] ${green} ✔ $@ ${plain}"
 }
 
 diy_echo(){
