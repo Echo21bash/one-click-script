@@ -24,7 +24,7 @@ php_install_set(){
 
 php_install_depend(){
 	#安装编译工具及库文件
-	diy_echo "正在安装编译工具及库文件..." "" "${info}"
+	info_log "正在安装编译工具及库文件..."
 	system_optimize_yum
 	[[ ${os_release} < "7" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install  httpd httpd-devel mod_proxy_fcgi
 	[[ ${os_release} > "6" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install httpd httpd-devel
@@ -41,9 +41,9 @@ php_install(){
 	#必要函数库
 	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ./libiconv-1.15.tar.gz && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install && cd ..
 	if [ $? = "0" ];then
-		diy_echo "libiconv库编译及编译安装成功..." "" "${info}"
+		info_log "libiconv库编译及编译安装成功..."
 	else
-		diy_echo "libiconv库编译及编译安装失败..." "${red}" "${error}"
+		error_log "libiconv库编译及编译安装失败..."
 		exit 1
 	fi
 	php_compile
@@ -63,9 +63,9 @@ php_compile(){
 	./configure --prefix=${home_dir} --with-config-file-path=${home_dir}/etc --with-config-file-scan-dir=${home_dir}/etc.d ${fpm} ${apxs2} ${mysql} --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-mhash --with-openssl --with-zlib --with-bz2 --with-curl --with-libxml-dir --with-gd --with-jpeg-dir --with-png-dir --with-zlib --enable-mbstring --with-mcrypt --enable-sockets --with-iconv-dir --with-xsl --enable-zip --with-pcre-dir --with-pear --enable-session  --enable-gd-native-ttf --enable-xml --with-freetype-dir --enable-inline-optimization --enable-shared --enable-bcmath --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-mbregex --enable-pcntl --with-xmlrpc --with-gettext --enable-exif --with-readline --with-recode --with-tidy --enable-soap
 	make && make install
 	if [ $? = "0" ];then
-		diy_echo "php编译完成..." "" "${info}"
+		info_log "php编译完成..."
 	else
-		diy_echo "php编译失败..." "${red}" "${error}"
+		error_log "php编译失败..."
 		exit 1
 	fi
 
@@ -87,7 +87,7 @@ php_modules_install(){
 			extension = redis.so
 			EOF
 		else
-			diy_echo "redis模块编译失败" "${red}" "${error}"
+			error_log "redis模块编译失败"
 			exit
 		fi
 	fi
@@ -105,7 +105,7 @@ php_modules_install(){
 			extension = memcached.so
 			EOF
 		else
-			diy_echo "memcached模块编译失败" "${red}" "${error}"
+			error_log "memcached模块编译失败"
 			exit
 		fi
 	fi

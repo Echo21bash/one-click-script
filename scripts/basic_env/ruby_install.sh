@@ -32,9 +32,9 @@ ruby_install(){
 	gem sources --add http://gems.ruby-china.com/ --remove http://rubygems.org/
 	ruby -v
 	if [ $? = 0 ];then
-		echo -e "${info} ruby环境搭建成功."
+		info_log "ruby环境搭建成功."
 	else
-		echo -e "${error} ruby环境搭建失败."
+		error_log "ruby环境搭建失败."
 		exit 1
 	fi
 }

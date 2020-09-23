@@ -14,7 +14,7 @@ check_java(){
 	j=`rpm -qa | grep  java | awk 'END{print NR}'`
 	#卸载旧版
 	if [ $j -gt 0 ];then
-		diy_echo "java卸载清单:" "${info}"
+		info_log "java卸载清单:"
 		for ((i=1;i<=j;i++));
 		do		
 			a1=`rpm -qa | grep java | awk '{if(NR == 1 ) print $0}'`
@@ -22,13 +22,13 @@ check_java(){
 			rpm -e --nodeps $a1
 		done
 		if [ $? = 0 ];then
-			diy_echo "卸载openjava完成." "${info}"
+			info_log "卸载openjava完成."
 		else
-			diy_echo "卸载openjava失败，请尝试手动卸载." "${error}"
+			error_log "卸载openjava失败，请尝试手动卸载."
 			exit 1
 		fi
 	else
-		diy_echo "该系统没有预装openjava." "${info}"
+		info_log "该系统没有预装openjava."
 	fi
 }
 
@@ -38,9 +38,9 @@ install_java(){
 	add_sys_env "JAVA_HOME=${home_dir} JAVA_BIN=\$JAVA_HOME/bin JAVA_LIB=\$JAVA_HOME/lib CLASSPATH=.:\$JAVA_LIB/tools.jar:\$JAVA_LIB/dt.jar PATH=\$JAVA_HOME/bin:\$PATH"
 	java -version
 	if [ $? = 0 ];then
-		diy_echo "JDK环境搭建成功.." "${info}"
+		info_log "JDK环境搭建成功.."
 	else
-		diy_echo "JDK环境搭建失败." "${error}"
+		error_log "JDK环境搭建失败."
 		exit 1
 	fi
 }

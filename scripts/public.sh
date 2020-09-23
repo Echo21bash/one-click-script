@@ -13,25 +13,25 @@ colour_keyword(){
 	green='\033[0;32m'
 	yellow='\033[0;33m'
 	plain='\033[0m'
-	info="[${green}info${plain}]"
-	warning="[${yellow}warning${plain}]"
-	error="[${red}error${plain}]"
+	info="[${green}INFO${plain}]"
+	warning="[${yellow}WARNING${plain}]"
+	error="[${red}ERROR${plain}]"
 }
 
 info_log(){
-	echo -e "[${green}INFO${plain}] ${green} ➜ $@ ${plain}"
+	echo -e "[${green}INFO${plain}] ${green}➜ $@ ${plain}"
 }
 
 error_log(){
-	echo -e "[${red}ERROR${plain}] ${red} ✖ $@ ${plain}"
+	echo -e "[${red}ERROR${plain}] ${red}✖ $@ ${plain}"
 }
 
 warning_log(){
-	echo -e "[${yellow}WARNING${plain}] ${yellow} ⚠ $@ ${plain}"
+	echo -e "[${yellow}WARNING${plain}] ${yellow}⚠ $@ ${plain}"
 }
 
 success_log(){
-	echo -e "[${green}SUCCESS${plain}] ${green} ✔ $@ ${plain}"
+	echo -e "[${green}SUCCESS${plain}] ${green}✔ $@ ${plain}"
 }
 
 diy_echo(){
@@ -41,7 +41,7 @@ diy_echo(){
 	fi
 	
 	if [[ $# = '2' ]];then
-		if [[ $2 =~ 'info' || $2 =~ 'warning' || $2 =~ 'error' ]];then
+		if [[ $2 =~ 'INFO' || $2 =~ 'WARNING' || $2 =~ 'ERROR' ]];then
 			echo -e "$2 $1${plain}"
 		else
 			echo -e "$2$1${plain}"
