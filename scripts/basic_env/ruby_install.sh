@@ -16,7 +16,7 @@ ruby_install_set(){
 
 ruby_install(){
 	if [[ ${install_method} = '1' ]];then
-		install -y zlib-devel openssl-devel
+		yum install -y zlib-devel openssl-devel
 		cd ${tar_dir}
 		./configure --prefix=${home_dir}  --disable-install-rdoc
 		make && make install
