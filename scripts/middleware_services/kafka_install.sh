@@ -50,7 +50,7 @@ kafka_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${install_dir}/kafka-broker${broker_id}
 				"
-				scp -r ${tar_dir}/* ${host_ip[$i]}:/${install_dir}/kafka-broker${broker_id}
+				scp -r ${tar_dir}/* ${host_ip[$i]}:${install_dir}/kafka-broker${broker_id}
 				scp -r ${tmp_dir}/kafka-broker${broker_id} ${host_ip[$i]}:/${install_dir}/kafka-broker${broker_id}
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/kafka-broker${broker_id}/kafka-broker${broker_id} /etc/systemd/system/kafka-broker${broker_id}
