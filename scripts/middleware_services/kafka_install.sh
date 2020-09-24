@@ -41,7 +41,7 @@ kafka_install(){
 		
 		local i=0
 		local k=0
-		for host in ${host_ip{@}}
+		for host in ${host_ip[@]}
 		do
 			for ((j=0;i<${node_num};j++))
 			do
