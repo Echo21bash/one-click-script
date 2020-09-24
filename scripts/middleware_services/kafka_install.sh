@@ -37,8 +37,6 @@ kafka_install(){
 	
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
-		home_dir=${tar_dir}
-		
 		local i=0
 		local k=0
 		for host in ${host_ip[@]}
@@ -66,7 +64,7 @@ kafka_install(){
 }
 
 kafka_config(){
-	conf_dir=${home_dir}/config
+	conf_dir=${tar_dir}/config
 	zookeeper_ip="${zookeeper_ip[@]}"
 	zookeeper_connect=$(echo ${zookeeper_ip} | sed 's/ /,/g')
 	[[ -n ${kafka_id} ]] && sed -i "s/broker.id=0/broker.id=${kafka_id}/" ${conf_dir}/server.properties
