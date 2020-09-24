@@ -70,7 +70,7 @@ kafka_config(){
 	conf_dir=${tar_dir}/config
 	zookeeper_ip="${zookeeper_ip[@]}"
 	zookeeper_connect=$(echo ${zookeeper_ip} | sed 's/ /,/g')
-	[[ -n ${kafka_id} ]] && sed -i "s/broker.id=0/broker.id=${kafka_id}/" ${conf_dir}/server.properties
+	[[ -n ${broker_id} ]] && sed -i "s/broker.id=0/broker.id=${broker_id}/" ${conf_dir}/server.properties
 	[[ -z ${kafka_port} ]] && kafka_port=9092
 	[[ -z `grep port ${conf_dir}/server.properties` ]] && sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
 	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}%" ${conf_dir}/server.properties
