@@ -66,9 +66,16 @@ add_log_cut(){
 }
 #守护进程配置
 conf_system_service(){
-#必传参数ExecStart
+	if [[ -z ${ExecStart} ]];then
+		error_log "conf_system_service函数缺少ExecStart变量"
+		exit 1
+	fi
+	if [[ -z ${init_dir} ]];then
+		init_dir=${home_dir}
+	fi
+	#必传参数ExecStart
 	if [[ "${os_release}" -lt 7 ]]; then
-		cat >${home_dir}/${initd:-init}<<-EOF
+		cat >${init_dir}/${init_file:-init}<<-EOF
 		#!/bin/bash
 		# chkconfig: 345 70 60
 		# description: ${soft_name} daemon
@@ -77,20 +84,19 @@ conf_system_service(){
 		EnvironmentFile="${EnvironmentFile:-}"
 		Environment="${Environment:-}"
 		Name="${Name:-${soft_name}}"
-		Home="${Home:-${home_dir}}"
 		PidFile="${PidFile:-}"
 		User="${User:-root}"
 		ExecStart="${ExecStart:-}"
 		ARGS="${ARGS:-}"
 		ExecStop="${ExecStop:-}"
 		EOF
-		cat >>${home_dir}/${initd:-init}<<-'EOF'
+		cat >>${init_dir}/${init_file:-init}<<-'EOF'
 		#EUV
 		[[ -f ${EnvironmentFile} ]] && . ${EnvironmentFile}
 		[[ -f ${Environment} ]] && export ${Environment}
 		_pid(){
 		  [[ -s $PidFile ]] && pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
-		  [[ -z $PidFile ]] && pid=$(ps aux | grep ${Home} | grep -v grep | awk '{print $2}')
+		  [[ -z $PidFile ]] && pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
 		}
 
 		_start(){
@@ -163,7 +169,7 @@ conf_system_service(){
 		esac
 		EOF
 	elif [[ "${os_release}" -ge 7 ]]; then
-		cat >${home_dir}/${initd:-init}<<-EOF
+		cat >${init_dir}/${init_file:-init}<<-EOF
 		[Unit]
 		Description=${soft_name}
 		After=syslog.target network.target
@@ -189,11 +195,11 @@ conf_system_service(){
 		EOF
 	fi
 	#删除空值
-	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${home_dir}/${initd:-init}
-	[[ -z ${Environment} ]] && sed -i /Environment=/d ${home_dir}/${initd:-init}
-	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${home_dir}/${initd:-init}
-	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${home_dir}/${initd:-init}
-	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${home_dir}/${initd:-init}
+	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${init_dir}/${init_file:-init}
+	[[ -z ${Environment} ]] && sed -i /Environment=/d ${init_dir}/${init_file:-init}
+	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${init_dir}/${init_file:-init}
+	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${init_dir}/${init_file:-init}
+	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${init_dir}/${init_file:-init}
 
 }
 #添加守护进程

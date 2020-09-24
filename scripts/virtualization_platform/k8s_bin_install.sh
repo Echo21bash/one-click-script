@@ -197,41 +197,41 @@ get_etcd_cluster_ip(){
 }
 
 add_system(){
-	home_dir=${tmp_dir}
+	init_dir=${tmp_dir}
 	##etcd
 	Type="notify"
-	initd="etcd_init"
+	init_file="etcd_init"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
 	conf_system_service
 
 	##apiserver
 	ExecStartPost=
 	Type="notify"
-	initd="apiserver_init"
+	init_file="apiserver_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-apiserver"
 	ExecStart="${k8s_dir}/bin/kube-apiserver \$KUBE_APISERVER_OPTS"
 	conf_system_service
 	##scheduler
 	Type="simple"
-	initd="scheduler_init"
+	init_file="scheduler_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
 	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
 	conf_system_service
 	##controller
 	Type="simple"
-	initd="controller_init"
+	init_file="controller_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"
 	conf_system_service
 	##proxy
 	Type="simple"
-	initd="proxy_init"
+	init_file="proxy_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
 	conf_system_service
 	##proxy
 	Type="simple"
-	initd="kubelet_init"
+	init_file="kubelet_init"
 	EnvironmentFile="${k8s_dir}/cfg/kubelet"
 	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
 	conf_system_service
