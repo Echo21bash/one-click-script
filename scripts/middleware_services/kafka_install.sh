@@ -74,7 +74,7 @@ kafka_config(){
 	[[ -z ${kafka_port} ]] && kafka_port=9092
 	[[ -z `grep ^port ${conf_dir}/server.properties` ]] && sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
 	[[ -n `grep ^port ${conf_dir}/server.properties` ]] && sed -i "s/port=.*/port=${kafka_port}/" ${conf_dir}/server.properties
-	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}/${broker_id}%" ${conf_dir}/server.properties
+	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}/broker${broker_id}%" ${conf_dir}/server.properties
 	sed -i "s/zookeeper.connect=localhost:2181/zookeeper.connect=${zookeeper_connect}/" ${conf_dir}/server.properties
 }
 
