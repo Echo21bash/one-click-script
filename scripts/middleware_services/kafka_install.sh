@@ -41,7 +41,7 @@ kafka_install(){
 		local k=0
 		for host in ${host_ip[@]}
 		do
-			for ((j=0;j<${node_num};j++))
+			for ((j=0;j<${node_num[$k]};j++))
 			do
 				broker_id=$i
 				kafka_config
