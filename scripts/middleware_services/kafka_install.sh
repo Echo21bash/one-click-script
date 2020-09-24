@@ -44,6 +44,8 @@ kafka_install(){
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				broker_id=$i
+				kafka_port=9092
+				let kafka_port=${kafka_port}+$j
 				kafka_config
 				home_dir=${install_dir}/kafka-broker${broker_id}
 				add_kafka_service
@@ -69,7 +71,8 @@ kafka_config(){
 	zookeeper_ip="${zookeeper_ip[@]}"
 	zookeeper_connect=$(echo ${zookeeper_ip} | sed 's/ /,/g')
 	[[ -n ${kafka_id} ]] && sed -i "s/broker.id=0/broker.id=${kafka_id}/" ${conf_dir}/server.properties
-	sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
+	[[ -z ${kafka_port} ]] && kafka_port=9092
+	[[ -z `grep port ${conf_dir}/server.properties` ]] && sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
 	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}%" ${conf_dir}/server.properties
 	sed -i "s/zookeeper.connect=localhost:2181/zookeeper.connect=${zookeeper_connect}/" ${conf_dir}/server.properties
 }
