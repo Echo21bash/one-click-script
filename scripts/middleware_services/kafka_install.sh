@@ -39,7 +39,7 @@ kafka_install(){
 		auto_ssh_keygen
 		local i=0
 		local k=0
-		for host in ${host_ip[@]}
+		for now_host in ${host_ip[@]}
 		do
 			kafka_port=9092
 			for ((j=0;j<${node_num[$k]};j++))
@@ -69,12 +69,20 @@ kafka_install(){
 
 kafka_config(){
 	conf_dir=${tar_dir}/config
+	if [[ ${deploy_mode} = '1' ]];then
+		get_ip
+		listeners_ip=${local_ip}
+	else
+		listeners_ip=${now_host}
+	fi
+	
 	zookeeper_ip="${zookeeper_ip[@]}"
 	zookeeper_connect=$(echo ${zookeeper_ip} | sed 's/ /,/g')
 	[[ -n ${broker_id} ]] && sed -i "s/broker.id=.*/broker.id=${broker_id}/" ${conf_dir}/server.properties
 	[[ -z ${kafka_port} ]] && kafka_port=9092
 	[[ -z `grep ^port ${conf_dir}/server.properties` ]] && sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
 	[[ -n `grep ^port ${conf_dir}/server.properties` ]] && sed -i "s/port=.*/port=${kafka_port}/" ${conf_dir}/server.properties
+	sed -i "s%#listeners=.*%listeners=PLAINTEXT://${listeners_ip}:${kafka_port}%" ${conf_dir}/server.properties
 	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}/broker${broker_id}%" ${conf_dir}/server.properties
 	sed -i "s/zookeeper.connect=localhost:2181/zookeeper.connect=${zookeeper_connect}/" ${conf_dir}/server.properties
 }
