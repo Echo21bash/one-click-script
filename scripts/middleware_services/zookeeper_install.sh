@@ -6,7 +6,7 @@ zookeeper_env_load(){
 	mkdir -p ${tmp_dir}
 	soft_name=zookeeper
 	program_version=('3.4' '3.5')
-	url='http://mirrors.ustc.edu.cn/apache/zookeeper'
+	url='https://mirrors.huaweicloud.com/apache/zookeeper'
 	down_url='${url}/zookeeper-${detail_version_number}/zookeeper-${detail_version_number}.tar.gz'
 
 }
@@ -84,8 +84,8 @@ add_zookeeper_server_list(){
 }
 
 zookeeper_config(){
-	mkdir -p ${home_dir}/{logs,data}
-	conf_dir=${home_dir}/conf
+
+	conf_dir=${tar_dir}/conf
 	cp ${conf_dir}/zoo_sample.cfg ${conf_dir}/zoo.cfg
 	cp ${workdir}/config/zookeeper/java.env ${conf_dir}
 
