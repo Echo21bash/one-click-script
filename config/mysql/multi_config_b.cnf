@@ -90,10 +90,10 @@ long_query_time = 1
 
 #wsrep config
 #wsrep_provider = /usr/lib64/galera-3/libgalera_smm.so
-#wsrep_cluster_address = "gcomm://"
+#wsrep_cluster_address = "gcomm://192.168.1.2:4567,192.168.1.3:4567"
 #wsrep_cluster_name = "mycluster"
 #wsrep_node_name = "node1"
-#wsrep_node_address = "192.168.71.177:4567"
+#wsrep_node_address = "192.168.1.1:4567"
 #binlog_format = row
 #default_storage_engine = InnoDB
 #innodb_autoinc_lock_mode = 2
