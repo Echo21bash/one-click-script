@@ -61,6 +61,7 @@ skip-name-resolve
 lower_case_table_names = 1
 skip-external-locking
 #mysql5.7+
+#日志时区设置为跟随系统
 #log_timestamps = SYSTEM
 
 #innodb config
@@ -69,16 +70,17 @@ innodb_log_file_size = 128M
 innodb_buffer_pool_size = 2G
 innodb_log_buffer_size = 8M
 innodb_flush_log_at_trx_commit = 2
-innodb_write_io_threads = 8
-innodb_read_io_threads = 8
+innodb_write_io_threads = 16
+innodb_read_io_threads = 16
 #mysql5.7+
+#ibtmp1文件是MySQL5.7使用了独立的临时表空间来存储临时表数据,设置最大值避免塞满磁盘
 #innodb_temp_data_file_path = ibtmp1:64M:autoextend:max:5G
 
 #myisam config
 myisam_sort_buffer_size = 64M
 
 #binlog config
-binlog_format = mixed
+binlog_format = row
 expire_logs_days = 15
 max_binlog_size = 512M
 sync_binlog = 200
