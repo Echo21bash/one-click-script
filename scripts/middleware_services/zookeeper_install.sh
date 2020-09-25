@@ -34,26 +34,20 @@ zookeeper_install(){
 	
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
-		
+		add_zookeeper_server_list
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
 			zk_port=2181
-			zk_heartbeat_port=2888
-			zk_info_port=3888
 			service_id=1
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				let service_id=${service_id}+$j
 				let zk_port=${zk_port}+$j
-				let zk_heartbeat_port=${zk_heartbeat_port}+$j
-				let zk_info_port=${zk_info_port}+$j
-				add_zookeeper_server_list
 				zookeeper_config
 				home_dir=${install_dir}/zookeeper-node${service_id}
 				add_zookeeper_service
-				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${install_dir}/zookeeper-node${service_id}
 				mkdir -p ${zookeeper_data_dir}/node${service_id}
@@ -77,11 +71,26 @@ zookeeper_install(){
 }
 
 add_zookeeper_server_list(){
-
-	if [[ ${service_id} = '1' ]];then
-		rm -rf ${tmp_dir}/zk_list
-	fi
-	echo "server.${service_id}=${host_ip[$k]}:${zk_heartbeat_port}:${zk_info_port}">>${tmp_dir}/zk_list
+	local i=1
+	local k=0
+	for now_host in ${host_ip[@]}
+	do
+		zk_heartbeat_port=2888
+		zk_info_port=3888
+		service_id=1
+		for ((j=0;j<${node_num[$k]};j++))
+		do
+			let service_id=${service_id}+$j
+			let zk_heartbeat_port=${zk_heartbeat_port}+$j
+			let zk_info_port=${zk_info_port}+$j
+			if [[ ${service_id} = '1' ]];then
+				rm -rf ${tmp_dir}/zk_list
+			fi
+			echo "server.${service_id}=${host_ip[$k]}:${zk_heartbeat_port}:${zk_info_port}">>${tmp_dir}/zk_list
+			((i++))
+		done
+		((k++))
+	done
 
 }
 
@@ -91,17 +100,17 @@ zookeeper_config(){
 	cp ${conf_dir}/zoo_sample.cfg ${conf_dir}/zoo.cfg
 	cp ${workdir}/config/zookeeper/java.env ${conf_dir}
 
-
-	sed -i "s#dataDir=/tmp/zookeeper#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
+	sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
 	sed -i "s#clientPort=.*#clientPort=${zk_port}#" ${conf_dir}/zoo.cfg
-	sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${tar_dir}'/logs' ${tar_dir}/bin/zkServer.sh
-	if [[ ${deploy_mode} = '2' ]];then
+	[[ -z `grep ^ZOO_LOG_DIR ${tar_dir}/bin/zkServer.sh` ]] && sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${install_dir}'/zookeeper-node'${service_id}'/logs' ${tar_dir}/bin/zkServer.sh
+	[[ -n `grep ^ZOO_LOG_DIR ${tar_dir}/bin/zkServer.sh` ]] && sed -i "s%ZOO_LOG_DIR=.*%ZOO_LOG_DIR=${install_dir}/zookeeper-node${service_id}/logs%" ${tar_dir}/bin/zkServer.sh
+	if [[ ${deploy_mode} = '1' ]];then
+		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/zookeeper.out
+		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/
+	else
 		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo_node${service_id}.cfg
 		echo "${service_id}" > ${tmp_dir}/myid_node${service_id}
 		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${home_dir}/logs/zookeeper.out
-	else
-		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/zookeeper.out
-		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/
 	fi
 }
 
