@@ -35,15 +35,15 @@ zookeeper_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		add_zookeeper_server_list
+		
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
 			zk_port=2181
-			service_id=1
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				let service_id=${service_id}+$j
+				service_id=$i
 				let zk_port=${zk_port}+$j
 				zookeeper_config
 				home_dir=${install_dir}/zookeeper-node${service_id}
@@ -79,8 +79,7 @@ add_zookeeper_server_list(){
 		zk_info_port=3888
 		for ((j=0;j<${node_num[$k]};j++))
 		do
-			service_id=1
-			let service_id=${service_id}+$j
+			service_id=$i
 			let zk_heartbeat_port=${zk_heartbeat_port}+$j
 			let zk_info_port=${zk_info_port}+$j
 			if [[ ${service_id} = '1' ]];then
