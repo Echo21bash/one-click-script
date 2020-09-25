@@ -60,18 +60,18 @@ add_log_cut(){
 		pdir=`dirname ${log_cut_config_file}`
 		if [[ ! -d ${pdir} ]];then
 			mkdir -p ${pdir}
-			cat >${log_cut_config_file}<<-EOF
-			${logs_dir}{
-			daily
-			rotate 15
-			missingok
-			notifempty
-			copytruncate
-			dateext
-			}
-			EOF
-			success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/rsyslog.d/下"
 		fi
+		cat >${log_cut_config_file}<<-EOF
+		${logs_dir}{
+		daily
+		rotate 15
+		missingok
+		notifempty
+		copytruncate
+		dateext
+		}
+		EOF
+		success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/rsyslog.d/下"
 	else
 		error_log "函数add_log_cut缺少参数\$1(日志切割配置模板路径)"
 		exit 1
@@ -222,11 +222,11 @@ conf_system_service(){
 		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/systemd/system/下"
 	fi
 	#删除空值
-	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${init_dir}/${init_file:-init}
-	[[ -z ${Environment} ]] && sed -i /Environment=/d ${init_dir}/${init_file:-init}
-	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${init_dir}/${init_file:-init}
-	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${init_dir}/${init_file:-init}
-	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${init_dir}/${init_file:-init}
+	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
+	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
+	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
+	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
+	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
 
 }
 #添加守护进程

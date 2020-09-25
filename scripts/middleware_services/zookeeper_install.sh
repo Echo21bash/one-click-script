@@ -42,9 +42,9 @@ zookeeper_install(){
 			zk_port=2181
 			zk_heartbeat_port=2888
 			zk_info_port=3888
+			service_id=1
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				service_id=$i
 				let service_id=${service_id}+$j
 				let zk_port=${zk_port}+$j
 				let zk_heartbeat_port=${zk_heartbeat_port}+$j
