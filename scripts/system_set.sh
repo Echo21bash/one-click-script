@@ -49,25 +49,50 @@ add_sysuser(){
 
 #日志切割
 add_log_cut(){
-	#$1配置文件名 $2日志文件路径
-	conf_name=$1
+	#$1生成日志切割配置模板路径 $2日志文件路径
+	log_cut_config_file=$1
 	logs_dir=$2
-	cat >/etc/logrotate.d/${conf_name}<<-EOF
-	${logs_dir}{
-	daily
-	rotate 15
-	missingok
-	notifempty
-	copytruncate
-	dateext
-	}
-	EOF
+	if [[ -z ${logs_dir} ]];then
+		error_log "函数add_log_cut缺少参数\$2(日志文件路径)"
+		exit 1
+	fi
+	if [[ -n ${log_cut_config_file} ]];then
+		pdir=`dirname ${log_cut_config_file}`
+		if [[ ! -d ${pdir} ]];then
+			mkdir -p ${pdir}
+			cat >${log_cut_config_file}<<-EOF
+			${logs_dir}{
+			daily
+			rotate 15
+			missingok
+			notifempty
+			copytruncate
+			dateext
+			}
+			EOF
+			success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/rsyslog.d/下"
+		fi
+	else
+		error_log "函数add_log_cut缺少参数\$1(日志切割配置模板路径)"
+		exit 1
+	fi
 
 }
 #守护进程配置
 conf_system_service(){
+	#$1生成系统服务配置模板路径
+	system_service_config_file=$1
+	if [[ -n ${system_service_config_file} ]];then
+		pdir=`dirname ${system_service_config_file}`
+		if [[ ! -d ${pdir} ]];then
+			mkdir -p ${pdir}
+		fi
+	else
+		error_log "函数conf_system_service缺少参数\$1(生成系统服务配置模板路径)"
+		exit 1
+	fi
 	if [[ -z ${ExecStart} ]];then
-		error_log "conf_system_service函数缺少ExecStart变量"
+		error_log "函数conf_system_service函数缺少ExecStart变量"
 		exit 1
 	fi
 	if [[ -z ${init_dir} ]];then
@@ -75,7 +100,7 @@ conf_system_service(){
 	fi
 	#必传参数ExecStart
 	if [[ "${os_release}" -lt 7 ]]; then
-		cat >${init_dir}/${init_file:-init}<<-EOF
+		cat >${system_service_config_file}<<-EOF
 		#!/bin/bash
 		# chkconfig: 345 70 60
 		# description: ${soft_name} daemon
@@ -90,7 +115,7 @@ conf_system_service(){
 		ARGS="${ARGS:-}"
 		ExecStop="${ExecStop:-}"
 		EOF
-		cat >>${init_dir}/${init_file:-init}<<-'EOF'
+		cat >>${system_service_config_file}<<-'EOF'
 		#EUV
 		[[ -f ${EnvironmentFile} ]] && . ${EnvironmentFile}
 		[[ -f ${Environment} ]] && export ${Environment}
@@ -168,8 +193,9 @@ conf_system_service(){
 		    ;;
 		esac
 		EOF
+		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/init.d/下"
 	elif [[ "${os_release}" -ge 7 ]]; then
-		cat >${init_dir}/${init_file:-init}<<-EOF
+		cat >${system_service_config_file}<<-EOF
 		[Unit]
 		Description=${soft_name}
 		After=syslog.target network.target
@@ -193,6 +219,7 @@ conf_system_service(){
 		[Install]
 		WantedBy=multi-user.target
 		EOF
+		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/systemd/system/下"
 	fi
 	#删除空值
 	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${init_dir}/${init_file:-init}
