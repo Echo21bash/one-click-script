@@ -206,7 +206,5 @@ update_kernel(){
 }
 
 clear_install(){
-	if [[ -n ${install_dir} ]];then
-		rm -rf ${tar_dir}
-	fi
+	echo
 }

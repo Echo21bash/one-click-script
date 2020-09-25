@@ -78,7 +78,9 @@ zookeeper_install(){
 
 add_zookeeper_server_list(){
 
-	rm -rf ${tmp_dir}/zk_list
+	if [[ ${service_id} = '1' ]];then
+		rm -rf ${tmp_dir}/zk_list
+	fi
 	echo "server.${service_id}=${host_ip[$k]}:${zk_heartbeat_port}:${zk_info_port}">>${tmp_dir}/zk_list
 
 }
@@ -92,7 +94,7 @@ zookeeper_config(){
 
 	sed -i "s#dataDir=/tmp/zookeeper#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
 	sed -i "s#clientPort=.*#clientPort=${zk_port}#" ${conf_dir}/zoo.cfg
-	sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${home_dir}'/logs' ${home_dir}/bin/zkServer.sh
+	sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${tar_dir}'/logs' ${tar_dir}/bin/zkServer.sh
 	if [[ ${deploy_mode} = '2' ]];then
 		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo_node${service_id}.cfg
 		echo "${service_id}" > ${tmp_dir}/myid_node${service_id}
