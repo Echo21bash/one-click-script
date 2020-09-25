@@ -58,7 +58,7 @@ zookeeper_install(){
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/zookeeper-node${service_id}/zookeeper-node${i}.service /etc/systemd/system/zookeeper-node${i}.service
-				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}
+				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
 				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/rsyslog.d/zookeeper-node${i}
 				systemctl daemon-reload
 				"
@@ -97,7 +97,7 @@ add_zookeeper_server_list(){
 zookeeper_config(){
 
 	conf_dir=${tar_dir}/conf
-	cp ${conf_dir}/zoo_sample.cfg ${conf_dir}/zoo.cfg
+	\cp ${conf_dir}/zoo_sample.cfg ${conf_dir}/zoo.cfg
 	cp ${workdir}/config/zookeeper/java.env ${conf_dir}
 
 	sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
@@ -108,7 +108,7 @@ zookeeper_config(){
 		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/zookeeper.out
 		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/
 	else
-		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo_node${service_id}.cfg
+		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo.cfg
 		echo "${service_id}" > ${tmp_dir}/myid_node${service_id}
 		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${home_dir}/logs/zookeeper.out
 	fi
