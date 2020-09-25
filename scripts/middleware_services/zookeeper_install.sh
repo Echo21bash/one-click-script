@@ -77,9 +77,9 @@ add_zookeeper_server_list(){
 	do
 		zk_heartbeat_port=2888
 		zk_info_port=3888
-		service_id=1
 		for ((j=0;j<${node_num[$k]};j++))
 		do
+			service_id=1
 			let service_id=${service_id}+$j
 			let zk_heartbeat_port=${zk_heartbeat_port}+$j
 			let zk_info_port=${zk_info_port}+$j
