@@ -109,7 +109,7 @@ zookeeper_config(){
 	else
 		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo.cfg
 		echo "${service_id}" > ${tmp_dir}/myid_node${service_id}
-		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${home_dir}/logs/zookeeper.out
+		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${install_dir}/zookeeper-node${service_id}/logs/zookeeper.out
 	fi
 }
 
