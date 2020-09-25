@@ -89,18 +89,19 @@ kafka_config(){
 }
 
 add_kafka_service(){
-	if [[ ${deploy_mode} = '2' ]];then
-		init_file=kafka-broker${broker_id}
-		init_dir=${tmp_dir}
-	fi
+
 	Type=simple
 	ExecStart="${home_dir}/bin/kafka-server-start.sh ${home_dir}/config/server.properties"
 	ExecStop="${home_dir}/bin/kafka-server-stop.sh"
 	Environment="JAVA_HOME=$(echo $JAVA_HOME) KAFKA_HOME=${home_dir}"
-	conf_system_service
+	if [[ ${deploy_mode} = '1' ]];then
+		conf_system_service ${home_dir}/kafka.service
+	else
+		conf_system_service ${tmp_dir}/kafka-broker${broker_id}
+	fi
 
 	if [[ ${deploy_mode} = '1' ]];then
-		add_system_service kafka ${home_dir}/init
+		add_system_service kafka ${home_dir}/kafka.service
 	fi
 }
 
