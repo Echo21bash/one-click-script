@@ -89,11 +89,14 @@ kafka_config(){
 }
 
 add_kafka_service(){
-
+	JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	if [[ -z ${JAVA_HOME} ]];then
+		warning_log "主机${host_ip[$k]}没有正确配置JAVA_HOME变量"
+	fi
 	Type=simple
 	ExecStart="${home_dir}/bin/kafka-server-start.sh ${home_dir}/config/server.properties"
 	ExecStop="${home_dir}/bin/kafka-server-stop.sh"
-	Environment="JAVA_HOME=$(echo $JAVA_HOME) KAFKA_HOME=${home_dir}"
+	Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${home_dir}/kafka.service
 	else
