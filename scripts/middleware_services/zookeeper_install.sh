@@ -46,7 +46,7 @@ zookeeper_install(){
 				service_id=$i
 				let zk_port=${zk_port}+$j
 				zookeeper_config
-				home_dir=${install_dir}/zookeeper-node${service_id}
+				home_dir=${install_dir}/zookeeper-node${service_id}				
 				add_zookeeper_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${install_dir}/zookeeper-node${service_id}
@@ -114,9 +114,13 @@ zookeeper_config(){
 }
 
 add_zookeeper_service(){
+	JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	if [[ -z ${JAVA_HOME} ]];then
+		warning_log "主机${host_ip[$k]}没有正确配置JAVA_HOME变量"
+	fi
 	Type="forking"
 	ExecStart="${home_dir}/bin/zkServer.sh start"
-	Environment="JAVA_HOME=$(echo $JAVA_HOME) ZOO_LOG_DIR=${home_dir}/logs"
+	Environment="JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs"
 	
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${tmp_dir}/zookeeper.service
