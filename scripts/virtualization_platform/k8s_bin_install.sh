@@ -39,7 +39,6 @@ env_load(){
 	
 	. /root/public.sh
 	. /root/system_optimize.sh
-	conf=(1 2 4 5 6 7)
 	system_optimize_set
 	yum install bash-completion ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
 	rm -rf /root/public.sh /root/system_optimize.sh"
