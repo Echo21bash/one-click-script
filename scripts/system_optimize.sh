@@ -1,36 +1,8 @@
 #!/bin/bash
 
 system_optimize_set(){
-	if [[ -z ${conf[@]} ]];then
-		output_option "选择需要优化的项(可多选)" "替换为国内YUM源 优化最大限制 优化SSHD服务 系统时间同步 优化内核参数 关闭SElinux 关闭非必须服务 设置shell终端参数 锁定系统关键文件 全部优化" "conf"
-	fi
-	for conf in ${conf[@]}
-	do
-		case "$conf" in
-			1)system_optimize_yum
-			;;
-			2)system_optimize_Limits
-			;;
-			3)system_optimize_sshd
-			;;
-			4)system_optimize_systime
-			;;
-			5)system_optimize_kernel
-			;;
-			6)system_optimize_selinux
-			;;
-			7)system_optimize_service
-			;;
-			8)system_optimize_profile
-			;;
-			9)system_optimize_permission
-			;;
-		esac
-	done
-}
 
-system_optimize_yum(){
-	
+	###yum替换为阿里源
 	[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 
 	if [[ ${os_release} < "7" ]];then
@@ -46,16 +18,14 @@ system_optimize_yum(){
 		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
 		yum clean all >/dev/null 2>&1
 	fi
-	yum -y install bash-completion wget chrony vim sysstat>/dev/null 2>&1
+	yum -y install bash-completion wget chrony vim sysstat >/dev/null 2>&1
 	if [[ $? = 0 ]];then
-		diy_echo "完成yum源优化,并安装必要的命令..." "" "${info}"
+		success_log "完成yum源优化,并安装必要的命令..."
 	else
-		diy_echo "yum源优化失败请检查网络!" "" "${error}"
+		error_log "yum源优化失败请检查网络!"
 	fi
-}
-
-system_optimize_Limits(){
-
+	
+	###系统limit限制优化
 	LIMIT=`grep nofile /etc/security/limits.conf |grep -v "^#"|wc -l`
 	if [ $LIMIT -eq 0 ];then
 		[ ! -f /etc/security/limits.conf.bakup ] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
@@ -64,12 +34,12 @@ system_optimize_Limits(){
 		[ -f /etc/security/limits.d/20-nproc.conf ] && sed -i 's/*          soft    nproc     4096/*          soft    nproc     65536/' /etc/security/limits.d/20-nproc.conf
 		ulimit -HSn 65536
 		if [ $? -eq 0 ];then
-			diy_echo "完成最大进程数和最大打开文件数优化" "" "${info}"
+			success_log "完成最大进程数和最大打开文件数优化"
 		else
-			diy_echo "完成最大进程数和最大打开文件数优化" "${red}" "${error}"
+			error_log "完成最大进程数和最大打开文件数优化"
 		fi
 	fi
-  #Centos7对于systemd service的资源设置，则需修改全局配置，全局配置文件放在/etc/systemd/system.conf和/etc/systemd/user.conf，同时也会加载两个对应目录中的所有.conf文件/etc/systemd/system.conf.d/*.conf和/etc/systemd/user.conf.d/*.conf。system.conf是系统实例使用的，user.conf是用户实例使用的。
+	#Centos7对于systemd service的资源设置，则需修改全局配置，全局配置文件放在/etc/systemd/system.conf和/etc/systemd/user.conf，同时也会加载两个对应目录中的所有.conf文件/etc/systemd/system.conf.d/*.conf和/etc/systemd/user.conf.d/*.conf。system.conf是系统实例使用的，user.conf是用户实例使用的。
 	if [[ -f /etc/systemd/system.conf ]];then
 		[[ ! -f /etc/systemd/system.conf.bakup ]] && cp /etc/systemd/system.conf /etc/systemd/system.conf.bakup
 		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65536/' /etc/systemd/system.conf
@@ -80,10 +50,8 @@ system_optimize_Limits(){
 		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65536/' /etc/systemd/user.conf
 		sed -i 's/#DefaultLimitNPROC=/DefaultLimitNPROC=65536/' /etc/systemd/user.conf
 	fi
-}
 
-system_optimize_sshd(){
-
+	###ssh连接速度优化
 	[ ! -f /etc/ssh/sshd_config.bakup ] && cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bakup
 	#sed -i 's/#Port 22/Port 52233/g' /etc/ssh/sshd_config
 	sed -i 's/^#LogLevel INFO/LogLevel INFO/g' /etc/ssh/sshd_config
@@ -92,20 +60,19 @@ system_optimize_sshd(){
 	sed -i 's/^GSSAPIAuthentication yes/GSSAPIAuthentication no/' /etc/ssh/sshd_config 
 	sed -i 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
 	echo '+-------modify the sshd_config-------+'
-	echo 'Port 52233'
+	#echo 'Port 52233'
 	echo 'LogLevel INFO'
 	echo 'PermitEmptyPasswords no'
 	#echo 'PermitRootLogin no'
 	echo 'UseDNS no'
 	echo '+------------------------------------+'
 	if [[ ${os_release} < '7' ]];then
-		/etc/init.d/sshd reload >/dev/null 2>&1 && diy_echo "完成SSHD服务优化" "" "${info}" || diy_echo "SSHD服务优化失败" "" "${error}"
+		/etc/init.d/sshd reload >/dev/null 2>&1 && success_log "完成SSHD服务优化" || error_log "SSHD服务优化失败"
 	else
-		systemctl restart sshd && diy_echo "完成SSHD服务优化" "" "${info}" || diy_echo "SSHD服务优化失败" "" "${error}"
+		systemctl restart sshd && success_log "完成SSHD服务优化" || error_log "SSHD服务优化失败"
 	fi
-}
 
-system_optimize_systime(){
+	###系统时区配置为上海东八区，根据阿里云时钟进行时间同步
 	rm -rf /etc/localtime
 	ln -sfn /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	yum -y install chrony
@@ -114,16 +81,15 @@ system_optimize_systime(){
 		if [[ -z `grep time.pool.aliyun.com /etc/chrony.conf` ]];then
 			sed -i '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
 			if [ $? -eq 0 ];then
-				diy_echo "完成时间同步配置" "" "${info}"
+				success_log "完成时间同步配置"
 			else
-				diy_echo "时间同步配置失败" "" "${error}"
+				error_log "时间同步配置失败"
 			fi
 		fi
 
 	fi
-}
-
-system_optimize_kernel(){
+	
+	###内核参数调整
 	[ ! -f /etc/sysctl.conf.bakup ] && cp /etc/sysctl.conf /etc/sysctl.conf.bakup
 	
 	[[ -z `grep -E '^kernel.sem' /etc/sysctl.conf` ]] && echo 'kernel.sem = 500 1024000 200 4096'>>/etc/sysctl.conf
@@ -147,25 +113,21 @@ system_optimize_kernel(){
 	[[ -z `grep -E '^vm.dirty_ratio' /etc/sysctl.conf` ]] && echo 'vm.dirty_ratio = 20'>>/etc/sysctl.conf
 
 	sysctl -p>/dev/null 2>&1
-	diy_echo "完成内核参数调整" "" "${info}"
+	success_log "完成内核参数调整"
 
-}
 
-system_optimize_selinux(){
-
+	###关闭seliux关闭防火墙
 	[ ! -f /etc/selinux/config.bakup ] && cp /etc/selinux/config /etc/selinux/config.bakup
 	[[ ${os_release} < "7" ]] && /etc/init.d/iptables stop >/dev/null
 	[[ ${os_release} > "6" ]] && systemctl stop firewalld.service >/dev/null
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	setenforce 0
 	if [ ! -z `grep SELINUX=disabled /etc/selinux/config` ];then
-		diy_echo "完成禁用selinux、关闭防火墙" "" "${info}"
+		success_log "完成禁用selinux、关闭防火墙"
 	else
-		diy_echo "禁用selinux、关闭防火墙失败" "" "${error}"
+		error_log "禁用selinux、关闭防火墙失败"
 	fi
-}
 
-system_optimize_service(){
 
 	if [[ ${os_release} < "7" ]];then
 		for A in `chkconfig --list |grep -E '3:on|3:启用' |awk '{print $1}' `
@@ -180,27 +142,33 @@ system_optimize_service(){
 		done
 		for A in sysstat rsyslog network sshd crond chronyd;do systemctl enable $A;done
 	fi
-	diy_echo "精简开机自启动完成" "" "${info}"
-}
+	success_log "精简开机自启动完成"
 
-system_optimize_profile(){
+	###系统用户操作记录配置/var/log/bash_history.log
+	cat >/etc/profile.d/bash_history.sh <<-'EOF'
+	#!/bin/bash
+	
+	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
+	export PROMPT_COMMAND='\
+	if [ -z "$OLD_PWD" ];then
+		export OLD_PWD=$(pwd);
+	fi;
+	if [ ! -z "$LAST_CMD" ] && [ "$(history 1)" != "$LAST_CMD" ]; then
+		echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
+	fi;
+	export LAST_CMD="$(history 1)";
+	export OLD_PWD=$(pwd);'
+	EOF
+	[[ -z `grep 'TMOUT=600' ` ]] && echo 'TMOUT=600' >> /etc/profile
+	source /etc/profile
+	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log"
 
-	if [ -z `grep TMOUT=600 /etc/profile` ];then
-		echo "TMOUT=600" >>/etc/profile
-		echo "HISTSIZE=10" >>/etc/profile
-		echo "HISTFILESIZE=10" >>/etc/profile
-		source /etc/profile
-		diy_echo "完成历史记录数和连接超时时间调整" "" "${info}"
-	fi
-}
-
-system_optimize_permission(){
 	#锁定关键文件系统
-	chattr +i /etc/passwd
-	chattr +i /etc/inittab
-	chattr +i /etc/group
-	chattr +i /etc/shadow
-	chattr +i /etc/gshadow
-	/bin/mv /usr/bin/chattr /usr/bin/lock
-	diy_echo "完成系统关键文件锁定" "" "${info}"
+	#chattr +i /etc/passwd
+	#chattr +i /etc/inittab
+	#chattr +i /etc/group
+	#chattr +i /etc/shadow
+	#chattr +i /etc/gshadow
+	#/bin/mv /usr/bin/chattr /usr/bin/lock
+	#success_log "完成系统关键文件锁定"
 }
