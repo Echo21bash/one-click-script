@@ -26,19 +26,23 @@ system_optimize_set(){
 	fi
 	
 	###系统limit限制优化
-	LIMIT=`grep nofile /etc/security/limits.conf |grep -v "^#"|wc -l`
-	if [ $LIMIT -eq 0 ];then
-		[ ! -f /etc/security/limits.conf.bakup ] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
+	[[ ! -f /etc/security/limits.conf.bakup ]] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
+	if [[ -z `grep '*                  -        nofile         65536' /etc/security/limits.conf` ]];then
 		echo '*                  -        nofile         65536'>>/etc/security/limits.conf
-		echo '*                  -        nproc          65536'>>/etc/security/limits.conf
-		[ -f /etc/security/limits.d/20-nproc.conf ] && sed -i 's/*          soft    nproc     4096/*          soft    nproc     65536/' /etc/security/limits.d/20-nproc.conf
-		ulimit -HSn 65536
-		if [ $? -eq 0 ];then
-			success_log "完成最大进程数和最大打开文件数优化"
-		else
-			error_log "完成最大进程数和最大打开文件数优化"
-		fi
 	fi
+		
+	if [[ -z `grep '*                  -        nproc          65536' /etc/security/limits.conf` ]];then
+		echo '*                  -        nproc          65536'>>/etc/security/limits.conf
+	fi
+	[[ -f /etc/security/limits.d/20-nproc.conf ]] && sed -i 's/*          soft    nproc     4096/*          soft    nproc     65536/' /etc/security/limits.d/20-nproc.conf
+	ulimit -HSn 65536
+	
+	if [ $? -eq 0 ];then
+		success_log "完成最大进程数和最大打开文件数优化"
+	else
+		error_log "完成最大进程数和最大打开文件数优化"
+	fi
+
 	#Centos7对于systemd service的资源设置，则需修改全局配置，全局配置文件放在/etc/systemd/system.conf和/etc/systemd/user.conf，同时也会加载两个对应目录中的所有.conf文件/etc/systemd/system.conf.d/*.conf和/etc/systemd/user.conf.d/*.conf。system.conf是系统实例使用的，user.conf是用户实例使用的。
 	if [[ -f /etc/systemd/system.conf ]];then
 		[[ ! -f /etc/systemd/system.conf.bakup ]] && cp /etc/systemd/system.conf /etc/systemd/system.conf.bakup
@@ -81,10 +85,12 @@ system_optimize_set(){
 		if [[ -z `grep time.pool.aliyun.com /etc/chrony.conf` ]];then
 			sed -i '/# Please consider/aserver time.pool.aliyun.com' /etc/chrony.conf
 			if [ $? -eq 0 ];then
-				success_log "完成时间同步配置"
+				success_log "完成系统时区、时间同步配置"
 			else
 				error_log "时间同步配置失败"
 			fi
+		else
+			success_log "完成系统时区、时间同步配置"
 		fi
 
 	fi
