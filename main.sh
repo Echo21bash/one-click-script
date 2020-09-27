@@ -10,7 +10,6 @@ workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/public.sh
 . ${workdir}/scripts/system_set.sh
 . ${workdir}/scripts/tools.sh
-. ${workdir}/scripts/system_optimize.sh
 
 for i in ${workdir}/scripts/*/*.sh; do
 	if [ -r "$i" ]; then

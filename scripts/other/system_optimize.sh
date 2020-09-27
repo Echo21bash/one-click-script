@@ -130,19 +130,11 @@ system_optimize_set(){
 
 
 	if [[ ${os_release} < "7" ]];then
-		for A in `chkconfig --list |grep -E '3:on|3:启用' |awk '{print $1}' `
-		do
-			chkconfig $A off
-		done
 		for A in sysstat rsyslog network sshd crond chronyd;do chkconfig $A on;done
 	else
-		for A in `systemctl list-unit-files|grep enabled |awk '{print $1}'`
-		do
-			systemctl disable $A >/dev/null
-		done
 		for A in sysstat rsyslog network sshd crond chronyd;do systemctl enable $A;done
 	fi
-	success_log "精简开机自启动完成"
+	success_log "系统必要服务设置开机自启"
 
 	###系统用户操作记录配置/var/log/bash_history.log
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
