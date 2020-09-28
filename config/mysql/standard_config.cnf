@@ -68,10 +68,13 @@ skip-external-locking
 innodb_open_files = 2048
 innodb_log_file_size = 128M
 innodb_buffer_pool_size = 2G
-innodb_log_buffer_size = 8M
+innodb_log_buffer_size = 32M
 innodb_flush_log_at_trx_commit = 2
 innodb_write_io_threads = 16
 innodb_read_io_threads = 16
+innodb_buffer_pool_instances = 16
+innodb_io_capacity = 2000
+innodb_flush_method = O_DIRECT
 #mysql5.7+
 #ibtmp1文件是MySQL5.7使用了独立的临时表空间来存储临时表数据,设置最大值避免塞满磁盘
 #innodb_temp_data_file_path = ibtmp1:64M:autoextend:max:5G
