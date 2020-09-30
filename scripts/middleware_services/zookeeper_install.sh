@@ -114,7 +114,12 @@ zookeeper_config(){
 }
 
 add_zookeeper_service(){
-	JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	if [[ ${deploy_mode} = '1' ]];then
+		JAVA_HOME=${JAVA_HOME}
+	else
+		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	fi
+	
 	if [[ -z ${JAVA_HOME} ]];then
 		warning_log "主机${host_ip[$k]}没有正确配置JAVA_HOME变量"
 	fi
