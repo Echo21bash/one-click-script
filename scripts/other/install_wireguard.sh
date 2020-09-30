@@ -2,47 +2,50 @@
 
 wireguard_install(){
 	if [[ ${os_release} < '7' ]];then
-		echo -e "${error} wireguard只支持Centos7"
+		error_log "wireguard只支持Centos7"
 		exit 1
 	fi
 	if [[ `modprobe wireguard` ]];then
 		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
 	else
-		diy_echo "缺少wireguard内核模块，请先升级高版本内核" "${red}" "${error}"
+		error_log "缺少wireguard内核模块，请先升级高版本内核"
+		exit
 	fi
 	system_optimize_yum
 	cat > /etc/yum.repos.d/wireguard.repo <<-EOF
-	[jdoss-wireguard]
+	[copr:copr.fedorainfracloud.org:jdoss:wireguard]
 	name=Copr repo for wireguard owned by jdoss
-	baseurl=https://copr-be.cloud.fedoraproject.org/results/jdoss/wireguard/epel-7-$basearch/
+	baseurl=https://download.copr.fedorainfracloud.org/results/jdoss/wireguard/epel-7-$basearch/
 	type=rpm-md
 	skip_if_unavailable=True
 	gpgcheck=1
-	gpgkey=https://copr-be.cloud.fedoraproject.org/results/jdoss/wireguard/pubkey.gpg
+	gpgkey=https://download.copr.fedorainfracloud.org/results/jdoss/wireguard/pubkey.gpg
 	repo_gpgcheck=0
 	enabled=1
 	enabled_metadata=1
 	EOF
 	yum install -y dkms iptables-services wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
-		echo -e "${info} wireguard安装成功"
+		success_log "wireguard安装成功"
 	else
-		echo -e "${error} wireguard安装失败"
-		exit 2
+		error_log "wireguard安装失败"
+		exit 1
 	fi
 }
 
 wireguard_config(){
 	mkdir /etc/wireguard
 	cd /etc/wireguard
-	wg genkey | tee sprivatekey | wg pubkey > spublickey
-	wg genkey | tee cprivatekey | wg pubkey > cpublickey
-	s1=$(cat sprivatekey)
-	s2=$(cat spublickey)
-	c1=$(cat cprivatekey)
-	c2=$(cat cpublickey)
+	###生成私钥和公钥
+	wg genkey | tee server_private_key | wg pubkey > server_public_key
+	wg genkey | tee client_private_key | wg pubkey > client_public_key
+	s1=$(cat server_private_key)
+	s2=$(cat server_public_key)
+	c1=$(cat client_private_key)
+	c2=$(cat client_public_key)
 	get_public_ip
 	get_net_name
+	###配置文件
 	cat > /etc/wireguard/wg0.conf <<-EOF
 	[Interface]
 	PrivateKey = $s1
@@ -78,9 +81,9 @@ wireguard_config(){
 	fi
 	systemctl start wg-quick@wg0
 	if [[ -n $(ip a | grep -Eo '^wg0') ]];then
-		echo -e "${info} wireguard启动成功，请下载/etc/wireguard/client.conf客户端配置文件"
+		success_log "wireguard启动成功，请下载/etc/wireguard/client.conf客户端配置文件"
 	else
-		echo -e "${info} wireguard启动失败"
+		error_log "wireguard启动失败"
 	fi
 }
 
