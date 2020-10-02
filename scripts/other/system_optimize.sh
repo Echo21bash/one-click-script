@@ -18,7 +18,7 @@ system_optimize_set(){
 		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
 		yum clean all >/dev/null 2>&1
 	fi
-	yum -y install bash-completion wget chrony vim sysstat >/dev/null 2>&1
+	yum -y install bash-completion wget chrony vim sysstat net-tools >/dev/null 2>&1
 	if [[ $? = 0 ]];then
 		success_log "完成yum源优化,并安装必要的命令..."
 	else
