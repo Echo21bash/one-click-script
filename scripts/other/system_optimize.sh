@@ -124,8 +124,8 @@ system_optimize_set(){
 
 	###关闭seliux关闭防火墙
 	[ ! -f /etc/selinux/config.bakup ] && cp /etc/selinux/config /etc/selinux/config.bakup
-	[[ ${os_release} < "7" ]] && /etc/init.d/iptables stop >/dev/null
-	[[ ${os_release} > "6" ]] && systemctl stop firewalld.service >/dev/null
+	[[ ${os_release} < "7" ]] && /etc/init.d/iptables stop >/dev/null && chkconfig iptables off
+	[[ ${os_release} > "6" ]] && systemctl stop firewalld.service && systemctl disable firewalld.service >/dev/null
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 	setenforce 0
 	if [ ! -z `grep SELINUX=disabled /etc/selinux/config` ];then
