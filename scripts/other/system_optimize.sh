@@ -160,7 +160,7 @@ system_optimize_set(){
 	export OLD_PWD=$(pwd);'
 	EOF
 	[[ -z `grep 'TMOUT=600' /etc/profile` ]] && echo 'TMOUT=600' >> /etc/profile
-	touch /var/log/bash_history.log
+	[[ ! -f /var/log/bash_history.log ]] && touch /var/log/bash_history.log
 	chmod +w /var/log/bash_history.log
 	chmod +x /etc/profile.d/bash_history.sh
 	source /etc/profile
