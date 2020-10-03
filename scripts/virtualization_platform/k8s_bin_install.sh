@@ -11,7 +11,8 @@ env_load(){
 	local i=0
 	for host in ${host_ip[@]};
 	do
-	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
+	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/root
+	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/root
 	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
 	br_netfilter
