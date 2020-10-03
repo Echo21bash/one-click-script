@@ -200,41 +200,35 @@ add_system(){
 	init_dir=${tmp_dir}
 	##etcd
 	Type="notify"
-	init_file="etcd_init"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
-	conf_system_service
+	conf_system_service ${tmp_dir}/etcd_init
 
 	##apiserver
 	ExecStartPost=
 	Type="notify"
-	init_file="apiserver_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-apiserver"
 	ExecStart="${k8s_dir}/bin/kube-apiserver \$KUBE_APISERVER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/apiserver_init
 	##scheduler
 	Type="simple"
-	init_file="scheduler_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
 	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/scheduler_init
 	##controller
 	Type="simple"
-	init_file="controller_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/controller_init
 	##proxy
 	Type="simple"
-	init_file="proxy_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/proxy_init
 	##proxy
 	Type="simple"
-	init_file="kubelet_init"
 	EnvironmentFile="${k8s_dir}/cfg/kubelet"
 	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/kubelet_init
 
 }
 
