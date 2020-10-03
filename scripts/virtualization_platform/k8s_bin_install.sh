@@ -293,8 +293,8 @@ apiserver_conf(){
 	--etcd-cafile=${k8s_dir}/ssl/ca.pem \\
 	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \\
 	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem \\
-	--kubelet-client-certificate=${k8s_dir}/kubernetes.pem \\
-	--kubelet-client-key=${k8s_dir}/kubernetes-key.pem "
+	--kubelet-client-certificate=${k8s_dir}/ssl/kubernetes.pem \\
+	--kubelet-client-key=${k8s_dir}/ssl/kubernetes-key.pem "
 	EOF
 
 }
