@@ -81,9 +81,9 @@ create_ca(){
 		[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 		
 		if [[ -n ${vip} ]];then
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 		fi
 
 	done
@@ -604,12 +604,13 @@ master_node_check(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
+			api_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl "`
+			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $scheduler_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
+			ontroller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $ontroller_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
+			etcd_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
+			[[ $etcd_healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
 		fi
 		((i++))
 	done
