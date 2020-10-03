@@ -6,17 +6,19 @@ system_optimize_set(){
 	[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 
 	if [[ ${os_release} < "7" ]];then
-		[[ ! -f /etc/yum.repos.d/epel.repo ]] && \
-		curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
-		[[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]] && \
-		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
-		yum clean all >/dev/null 2>&1
+		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
+			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
+		fi
+		if [[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]];then
+			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
+		fi
 	else
-		[[ ! -f /etc/yum.repos.d/epel.repo ]] && \
-		curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
-		[[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]] && \
-		curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
-		yum clean all >/dev/null 2>&1
+		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
+			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
+		fi
+		if [[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]];then
+			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
+		fi
 	fi
 	yum -y install bash-completion wget chrony vim sysstat net-tools >/dev/null 2>&1
 	if [[ $? = 0 ]];then
