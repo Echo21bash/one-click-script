@@ -17,7 +17,7 @@ rancher_install_ctl(){
 	-p ${port}:443 \
 	-v ${data_dir}:/var/lib/rancher \
 	rancher/rancher:latest
-	info_log "正在启动容器..."
+	info_log "正在启动容器......"
 	sleep 40
 	http_code=`curl -sILk -w %{http_code} -o /dev/null https://${local_ip}:${port}`
 	if [[ ${http_code} = '200' ]];then
