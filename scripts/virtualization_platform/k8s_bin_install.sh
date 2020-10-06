@@ -7,11 +7,12 @@ env_load(){
 	tmp_dir=/tmp/k8s_install_tmp
 	mkdir -p ${tmp_dir}/{soft,ssl,conf}
 	cd ${tmp_dir}
-	
+	info_log "正在配置k8s基础环境......"
 	local i=0
 	for host in ${host_ip[@]};
 	do
-	scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
+	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/root
+	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/root
 	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
 	br_netfilter
@@ -36,7 +37,6 @@ env_load(){
 	net.bridge.bridge-nf-call-arptables = 1
 	EOF
 	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
-	
 	. /root/public.sh
 	. /root/system_optimize.sh
 	system_optimize_set
@@ -80,9 +80,9 @@ create_ca(){
 		[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 		
 		if [[ -n ${vip} ]];then
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-			[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
 		fi
 
 	done
@@ -90,7 +90,7 @@ create_ca(){
 	
 	
 	cd ${tmp_dir}/ssl
-	diy_echo "创建所需证书..." "${info}"
+	info_log "正在创建所需的证书......"
 	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
 	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/admin-csr.json | cfssljson -bare admin
@@ -160,6 +160,7 @@ etcd_start(){
 }
 
 etcd_check(){
+	info_log "正在检查etcd集群服务是否正常..."
 	sleep 5
 	local i=0
 	for host in ${host_ip[@]};
@@ -167,9 +168,9 @@ etcd_check(){
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
 			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
 			if [[ ${healthy} = '1' ]];then
-				diy_echo "etcd集群状态正常" "${info}"
+				info_log "etcd集群状态正常"
 			else
-				diy_echo "etcd集群状态不正常，请检查！！" "${red}" "${error}"
+				error_log "etcd集群状态不正常，请检查！！"
 				exit 1
 			fi
 		fi
@@ -199,41 +200,35 @@ add_system(){
 	init_dir=${tmp_dir}
 	##etcd
 	Type="notify"
-	init_file="etcd_init"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
-	conf_system_service
+	conf_system_service ${tmp_dir}/etcd_init
 
 	##apiserver
 	ExecStartPost=
 	Type="notify"
-	init_file="apiserver_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-apiserver"
 	ExecStart="${k8s_dir}/bin/kube-apiserver \$KUBE_APISERVER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/apiserver_init
 	##scheduler
 	Type="simple"
-	init_file="scheduler_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
 	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/scheduler_init
 	##controller
 	Type="simple"
-	init_file="controller_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/controller_init
 	##proxy
 	Type="simple"
-	init_file="proxy_init"
 	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/proxy_init
 	##proxy
 	Type="simple"
-	init_file="kubelet_init"
 	EnvironmentFile="${k8s_dir}/cfg/kubelet"
 	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
-	conf_system_service
+	conf_system_service ${tmp_dir}/kubelet_init
 
 }
 
@@ -298,8 +293,8 @@ apiserver_conf(){
 	--etcd-cafile=${k8s_dir}/ssl/ca.pem \\
 	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \\
 	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem \\
-	--kubelet-client-certificate=${k8s_dir}/kubernetes.pem \\
-	--kubelet-client-key=${k8s_dir}/kubernetes-key.pem "
+	--kubelet-client-certificate=${k8s_dir}/ssl/kubernetes.pem \\
+	--kubelet-client-key=${k8s_dir}/ssl/kubernetes-key.pem "
 	EOF
 
 }
@@ -401,7 +396,7 @@ master_node_install_ctl(){
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
-			
+			info_log "正在向主节点${ssh_port[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -411,6 +406,7 @@ master_node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
+			info_log "正在生成主节点${ssh_port[i]}kubeconfig配置文件..."
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#利用证书生成kubectl的kubeconfig
@@ -526,8 +522,8 @@ master_node_install_ctl(){
 			
 			systemctl restart kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
-			sleep 10
-			"
+			sleep 20
+			" &
 		fi
 		((i++))
 	done
@@ -543,6 +539,7 @@ work_node_install_ctl(){
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
+			info_log "正在向工作节点${ssh_port[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -595,8 +592,8 @@ work_node_install_ctl(){
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
-			sleep 10
-			"
+			sleep 20
+			" &
 		fi
 		((i++))
 	done
@@ -605,19 +602,28 @@ work_node_install_ctl(){
 }
 
 master_node_check(){
+	info_log "正在检查主节点各个服务是否正常..."
 	local i=0
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
-			[[ $healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
+			api_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-apiserver >/dev/null 2>&1  && echo 0"`
+			[[ x$api_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件apiserver状态异常"
+			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-scheduler >/dev/null 2>&1  && echo 0"`
+			[[ x$scheduler_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件scheduler状态异常"
+			controller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-controller-manager >/dev/null 2>&1  && echo 0"`
+			[[ x$controller_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件controller-manager状态异常"
+				
+			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $scheduler_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
+			ontroller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
+			[[ $ontroller_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
+			etcd_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
+			[[ $etcd_healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
 		fi
 		((i++))
 	done
+	
 }
 
 culster_bootstrap_conf(){
