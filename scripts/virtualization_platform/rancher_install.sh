@@ -13,7 +13,7 @@ rancher_install_ctl(){
 	if [[ -d ${data_dir} ]];then
 		mkdir -p ${data_dir}
 	fi
-	docker run -itd --name rancher --restart=unless-stopped \
+	docker run -itd --name rancher --privileged --restart=unless-stopped \
 	-p ${port}:443 \
 	-v ${data_dir}:/var/lib/rancher \
 	rancher/rancher:latest
