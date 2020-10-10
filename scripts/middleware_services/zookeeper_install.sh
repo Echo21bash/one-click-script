@@ -129,7 +129,7 @@ add_zookeeper_service(){
 	
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${tmp_dir}/zookeeper.service
-		add_system_service ${tmp_dir}/zookeeper.service
+		add_system_service zookeeper ${tmp_dir}/zookeeper.service
 	else
 		conf_system_service ${tmp_dir}/zookeeper-node${i}.service
 	fi
