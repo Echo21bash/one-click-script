@@ -24,7 +24,7 @@ update_kernel(){
 		error_log "安装内核失败请检查"
 		exit 1
 	fi
-	if [[ ${os_release} < '7']];then
+	if [[ ${os_release} < '7' ]];then
 		if [ ! -f "/boot/grub/grub.conf" ]; then
 			echo -e "${error} /boot/grub/grub.conf not found, please check it."
 			exit 1
