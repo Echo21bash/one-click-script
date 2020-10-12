@@ -5,7 +5,16 @@ redis_env_load(){
 	soft_name=redis
 	program_version=('3.2' '4.0' '5.0')
 	url="https://mirrors.huaweicloud.com/redis"
-	down_url='${url}/redis-${detail_version_number}.tar.gz'
+	select_version
+	install_dir_set
+	online_version
+
+}
+
+redis_down(){
+	down_url="${url}/redis-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/redis-${detail_version_number}.tar.gz ${tmp_dir}
 }
 
 redis_install_set(){
@@ -188,12 +197,7 @@ redis_cluster_description(){
 redis_install_ctl(){
 	redis_env_load
 	redis_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
-	install_set
+	redis_down
 	redis_install
 	clear_install
 }
