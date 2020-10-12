@@ -27,7 +27,7 @@ unpacking_file(){
 		package_root_dir=
 	fi
 	#解压文件
-	info_log "正在解压文件${unpack_file_name}..."
+	info_log "正在解压文件${unpack_file_name}到${unpack_dir}"
 	if [[	${file_type} = 'gzip' ]];then
 		tar -zxf ${unpack_file_name} -C ${unpack_dir}
 	elif [[ ${file_type} = 'zip' ]];then
