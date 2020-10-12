@@ -18,9 +18,9 @@ unpacking_file(){
 	#获取文件目录
 	info_log "正在获取压缩包根目录"
 	if [[	${file_type} = 'gzip' ]];then
-		package_root_dir=$(tar -tf ${tmp_dir}/${file_name}  | awk 'NR==1' | awk -F '/' '{print $1}' | sed 's#/##')
+		package_root_dir=$(tar -tf ${unpack_file_name}  | awk 'NR==1' | awk -F '/' '{print $1}' | sed 's#/##')
 	elif [[ ${file_type} = 'zip' ]];then
-		package_root_dir=$(unzip -v ${tmp_dir}/${file_name} | awk '{print $8}'| awk 'NR==4' | sed 's#/##')
+		package_root_dir=$(unzip -v ${unpack_file_name} | awk '{print $8}'| awk 'NR==4' | sed 's#/##')
 	elif [[ ${file_type} = 'executable' ]];then
 		package_root_dir=
 	elif [[ ${file_type} = 'bin' ]];then
