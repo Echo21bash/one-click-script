@@ -176,7 +176,7 @@ add_redis_service(){
 	Type="forking"
 	ExecStart="${home_dir}/bin/redis-server ${home_dir}/etc/redis.conf"
 	PIDFile="${home_dir}/data/redis.pid"
-	conf_system_service
+	conf_system_service ${home_dir}/init
 	if [[ ${deploy_mode} = '1' ]];then
 		add_system_service redis ${home_dir}/init
 	elif [[ ${deploy_mode} = '2' ]];then
