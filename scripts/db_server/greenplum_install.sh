@@ -52,7 +52,10 @@ greenplum_install(){
 		echo "${host_ip[$i]} ${host_name[$i]}">>${tmp_dir}/hosts
 		((i++))
 	done
-	
+	info_log "正在下载greenplum备份恢复工具"
+	down_file https://github.com/greenplum-db/gpbackup/releases/download/1.19.0/gpbackup ${tmp_dir}/gpbackup
+	down_file https://github.com/greenplum-db/gpbackup/releases/download/1.19.0/gprestore ${tmp_dir}/gprestore
+	chmod +x ${tmp_dir}/gpbackup ${tmp_dir}/gprestore
 	#发送安装包并安装
 	local i=0
 	for host in ${host_ip[@]};
@@ -70,6 +73,7 @@ greenplum_install(){
 		greenplum_bin="\`grep -o 'greenplum_path' /home/gpadmin/.bashrc\`"
 		[[ x\${greenplum_bin} = x ]] && echo 'source /usr/local/greenplum-db/greenplum_path.sh' >>/home/gpadmin/.bashrc
 		EOF
+		scp -P ${ssh_port[i]} ${tmp_dir}/{gpbackup,gprestore} root@${host}:/usr/local/greenplum-db/bin/
 		((i++))
 	done
 	
@@ -79,7 +83,7 @@ greenplum_install(){
 	#配置主机免密
 	host_ip=(${host_name[@]})
 	user=gpadmin
-	passwd=('gpadmin' 'gpadmin' 'gpadmin' 'gpadmin' 'gpadmin')
+	passwd='passw0ord!@#123'
 	auto_ssh_keygen
 
 }

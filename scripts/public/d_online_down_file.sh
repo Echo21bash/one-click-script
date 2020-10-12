@@ -5,7 +5,7 @@ online_down_file(){
 		diy_echo "函数online_down_file缺少down_url变量" "${error}"
 		exit 1
 	fi
-	if [[ -z ${down_url} ]];then
+	if [[ -z ${tmp_dir} ]];then
 		tmp_dir=/tmp
 	fi
 	down_url=`eval echo ${down_url}`
