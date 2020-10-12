@@ -8,7 +8,15 @@ mongodb_env_load(){
 		diy_echo "mongodb不支持32位系统" "${red}" "${error}"
 		exit 1
 	fi
-	down_url='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${detail_version_number}.tgz'
+	select_version
+	install_dir_set
+	online_version
+}
+
+mongodb_down(){
+	down_url="http://downloads.mongodb.org/linux/mongodb-linux-x86_64-${detail_version_number}.tgz"
+	online_down_file
+	unpacking_file ${tmp_dir}/mongodb-linux-x86_64-${detail_version_number}.tgz ${tmp_dir}
 }
 
 mongodb_install_set(){
@@ -21,6 +29,8 @@ mongodb_install_set(){
 }
 
 mongodb_install(){
+	home_dir=${install_dir}/mongodb
+	mkdir -p ${home_dir}
 	cp -rp ${tar_dir}/* ${home_dir}
 	mkdir -p ${home_dir}/{etc,logs}
 	mkdir -p ${mongodb_data_dir}
@@ -42,7 +52,7 @@ mongodb_config(){
 add_mongodb_service(){
 	ExecStart="${home_dir}/bin/mongod -f ${home_dir}/etc/mongodb.conf"
 	ExecStop="${home_dir}/bin/mongod -f ${home_dir}/etc/mongodb.conf"
-	conf_system_service
+	conf_system_service ${home_dir}/init
 	add_sys_env "PATH=${home_dir}/bin:\$PATH"
 	add_system_service mongodb ${home_dir}/init
 }
@@ -50,11 +60,7 @@ add_mongodb_service(){
 mongodb_inistall_ctl(){
 	mongodb_env_load
 	mongodb_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	mongodb_down
 	mongodb_install
 	clear_install
 }

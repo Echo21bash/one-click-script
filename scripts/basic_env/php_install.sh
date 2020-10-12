@@ -6,8 +6,16 @@ php_env_load(){
 	soft_name=php
 	program_version=('5.6' '7.0' '7.1')
 	url="http://mirrors.sohu.com/php/"
-	down_url='${url}/php-${detail_version_number}.tar.gz'
+	select_version
+	install_dir_set
+	online_version
 
+}
+
+php_down(){
+	down_url="${url}/php-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/php-${detail_version_number}.tar.gz ${tmp_dir}
 }
 
 php_install_set(){
@@ -35,6 +43,7 @@ php_install_depend(){
 php_install(){
 
 	cd ${tar_dir}
+	home_dir=${install_dir}/php
 	conf_dir=${home_dir}/etc
 	extra_conf_dir=${home_dir}/etc.d
 	mkdir -p ${home_dir}/{etc,etc.d}
@@ -159,11 +168,7 @@ php_config(){
 php_install_ctl(){
 	php_env_load
 	php_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	php_down
 	php_install_depend
 	php_install
 	clear_install

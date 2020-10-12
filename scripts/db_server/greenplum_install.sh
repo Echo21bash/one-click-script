@@ -7,18 +7,25 @@ greenplum_env_load(){
 	soft_name=greenplum
 	program_version=('6')
 	url='https://github.com/greenplum-db/gpdb'
-	if [[ ${os_release} = '6' ]];then
-		down_url='${url}/releases/download/${detail_version_number}/greenplum-db-${detail_version_number}-rhel6-x86_64.rpm'
-	fi
-	if [[ ${os_release} = '7' ]];then
-		down_url='${url}/releases/download/${detail_version_number}/greenplum-db-${detail_version_number}-rhel7-x86_64.rpm'
-	fi
+	select_version
+	online_version
+
 }
 
 greenplum_install_set(){
 	vi ${workdir}/config/greenplum/greenplum.conf
 	. ${workdir}/config/greenplum/greenplum.conf
 
+}
+
+greenplum_down(){
+	if [[ ${os_release} = '6' ]];then
+		down_url="${url}/releases/download/${detail_version_number}/greenplum-db-${detail_version_number}-rhel6-x86_64.rpm"
+	fi
+	if [[ ${os_release} = '7' ]];then
+		down_url="${url}/releases/download/${detail_version_number}/greenplum-db-${detail_version_number}-rhel7-x86_64.rpm"
+	fi
+	online_down_file
 }
 
 greenplum_install_env(){
@@ -67,7 +74,7 @@ greenplum_install(){
 		host1=\`tail -n 1 /etc/hosts | awk '{print \$2}'\`
 		host2=\`tail -n 1 /tmp/hosts | awk '{print \$2}'\`
 		[[ \${host1} != \${host2} ]] && cat /tmp/hosts >>/etc/hosts
-		yum install -y ${file_name}
+		yum install -y greenplum-db-${detail_version_number}-rhel7-x86_64.rpm
 		chown -R gpadmin.gpadmin /usr/local/greenplum-db*
 		hostnamectl set-hostname ${host_name[$i]}
 		greenplum_bin="\`grep -o 'greenplum_path' /home/gpadmin/.bashrc\`"
@@ -147,11 +154,8 @@ greenplum_config(){
 
 greenplum_install_ctl(){
 	greenplum_env_load
-	select_version
-	online_version
-	online_down_file
-	unpacking_file
 	greenplum_install_set
+	greenplum_down
 	greenplum_install_env
 	greenplum_install
 	greenplum_config

@@ -5,7 +5,15 @@ memcached_env_load(){
 	soft_name=memcached
 	program_version=('1.4' '1.5')
 	url="https://mirrors.huaweicloud.com/memcached"
-	down_url='${url}/memcached-${detail_version_number}.tar.gz'
+	select_version
+	install_dir_set
+	online_version
+}
+
+memcached_down(){
+	down_url="${url}/memcached-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/memcached-${detail_version_number}.tar.gz ${tmp_dir}
 }
 
 memcached_inistall_set(){
@@ -30,7 +38,8 @@ memcached_install(){
 	fi
 
 	cd ${tar_dir}
-	
+	home_dir=${install_dir}/memcached
+	mkdir -p ${home_dir}
 	if [ ${branch} = '1' ];then
 		./configure --prefix=${home_dir} && make && make install
 	fi
@@ -92,11 +101,7 @@ add_memcached_service(){
 memcached_inistall_ctl(){
 	memcached_env_load
 	memcached_inistall_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	memcached_down
 	memcached_install
 	clear_install
 }

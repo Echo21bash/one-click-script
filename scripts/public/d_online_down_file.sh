@@ -12,9 +12,7 @@ online_down_file(){
 	
 	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
 	
-	if [[ -z ${down_filename} ]];then
-		down_filename=${down_url##*/}
-	fi
+	down_file_name=${down_url##*/}
 	down_file ${down_url} ${tmp_dir}/${down_filename}
 
 }

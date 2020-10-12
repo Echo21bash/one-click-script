@@ -4,24 +4,34 @@ mysql_env_load(){
 	tmp_dir=/tmp/mysql_tmp
 	soft_name=mysql
 	program_version=('5.5' '5.6' '5.7')
+	select_version
+	install_dir_set
+	online_version
 	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
 	if [[ ${branch} = '1' ]];then
 		url='http://mirrors.163.com/mysql/Downloads'
-		if [[ ${os_bit} = '64' ]];then
-			down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz'
-		else
-			down_url='${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz'
-		fi
 	else
 		if [[ ${os_bit} = '32' ]];then
 			diy_echo "不支持32位系统建议换成64系统" "${red}" "${error}"
 			exit 1
 		fi
 		url='http://releases.galeracluster.com'
-		down_url='${url}/mysql-wsrep-${detail_version_number}/binary/mysql-wsrep-${detail_version_number}-linux-x86_64.tar.gz'
 	fi
-	
-	
+
+}
+
+mysql_down(){
+	if [[ ${branch} = '1' ]];then
+		if [[ ${os_bit} = '64' ]];then
+			down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz"
+		else
+			down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz"
+		fi
+	else
+		down_url="${url}/mysql-wsrep-${detail_version_number}/binary/mysql-wsrep-${detail_version_number}-linux-x86_64.tar.gz"
+	fi
+	online_down_file
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 
 }
 
@@ -210,11 +220,7 @@ mysql_first_password_set(){
 mysql_install_ctl(){
 	mysql_env_load
 	mysql_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	mysql_down
 	mysql_install
 	clear_install
 }
