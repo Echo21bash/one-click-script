@@ -26,11 +26,11 @@ greenplum_install_env(){
 	local i=0
 	for host in ${host_ip[@]};
 	do
-		scp -P ${ssh_port[i]} ${workdir}/scripts/{public.sh,system_optimize.sh} root@${host}:/root
+		scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/root
+		scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/root
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		. /root/public.sh
 		. /root/system_optimize.sh
-		conf=(2 4 5 6 7)
 		system_optimize_set
 		rm -rf /root/public.sh /root/system_optimize.sh
 		useradd gpadmin
