@@ -89,7 +89,7 @@ redis_install(){
 			exit 1
 		fi
 	fi
-
+	home_dir=${install_dir}/redis
 	cd ${tar_dir}
 	make && cd ${tar_dir}/src && make PREFIX=${home_dir} install
 	if [ $? = '0' ];then
