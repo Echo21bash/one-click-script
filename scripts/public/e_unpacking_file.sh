@@ -36,7 +36,7 @@ unpacking_file(){
 	
 	if [[ $? = '0' ]];then
 		info_log "解压完成"
-		tar_dir=${tmp_dir}/${dir_name}
+		tar_dir=${tmp_dir}/${package_root_dir}
 	else
 		error_log "解压失败"
 		exit 1
