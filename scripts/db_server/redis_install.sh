@@ -12,9 +12,12 @@ redis_env_load(){
 }
 
 redis_down(){
+
 	down_url="${url}/redis-${detail_version_number}.tar.gz"
 	online_down_file
-	unpacking_file ${tmp_dir}/redis-${detail_version_number}.tar.gz ${tmp_dir}
+	unpack_file_name=${tmp_dir}/redis-${detail_version_number}.tar.gz
+	unpack_dir=${tmp_dir}
+	unpacking_file
 }
 
 redis_install_set(){
@@ -90,6 +93,9 @@ redis_install(){
 		fi
 	fi
 	home_dir=${install_dir}/redis
+	if [[ ! -d ${home_dir} ]];then
+		mkdir -p ${home_dir}
+	fi
 	cd ${tar_dir}
 	make && cd ${tar_dir}/src && make PREFIX=${home_dir} install
 	if [ $? = '0' ];then
