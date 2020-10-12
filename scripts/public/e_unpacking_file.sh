@@ -8,7 +8,7 @@ unpacking_file(){
 		error_log "缺少变量unpack_file_name，或者参数\$1待解压文件路径"
 	fi
 	if [[ -z ${unpack_dir} && -n $2 ]];then
-		unpack_dir=$1
+		unpack_dir=$2
 	fi
 	if [[ -z ${unpack_dir} && -z $2 ]];then
 		error_log "缺少变量unpack_dir，或者参数\$2解压至目录"
