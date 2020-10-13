@@ -13,6 +13,6 @@ online_down_file(){
 	[[ ! -d ${tmp_dir} ]] && mkdir -p ${tmp_dir}
 	
 	down_file_name=${down_url##*/}
-	down_file ${down_url} ${tmp_dir}/${down_filename}
+	down_file ${down_url} ${tmp_dir}/${down_file_name}
 
 }
