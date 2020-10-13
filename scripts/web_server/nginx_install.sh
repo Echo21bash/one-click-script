@@ -40,6 +40,8 @@ nginx_install(){
 }
 
 nginx_compile(){
+	home_dir=${install_dir}/nginx
+	mkdir -p ${home_dir}
 	cd ${tar_dir}
 	configure_arg="--prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module"
 	if [[ ${add_module[*]} =~ '1' ]];then
