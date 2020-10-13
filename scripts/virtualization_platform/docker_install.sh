@@ -9,6 +9,8 @@ docker_install_ctl(){
 	else
 		down_file http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo /etc/yum.repos.d/docker-ce.repo
 		yum install -y docker-ce
+		down_file https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
+		chmod +x /usr/local/bin/docker-compose
 	fi
 	mkdir /etc/docker
 	\cp ${workdir}/config/k8s/daemon.json /etc/docker
