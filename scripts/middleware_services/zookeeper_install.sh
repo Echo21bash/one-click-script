@@ -7,7 +7,17 @@ zookeeper_env_load(){
 	soft_name=zookeeper
 	program_version=('3.4' '3.5')
 	url='https://mirrors.huaweicloud.com/apache/zookeeper'
-	down_url='${url}/zookeeper-${detail_version_number}/zookeeper-${detail_version_number}.tar.gz'
+	select_version
+	install_dir_set
+	online_version
+
+}
+
+zookeeper_down(){
+
+	down_url="${url}/zookeeper-${detail_version_number}/zookeeper-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/zookeeper-${detail_version_number}.tar.gz ${tmp_dir}
 
 }
 
@@ -29,6 +39,8 @@ zookeeper_install_set(){
 zookeeper_install(){
 	
 	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/zookeeper
+		mkdir -p ${install_dir}/zookeeper
 		zookeeper_config
 		cp -rp ${tar_dir}/* ${home_dir}
 		add_zookeeper_service
@@ -149,11 +161,7 @@ add_zookeeper_service(){
 zookeeper_install_ctl(){
 	zookeeper_env_load
 	zookeeper_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	zookeeper_down
 	zookeeper_install
 	clear_install
 }

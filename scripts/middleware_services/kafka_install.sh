@@ -6,7 +6,16 @@ kafka_env_load(){
 	soft_name=kafka
 	program_version=('2.1' '2.2' '2.3')
 	url='https://mirrors.huaweicloud.com/apache/kafka'
-	down_url='${url}/${detail_version_number}/kafka_2.11-${detail_version_number}.tgz'
+	select_version
+	install_dir_set
+	online_version
+
+}
+
+kafka_down(){
+	down_url="${url}/${detail_version_number}/kafka_2.11-${detail_version_number}.tgz"
+	online_down_file
+	unpacking_file
 
 }
 
@@ -111,12 +120,8 @@ add_kafka_service(){
 kafka_install_ctl(){
 
 	kafka_env_load
-	select_version
 	kafka_install_set
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	kafka_down
 	kafka_install
 	clear_install
 }

@@ -1,4 +1,24 @@
 #!/bin/bash
+activemq_env_load(){
+	
+	tmp_dir=/tmp/activemq_tmp
+	mkdir -p ${tmp_dir}
+	soft_name=activemq
+	program_version=('5')
+	url='https://mirrors.huaweicloud.com/apache/activemq'
+	select_version
+	install_dir_set
+	online_version
+
+}
+
+rocketmq_down(){
+
+	down_url="${url}/${detail_version_number}/apache-activemq-${detail_version_number}-bin.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/apache-activemq-${detail_version_number}-bin.tar.gz ${tmp_dir}
+
+}
 
 activemq_install_set(){
 	output_option '请选择安装模式' '单机模式 集群模式' 'deploy_mode'
@@ -157,11 +177,9 @@ add_activemq_service(){
 }
 
 activemq_install_ctl(){
-	install_version activemq
-	install_selcet
+	activemq_env_load
 	activemq_install_set
-	install_dir_set
-	download_unzip
+	activemq_down
 	activemq_install
 	clear_install
 }

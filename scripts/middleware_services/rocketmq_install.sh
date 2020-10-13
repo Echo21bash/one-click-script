@@ -1,4 +1,25 @@
 #!/bin/bash
+rocketmq_env_load(){
+	
+	tmp_dir=/tmp/rocketmq_tmp
+	mkdir -p ${tmp_dir}
+	soft_name=rocketmq
+	program_version=('4')
+	url='https://mirrors.huaweicloud.com/apache/rocketmq'
+	select_version
+	install_dir_set
+	online_version
+
+}
+
+rocketmq_down(){
+
+	down_url="${url}/${detail_version_number}/rocketmq-all-bin-${detail_version_number}.zip"
+	online_down_file
+	unpacking_file ${tmp_dir}/rocketmq-all-bin-${detail_version_number}.zip ${tmp_dir}
+
+}
+
 
 rocketmq_install_set(){
 
@@ -144,11 +165,9 @@ add_rocketmq_service(){
 }
 
 rocketmq_install_ctl(){
-	install_version rocketmq
-	install_selcet
+	rocketmq_env_load
 	rocketmq_install_set
-	install_dir_set
-	download_unzip
+	rocketmq_down
 	rocketmq_install
 	clear_install
 }
