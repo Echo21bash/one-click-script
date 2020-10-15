@@ -27,6 +27,8 @@ redis_install_set(){
 		input_option '请设置端口号' '6379' 'redis_port'
 		input_option '请设置redis密码' 'passw0ord' 'redis_password'
 		redis_password=${input_value}
+		input_option '请设置数据目录' '/data/redis' 'redis_data_dir'
+		redis_data_dir=${input_value}
 	else
 		output_option '请选择集群模式' '多主多从(集群模式) 一主多从(哨兵模式)' 'cluster_mode'
 	fi
@@ -96,7 +98,7 @@ redis_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/redis
-		mkdir -p ${home_dir}
+		mkdir -p ${home_dir} ${redis_data_dir}
 		cp -rp ${make_home_dir}/* ${home_dir}
 		redis_config
 		add_redis_service
@@ -116,7 +118,7 @@ redis_install(){
 				home_dir=${install_dir}/redis-node${service_id}				
 				add_redis_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/redis-node${service_id}
+				mkdir -p ${install_dir}/redis-node${service_id}/{etc,logs}
 				mkdir -p ${redis_data_dir}/node${service_id}
 				"
 				info_log "正在向节点${now_host}分发redis-node${service_id}安装程序和配置文件..."
@@ -143,7 +145,6 @@ redis_config(){
 	cp ${tar_dir}/redis.conf ${conf_dir}/redis.conf
 	sed -i "s/^port .*/port ${redis_port}/" ${conf_dir}/redis.conf
 	sed -i 's/^daemonize no/daemonize yes/' ${conf_dir}/redis.conf
-	sed -i "s#^dir .*#dir ${redis_data_dir}#" ${conf_dir}/redis.conf
 	sed -i "s/# requirepass foobared/requirepass ${redis_password}/" ${conf_dir}/redis.conf
 	sed -i 's/# maxmemory <bytes>/maxmemory 100mb/' ${conf_dir}/redis.conf
 	sed -i 's/# maxmemory-policy noeviction/maxmemory-policy volatile-lru/' ${conf_dir}/redis.conf
@@ -157,6 +158,7 @@ redis_config(){
 		sed -i "s/^bind.*/bind 127.0.0.1 ${local_ip}/" ${home_dir}/etc/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/redis-${redis_port}.pid#" ${home_dir}/etc/redis.conf
 		sed -i "s#^logfile .*#logfile ${home_dir}/logs/redis.log#" ${home_dir}/redis.conf
+		sed -i "s#^dir .*#dir ${redis_data_dir}#" ${conf_dir}/redis.conf
 		add_log_cut ${home_dir}/log_cut_redis ${home_dir}/logs/redis.log
 	fi
 	
@@ -165,6 +167,7 @@ redis_config(){
 		sed -i "s/^bind.*/bind 127.0.0.1 ${now_host}/" ${conf_dir}/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/node${service_id}/redis-${redis_port}.pid#" ${conf_dir}/redis.conf
 		sed -i "s#^logfile .*#logfile ${install_dir}/redis-node${service_id}/logs/redis.log#" ${conf_dir}/redis.conf
+		sed -i "s#^dir .*#dir ${redis_data_dir}/node${service_id}#" ${conf_dir}/redis.conf
 		sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
 		sed -i "s/# cluster-enabled yes/cluster-enabled yes/" ${conf_dir}/redis.conf
 		sed -i "s/# cluster-config-file nodes-6379.conf/cluster-config-file nodes-${redis_port}.conf/" ${conf_dir}/redis.conf
