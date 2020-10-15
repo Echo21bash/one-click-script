@@ -2,7 +2,7 @@
 
 rancher_install_ctl(){
 	input_option "请输入访问端口" "8888" "port"
-	input_option "请输入数据存储路径" "/opt/rancher" "data_dir"
+	input_option "请输入数据存储路径" "/data/rancher" "data_dir"
 	data_dir=${input_value}
 	if [[ -z `which dockerd 2>/dev/null` ]];then
 		docker_install
