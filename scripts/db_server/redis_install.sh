@@ -32,8 +32,8 @@ redis_install_set(){
 	fi
 		
 	if [[ ${cluster_mode} = '1' ]];then
-		vi ${work_dir}/config/redis/redis_cluster.conf
-		. ${work_dir}/config/redis/redis_cluster.conf
+		vi ${workdir}/config/redis/redis_cluster.conf
+		. ${workdir}/config/redis/redis_cluster.conf
 
 	fi
 
