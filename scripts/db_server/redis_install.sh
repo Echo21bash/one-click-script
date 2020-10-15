@@ -208,16 +208,12 @@ add_redis_service(){
 	ExecStart="${home_dir}/bin/redis-server ${home_dir}/etc/redis.conf"
 
 	if [[ ${deploy_mode} = '1' ]];then
-		PIDFile="${redis_data_dir}/redis-${redis_port}.pid"
 		conf_system_service ${home_dir}/redis.service
 		add_system_service redis ${home_dir}/redis.service
 	elif [[ ${deploy_mode} = '2' ]];then
-		PIDFile="${redis_data_dir}/node${service_id}/redis-${redis_port}.pid"
 		conf_system_service ${tmp_dir}/redis-node${service_id}.service
-		
 		if [[ ${cluster_mode} = '2' ]];then
 			ExecStart="${home_dir}/bin/redis-sentinel ${home_dir}/etc/sentinel"
-			PIDFile="${home_dir}/data/redis_sentinel.pid"
 			conf_system_service ${tmp_dir}/redis-sentinel-node${service_id}.service
 			add_system_service redis-sentinel-node${service_id} ${tmp_dir}/redis-sentinel-node${service_id}.service
 		fi
