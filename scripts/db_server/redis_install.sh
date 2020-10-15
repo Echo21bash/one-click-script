@@ -212,6 +212,7 @@ add_redis_service(){
 		add_system_service redis ${home_dir}/redis.service
 	elif [[ ${deploy_mode} = '2' ]];then
 		conf_system_service ${tmp_dir}/redis-node${service_id}.service
+		service_control redis-node${service_id}.service
 		if [[ ${cluster_mode} = '2' ]];then
 			ExecStart="${home_dir}/bin/redis-sentinel ${home_dir}/etc/sentinel"
 			conf_system_service ${tmp_dir}/redis-sentinel-node${service_id}.service

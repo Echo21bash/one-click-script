@@ -385,10 +385,10 @@ conf_system_service(){
 }
 #添加守护进程
 add_system_service(){
-	#$1服务名 $2服务文件路径 $3现在启动
+	#$1服务名 $2服务文件路径
 	service_name=$1
 	service_file_dir=$2
-	start_arg=$3
+
 	if [[ "${os_release}" < '7' ]]; then
 		if [[ -f /etc/init.d/${service_name} ]];then
 			input_option "已经存在服务名${service_name},请重新设置服务名称(可覆盖)" "${service_name}" 'service_name'
@@ -402,12 +402,15 @@ add_system_service(){
 		fi
 		\cp ${service_file_dir} /etc/systemd/system/${service_name}.service
 	fi
-	service_control
+
 }
 
 service_control(){
 	if [[ "x$1" != 'x' ]];then
 		service_name=$1
+	fi
+	if [[ "x$2" != 'x' ]];then
+		start_arg=$2
 	fi
 	if [[ ${os_release} -lt '7' ]];then
 		chmod +x /etc/init.d/${service_name}

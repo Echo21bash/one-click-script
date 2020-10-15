@@ -177,17 +177,20 @@ add_mysql_service(){
 		ExecStart="${home_dir}/bin/mysqld_safe --defaults-file=${home_dir}/my.cnf"
 		conf_system_service
 		add_system_service mysqld ${home_dir}/init y
+		service_control mysqld y
 	elif [[ ${deploy_mode} = '2' ]];then
 		if [[ ${os_release} > 6 ]];then
 			ExecStart="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf --log=/tmp/mysql_multi.log start %i"
 			ExecStop="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf stop %i"
 			conf_system_service
-			add_system_service mysqld@ ${home_dir}/init y
+			add_system_service mysqld@3306 ${home_dir}/init
+			service_control mysqld@3306 y
 		else
 			ExecStart="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf start \$2"
 			ExecStop="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf stop \$2"
 			conf_system_service
-			add_system_service mysqld_multi ${home_dir}/init y
+			add_system_service mysqld_multi ${home_dir}/init 
+			service_control 'mysqld_multi 3306' y
 		fi
 	fi
 
