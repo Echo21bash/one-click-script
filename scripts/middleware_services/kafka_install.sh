@@ -54,7 +54,7 @@ kafka_install(){
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				broker_id=$i
-				let kafka_port=${kafka_port}+$j
+				let kafka_port=9092+$j
 				kafka_config
 				home_dir=${install_dir}/kafka-broker${broker_id}
 				add_kafka_service

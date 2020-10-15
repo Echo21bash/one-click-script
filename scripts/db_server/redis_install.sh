@@ -113,7 +113,7 @@ redis_install(){
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				service_id=$i
-				let redis_port=${redis_port}+$j
+				let redis_port=6379+$j
 				redis_config
 				home_dir=${install_dir}/redis-node${service_id}				
 				add_redis_service
@@ -129,6 +129,10 @@ redis_install(){
 				\cp ${install_dir}/redis-node${service_id}/redis-node${i}.service /etc/systemd/system/redis-node${i}.service
 				\cp ${install_dir}/redis-node${service_id}/log_cut_redis-node${i} /etc/rsyslog.d/redis-node${i}
 				systemctl daemon-reload
+				"
+				info_log "正在启动节点redis-node${service_id}..."
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				systemctl restart redis-node${service_id}
 				"
 				((i++))
 			done

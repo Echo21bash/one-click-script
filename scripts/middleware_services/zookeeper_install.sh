@@ -58,7 +58,7 @@ zookeeper_install(){
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				service_id=$i
-				let zk_port=${zk_port}+$j
+				let zk_port=2181+$j
 				zookeeper_config
 				home_dir=${install_dir}/zookeeper-node${service_id}				
 				add_zookeeper_service
