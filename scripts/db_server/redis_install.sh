@@ -202,7 +202,6 @@ redis_config(){
 add_redis_service(){
 	Type="forking"
 	ExecStart="${home_dir}/bin/redis-server ${home_dir}/etc/redis.conf"
-	PIDFile="${home_dir}/data/redis.pid"
 
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${home_dir}/redis.service
