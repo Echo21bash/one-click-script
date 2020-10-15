@@ -118,7 +118,7 @@ redis_install(){
 				home_dir=${install_dir}/redis-node${service_id}				
 				add_redis_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/redis-node${service_id}/{etc,logs}
+				mkdir -p ${install_dir}/redis-node${service_id}
 				mkdir -p ${redis_data_dir}/node${service_id}
 				"
 				info_log "正在向节点${now_host}分发redis-node${service_id}安装程序和配置文件..."
@@ -141,7 +141,8 @@ redis_install(){
 
 redis_config(){
 	#public config
-	conf_dir=${make_home_dir}
+	mkdir -p ${make_home_dir}/{etc,logs}
+	conf_dir=${make_home_dir}/etc
 	cp ${tar_dir}/redis.conf ${conf_dir}/redis.conf
 	sed -i "s/^port .*/port ${redis_port}/" ${conf_dir}/redis.conf
 	sed -i 's/^daemonize no/daemonize yes/' ${conf_dir}/redis.conf
