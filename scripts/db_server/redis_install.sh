@@ -160,7 +160,7 @@ redis_config(){
 		mkdir -p ${home_dir}/{logs,etc,data}
 		cp -rp ${make_home_dir}/redis/* ${home_dir}
 		cp ${conf_dir}/redis.conf ${home_dir}/etc/redis.conf
-		sed -i "s/^bind.*/bind 127.0.0.1 ${local_ip}/" ${home_dir}/etc/redis.conf
+		sed -i "s/^bind.*/bind ${local_ip}/" ${home_dir}/etc/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/redis-${redis_port}.pid#" ${home_dir}/etc/redis.conf
 		sed -i "s#^logfile .*#logfile ${home_dir}/logs/redis.log#" ${home_dir}/redis.conf
 		sed -i "s#^dir .*#dir ${redis_data_dir}#" ${conf_dir}/redis.conf
@@ -169,7 +169,7 @@ redis_config(){
 	
 	if [[ ${deploy_mode} = '2' && ${cluster_mode} = '1' ]];then
 		cp ${tar_dir}/src/redis-trib.rb ${make_home_dir}/bin/redis-trib.rb
-		sed -i "s/^bind.*/bind 127.0.0.1 ${now_host}/" ${conf_dir}/redis.conf
+		sed -i "s/^bind.*/bind ${now_host}/" ${conf_dir}/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/node${service_id}/redis-${redis_port}.pid#" ${conf_dir}/redis.conf
 		sed -i "s#^logfile .*#logfile ${install_dir}/redis-node${service_id}/logs/redis.log#" ${conf_dir}/redis.conf
 		sed -i "s#^dir .*#dir ${redis_data_dir}/node${service_id}#" ${conf_dir}/redis.conf
@@ -183,7 +183,7 @@ redis_config(){
 	if [[ ${deploy_mode} = '2' && ${cluster_mode} = '2' ]];then
 		cp ${tar_dir}/sentinel.conf ${make_home_dir}/sentinel.conf
 		
-		sed -i "s/^bind.*/bind 127.0.0.1 ${now_host}/" ${conf_dir}/redis.conf
+		sed -i "s/^bind.*/bind ${now_host}/" ${conf_dir}/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/node${service_id}/redis-${redis_port}.pid#" ${conf_dir}/redis.conf
 		sed -i "s#^logfile .*#logfile ${install_dir}/redis-node${service_id}/logs/redis.log#" ${conf_dir}/redis.conf
 		sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
@@ -193,7 +193,7 @@ redis_config(){
 			sed -i "s/^# slaveof <masterip> <masterport>/slaveof ${mast_redis_ip} ${mast_redis_port}/" ${conf_dir}/redis.conf
 		fi
 		#哨兵配置文件
-		sed -i "s/^# bind.*/bind 127.0.0.1 ${now_host}/" ${conf_dir}/sentinel.conf
+		sed -i "s/^# bind.*/bind ${now_host}/" ${conf_dir}/sentinel.conf
 		sed -i "s/^port .*/port 2${redis_port}/" ${conf_dir}/sentinel.conf
 		sed -i "s#^dir .*#dir ${redis_data_dir}\nlogfile ${install_dir}/redis-node${service_id}/logs/sentinel.log\npidfile ${install_dir}/redis-node${service_id}/redis_sentinel.pid\ndaemonize yes#" ${conf_dir}/sentinel.conf
 		sed -i "s#^sentinel monitor mymaster 127.0.0.1 6379 2#sentinel monitor mymaster ${now_host} ${mast_redis_port} 2#" ${conf_dir}/sentinel.conf
