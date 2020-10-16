@@ -231,16 +231,16 @@ redis_cluster_init(){
 	###集群初始化
 	if [[ ${version_number} < '5.0' ]];then
 		ruby_redis_config=`find / -name client.rb | grep redis`
-		sed -i "s/password: .*,/password: ${redis_password},/" ${ruby_redis_config}
+		sed -i "s/password:.*,/password: '${redis_password}',/" ${ruby_redis_config}
 		redis_init=`expect <<-EOF
 		set timeout -1
-		spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-trib.rb --replicas 1 ${redis_service_list}"
+		spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-trib.rb create --replicas 1 ${redis_service_list}"
 		expect {
 			"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
 		}
 		EOF`
 	fi
-	if [[ ${version_number} -ge '5.0' ]];then
+	if [[ ${version_number} > '4.0' ]];then
 		redis_init=`expect <<-EOF
 		set timeout -1
 		spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
