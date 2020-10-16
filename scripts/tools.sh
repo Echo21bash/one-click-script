@@ -413,15 +413,19 @@ service_control(){
 		start_arg=$2
 	fi
 	if [[ ${os_release} -lt '7' ]];then
-		chmod +x /etc/init.d/${service_name}
-		chkconfig --add /etc/init.d/${service_name}
+		if [[ -f /etc/init.d/${service_name} ]];then
+			chmod +x /etc/init.d/${service_name}
+			chkconfig --add ${service_name}
+		fi
 		diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
 		[[ ${start_arg} = 'y' ]] && service ${service_name} start && diy_echo "${service_name}启动完成." "" "${info}"
 	fi
 
 	if [[  ${os_release} -ge '7' ]];then
 		systemctl daemon-reload
-		systemctl enable ${service_name} >/dev/null
+		if [[ -f /etc/systemd/system/${service_name} || -f /etc/systemd/system/${service_name}.service || -f /usr/lib/systemd/system/${service_name} || -f /usr/lib/systemd/system/${service_name}.service ]];then
+			systemctl enable ${service_name} >/dev/null
+		fi
 		diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
 		[[ ${start_arg} = 'y' ]] && systemctl start ${service_name} && diy_echo "${service_name}启动完成." "" "${info}"
 	fi

@@ -140,7 +140,7 @@ redis_install(){
 			done
 			((k++))
 		done
-		redis_cluster_description
+		redis_cluster_init
 	fi
 }
 
@@ -227,7 +227,7 @@ add_redis_service(){
 	fi
 }
 
-redis_cluster_description(){
+redis_cluster_init(){
 	if [[ ${cluster_mode} = '1' ]];then
 		diy_echo "现在Redis集群已经配置好了" "" "${info}"
 		diy_echo "如果小于5.0版本,添加集群命令示例 ${install_dir}/bin/redis-trib.rb create --replicas 1 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006,如果设置了集群密码还需要修改所使用ruby版本（本脚本默认使用ruby版本2.3.3）对应的client.rb文件（可通过find命令查找）,将password字段修改成对应的密码。"
@@ -246,7 +246,7 @@ redis_cluster_description(){
 	EOF`
 	if [[ -z `echo $redis_init | grep -Eo  "\[ERR\].*"` ]];then
 		success_log "redis集群初始化成功"
-		info_log "redis连接地址${redis_service_list}"
+		info_log "redis连接地址:${redis_service_list}"
 	else
 		error_log "redis集群初始化失败"
 	fi
