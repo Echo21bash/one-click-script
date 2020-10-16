@@ -539,7 +539,7 @@ work_node_install_ctl(){
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
-			info_log "正在向工作节点${ssh_port[i]}分发k8s程序及配置文件..."
+			info_log "正在向工作节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -668,6 +668,10 @@ culster_other_conf(){
 			${k8s_dir}/bin/kubectl create clusterrolebinding kube-apiserver:kubelet-apis --clusterrole=system:kubelet-api-admin --user kubernetes
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
+			sleep 30
+			"
+			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			#给节点打标签
 			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
 			${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 			#配置master节点禁止部署
@@ -683,7 +687,8 @@ culster_other_conf(){
 		if [[ "${node_ip[@]}" =~ ${host} || "${master_ip[@]}" =~ ${host} ]];then
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			ln -sf ${k8s_dir}/bin/* /usr/local/bin/
-			if [[ -z $(cat ~/.bashrc | grep 'source <(kubectl completion bash)') ]];then
+			k8s_bash=`cat ~/.bashrc | grep 'source <(kubectl completion bash)'`
+			if [[ x${k8s_bash} = 'x' ]];then
 				echo 'source <(kubectl completion bash)' >> ~/.bashrc
 			fi
 			"
