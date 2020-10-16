@@ -432,7 +432,7 @@ service_control(){
 }
 #添加环境变量
 add_sys_env(){
- 
+	>/etc/profile.d/${soft_name}.sh
 	if [[ -n $1 ]];then
 		option=($1)
 		for item in ${option[@]}
