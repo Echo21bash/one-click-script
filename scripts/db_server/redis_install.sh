@@ -240,13 +240,14 @@ redis_cluster_description(){
 	###集群初始化
 	redis_init=`expect <<-EOF
 	set timeout -1
-	spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
+	spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
 	expect {
 		"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
 	}
 	EOF`
 	if [[ -z `echo $redis_init | grep -Eo  "\[ERR\].*"` ]];then
 		success_log "redis集群初始化成功"
+		info_log "redis连接地址${redis_service_list}"
 	else
 		error_log "redis集群初始化失败"
 	fi
