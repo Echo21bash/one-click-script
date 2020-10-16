@@ -114,6 +114,7 @@ redis_install(){
 			do
 				service_id=$i
 				let redis_port=6379+$j
+				add_redis_server_list
 				redis_config
 				home_dir=${install_dir}/redis-node${service_id}				
 				add_redis_service
@@ -132,6 +133,7 @@ redis_install(){
 				"
 				info_log "正在启动节点redis-node${service_id}..."
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				systemctl enable redis-node${service_id}
 				systemctl restart redis-node${service_id}
 				"
 				((i++))
@@ -141,6 +143,11 @@ redis_install(){
 		add_sys_env "PATH=${home_dir}/bin:\$PATH"
 		redis_cluster_description
 	fi
+}
+
+add_redis_server_list(){
+	redis_service_list="${redis_service_list}${now_host}:${redis_port} "
+
 }
 
 redis_config(){
@@ -228,6 +235,20 @@ redis_cluster_description(){
 		diy_echo "如果大于5.0版本,添加集群命令示例 redis-cli -a ${redis_password} --cluster create 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006 --cluster-replicas 1"
 	elif [[ ${cluster_mode} = '2' ]];then
 		diy_echo "现在Redis集群已经配置好了" "" "${info}"
+	fi
+	
+	###集群初始化
+	redis_init=`expect <<-EOF
+	set timeout -1
+	spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
+	expect {
+		"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
+	}
+	EOF`
+	if [[ -z `echo $redis_init | grep -Eo  "\[ERR\].*"` ]];then
+		success_log "redis集群初始化成功"
+	else
+		error_log "redis集群初始化失败"
 	fi
 }
 
