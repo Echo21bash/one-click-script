@@ -18,9 +18,12 @@ ruby_env_load(){
 ruby_install(){
 
 	yum install -y zlib-devel openssl-devel
+	home_dir=${install_dir}/ruby
+	make_home_dir=${tmp_dir}/ruby
 	cd ${tar_dir}
-	./configure --prefix=${home_dir}  --disable-install-rdoc
+	./configure --prefix=${make_home_dir}  --disable-install-rdoc
 	make && make install
+	cp -rp ${make_home_dir}/* ${home_dir}
 	add_sys_env "PATH=${home_dir}/bin:\$PATH"
 
 	gem sources --add http://gems.ruby-china.com/ --remove http://rubygems.org/
