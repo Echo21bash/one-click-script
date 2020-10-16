@@ -228,22 +228,28 @@ add_redis_service(){
 }
 
 redis_cluster_init(){
-	if [[ ${cluster_mode} = '1' ]];then
-		diy_echo "现在Redis集群已经配置好了" "" "${info}"
-		diy_echo "如果小于5.0版本,添加集群命令示例 ${install_dir}/bin/redis-trib.rb create --replicas 1 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006,如果设置了集群密码还需要修改所使用ruby版本（本脚本默认使用ruby版本2.3.3）对应的client.rb文件（可通过find命令查找）,将password字段修改成对应的密码。"
-
-	elif [[ ${cluster_mode} = '2' ]];then
-		diy_echo "现在Redis集群已经配置好了" "" "${info}"
-	fi
-	
 	###集群初始化
-	redis_init=`expect <<-EOF
-	set timeout -1
-	spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
-	expect {
-		"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
-	}
-	EOF`
+	if [[ ${version_number} < '5.0' ]];then
+		ruby_redis_config=`find / -name client.rb | grep redis`
+		sed -i "s/password: .*,/password: ${redis_password},/" ${ruby_redis_config}
+		redis_init=`expect <<-EOF
+		set timeout -1
+		spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-trib.rb --replicas 1 ${redis_service_list}"
+		expect {
+			"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
+		}
+		EOF`
+	fi
+	if [[ ${version_number} -ge '5.0' ]];then
+		redis_init=`expect <<-EOF
+		set timeout -1
+		spawn ssh ${host_ip[0]} -p ${ssh_port[0]} "${install_dir}/redis-node1/bin/redis-cli -a ${redis_password} --cluster create ${redis_service_list} --cluster-replicas 1"
+		expect {
+			"*(type 'yes' to accept):*" { send "yes\r";exp_continue}
+		}
+		EOF`
+	fi
+
 	if [[ -z `echo $redis_init | grep -Eo  "\[ERR\].*"` ]];then
 		success_log "redis集群初始化成功"
 		info_log "redis连接地址:${redis_service_list}"
