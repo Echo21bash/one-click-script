@@ -225,7 +225,7 @@ add_log_cut(){
 		dateext
 		}
 		EOF
-		success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/rsyslog.d/下"
+		success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/logrotate.d/下"
 	else
 		error_log "函数add_log_cut缺少参数\$1(日志切割配置模板路径)"
 		exit 1
@@ -347,7 +347,7 @@ conf_system_service(){
 		    ;;
 		esac
 		EOF
-		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/init.d/下"
+		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/init.d下"
 	elif [[ "${os_release}" -ge 7 ]]; then
 		cat >${system_service_config_file}<<-EOF
 		[Unit]
@@ -373,7 +373,7 @@ conf_system_service(){
 		[Install]
 		WantedBy=multi-user.target
 		EOF
-		success_log "成功创建${system_service_config_file}系统服务配置文件"
+		success_log "成功创建${system_service_config_file}系统服务配置文件,,请复制到/etc/systemd/system下"
 	fi
 	#删除空值
 	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
@@ -415,14 +415,14 @@ service_control(){
 	if [[ ${os_release} -lt '7' ]];then
 		chmod +x /etc/init.d/${service_name}
 		chkconfig --add /etc/init.d/${service_name}
-		echo -e "${info} ${service_name} command: $(diy_echo "service ${service_name} start|stop|restart|status" "$yellow")"
+		diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
 		[[ ${start_arg} = 'y' ]] && service ${service_name} start && diy_echo "${service_name}启动完成." "" "${info}"
 	fi
 
 	if [[  ${os_release} -ge '7' ]];then
 		systemctl daemon-reload
 		systemctl enable ${service_name} >/dev/null
-		echo -e "${info} ${service_name} command: $(diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow")"
+		diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
 		[[ ${start_arg} = 'y' ]] && systemctl start ${service_name} && diy_echo "${service_name}启动完成." "" "${info}"
 	fi
 }

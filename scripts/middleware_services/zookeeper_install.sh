@@ -73,7 +73,7 @@ zookeeper_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/zookeeper-node${service_id}/zookeeper-node${i}.service /etc/systemd/system/zookeeper-node${i}.service
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
-				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/rsyslog.d/zookeeper-node${i}
+				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/logrotate.d/zookeeper-node${i}
 				systemctl daemon-reload
 				"
 				((i++))

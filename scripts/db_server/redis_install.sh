@@ -128,7 +128,7 @@ redis_install(){
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/redis-node${service_id}/redis-node${i}.service /etc/systemd/system/redis-node${i}.service
-				\cp ${install_dir}/redis-node${service_id}/log_cut_redis-node${i} /etc/rsyslog.d/redis-node${i}
+				\cp ${install_dir}/redis-node${service_id}/log_cut_redis-node${i} /etc/logrotate.d/redis-node${i}
 				systemctl daemon-reload
 				"
 				info_log "正在启动节点redis-node${service_id}..."

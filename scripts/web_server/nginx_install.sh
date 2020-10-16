@@ -85,7 +85,8 @@ nginx_config(){
 	if [[ ${add_module[*]} =~ '1' ]];then
 		\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	fi
-	add_log_cut nginx ${home_dir}/logs/*.log
+	add_log_cut ${tmp_dir}/log_cut_nginx ${home_dir}/logs/*.log
+	\cp ${tmp_dir}/log_cut_nginx /etc/logrotate.d
 }
 
 add_nginx_service(){

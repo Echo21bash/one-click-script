@@ -50,8 +50,8 @@ openresty_compile(){
 openresty_config(){
 	conf_dir=${home_dir}/conf
 	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
-
-	add_log_cut openresty ${home_dir}/logs/*.log
+	add_log_cut ${tmp_dir}/log_cut_openresty ${home_dir}/logs/*.log
+	\cp ${tmp_dir}/log_cut_openresty /etc/logrotate.d
 }
 
 add_openresty_service(){
