@@ -396,7 +396,7 @@ master_node_install_ctl(){
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
-			info_log "正在向主节点${ssh_port[i]}分发k8s程序及配置文件..."
+			info_log "正在向主节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -607,11 +607,11 @@ master_node_check(){
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[*]}" =~ ${host} ]];then
-			api_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-apiserver >/dev/null 2>&1  && echo 0"`
+			api_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl status kube-apiserver >/dev/null 2>&1  && echo 0"`
 			[[ x$api_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件apiserver状态异常"
-			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-scheduler >/dev/null 2>&1  && echo 0"`
+			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl status kube-scheduler >/dev/null 2>&1  && echo 0"`
 			[[ x$scheduler_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件scheduler状态异常"
-			controller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i] "systemctl status kube-controller-manager >/dev/null 2>&1  && echo 0"`
+			controller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl status kube-controller-manager >/dev/null 2>&1  && echo 0"`
 			[[ x$controller_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件controller-manager状态异常"
 				
 			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
