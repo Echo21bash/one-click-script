@@ -406,7 +406,7 @@ master_node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
 			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
-			info_log "正在生成主节点${ssh_port[i]}kubeconfig配置文件..."
+			info_log "正在生成主节点${host_ip[i]}kubeconfig配置文件..."
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#利用证书生成kubectl的kubeconfig
