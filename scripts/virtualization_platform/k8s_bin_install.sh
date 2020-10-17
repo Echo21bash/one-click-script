@@ -522,8 +522,7 @@ master_node_install_ctl(){
 			
 			systemctl restart kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
-			sleep 20
-			" &
+			"
 		fi
 		((i++))
 	done
@@ -592,8 +591,7 @@ work_node_install_ctl(){
 			${k8s_dir}/bin/kubectl config use-context default --kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig
 			
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
-			sleep 20
-			" &
+			"
 		fi
 		((i++))
 	done
@@ -682,10 +680,7 @@ culster_other_conf(){
 		if [[ "${node_ip[@]}" =~ ${host} || "${master_ip[@]}" =~ ${host} ]];then
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			ln -sf ${k8s_dir}/bin/* /usr/local/bin/
-			k8s_bash=`cat ~/.bashrc | grep 'source <(kubectl completion bash)'`
-			if [[ x${k8s_bash} = 'x' ]];then
-				echo 'source <(kubectl completion bash)' >> ~/.bashrc
-			fi
+			echo 'source <(kubectl completion bash)'>/etc/profile.d/k8s.sh
 			"
 		fi
 		((i++))
