@@ -12,6 +12,16 @@ filebeat_env_load(){
 	fi
 }
 
+filebeat_down(){
+	if [[ ${os_bit} = '64' ]];then
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz"
+	else
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86.tar.gz"
+	fi
+	online_down_file  
+
+}
+
 filebeat_install(){
 	mv ${tar_dir}/* ${home_dir}
 	filebeat_conf
