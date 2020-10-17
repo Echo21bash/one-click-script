@@ -613,17 +613,12 @@ master_node_check(){
 			[[ x$scheduler_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件scheduler状态异常"
 			controller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl status kube-controller-manager >/dev/null 2>&1  && echo 0"`
 			[[ x$controller_healthy = 'x' ]] && warning_log "主机${host_ip[$i]}k8s组件controller-manager状态异常"
-				
-			scheduler_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep scheduler | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $scheduler_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件scheduler状态异常！！！" "$red" "$error" && exit 1
-			ontroller_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep controller-manager | grep Unhealthy | awk '{print $2}' | wc -l"`
-			[[ $ontroller_healthy = '1' ]] && diy_echo "主机${host_ip[$i]}k8s组件controller-manage状态异常！！！" "$red" "$error" && exit 1
 			etcd_healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${k8s_dir}/bin/kubectl get cs | grep etcd | grep Healthy | awk '{print $2}' | wc -l"`
 			[[ $etcd_healthy = '0' ]] && diy_echo "k8s组件etcd状态异常！！！" "$red" "$error" && exit 1
 		fi
 		((i++))
 	done
-	
+
 }
 
 culster_bootstrap_conf(){
