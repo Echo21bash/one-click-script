@@ -373,7 +373,7 @@ conf_system_service(){
 		[Install]
 		WantedBy=multi-user.target
 		EOF
-		success_log "成功创建${system_service_config_file}系统服务配置文件,,请复制到/etc/systemd/system下"
+		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/systemd/system下"
 	fi
 	#删除空值
 	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
