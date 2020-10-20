@@ -15,7 +15,7 @@ kafka_env_load(){
 kafka_down(){
 	down_url="${url}/${detail_version_number}/kafka_2.11-${detail_version_number}.tgz"
 	online_down_file
-	unpacking_file
+	unpacking_file ${tmp_dir}/kafka_2.11-${detail_version_number}.tgz ${tmp_dir}
 
 }
 
