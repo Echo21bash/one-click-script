@@ -39,6 +39,8 @@ kafka_install_set(){
 kafka_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/kafka
+		mkdir -p ${home_dir}
 		cp -rp ${tar_dir}/* ${home_dir}
 		kafka_config
 		add_kafka_service
@@ -98,7 +100,12 @@ kafka_config(){
 }
 
 add_kafka_service(){
-	JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	if [[ ${deploy_mode} = '1' ]];then
+		JAVA_HOME=${JAVA_HOME}
+	else
+		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	fi
+	
 	if [[ -z ${JAVA_HOME} ]];then
 		warning_log "主机${host_ip[$k]}没有正确配置JAVA_HOME变量"
 	fi
@@ -108,13 +115,11 @@ add_kafka_service(){
 	Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${home_dir}/kafka.service
+		add_system_service kafka ${home_dir}/kafka.service
 	else
 		conf_system_service ${tmp_dir}/kafka-broker${broker_id}
 	fi
 
-	if [[ ${deploy_mode} = '1' ]];then
-		add_system_service kafka ${home_dir}/kafka.service
-	fi
 }
 
 kafka_install_ctl(){
