@@ -41,8 +41,8 @@ kafka_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/kafka
 		mkdir -p ${home_dir}
-		cp -rp ${tar_dir}/* ${home_dir}
 		kafka_config
+		cp -rp ${tar_dir}/* ${home_dir}
 		add_kafka_service
 	fi
 	
