@@ -15,7 +15,7 @@ node_env_load(){
 }
 
 node_install(){
-	${home_dir}=${install_dir}/node
+	home_dir=${install_dir}/node
 	mkdir -p ${home_dir}
 	cp -rp ${tar_dir}/* ${home_dir}
 	add_sys_env "NODE_HOME=${home_dir} PATH=\${NODE_HOME}/bin:\$PATH"
