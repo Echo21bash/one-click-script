@@ -109,11 +109,11 @@ redis_install(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			redis_port=6379
+			redis_port=${redis_start_port}
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				service_id=$i
-				let redis_port=6379+$j
+				let redis_port=${redis_start_port}+$j
 				add_redis_server_list
 				redis_config
 				home_dir=${install_dir}/redis-node${service_id}				
@@ -156,7 +156,9 @@ redis_config(){
 	cp ${tar_dir}/redis.conf ${conf_dir}/redis.conf
 	sed -i "s/^port .*/port ${redis_port}/" ${conf_dir}/redis.conf
 	sed -i 's/^daemonize no/daemonize yes/' ${conf_dir}/redis.conf
-	sed -i "s/# requirepass foobared/requirepass ${redis_password}/" ${conf_dir}/redis.conf
+	if [[ -n ${redis_password} ]];then
+		sed -i "s/# requirepass foobared/requirepass ${redis_password}/" ${conf_dir}/redis.conf
+	fi
 	sed -i 's/# maxmemory <bytes>/maxmemory 100mb/' ${conf_dir}/redis.conf
 	sed -i 's/# maxmemory-policy noeviction/maxmemory-policy volatile-lru/' ${conf_dir}/redis.conf
 	sed -i 's/appendonly no/appendonly yes/' ${conf_dir}/redis.conf
@@ -179,7 +181,9 @@ redis_config(){
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/node${service_id}/redis-${redis_port}.pid#" ${conf_dir}/redis.conf
 		sed -i "s#^logfile .*#logfile ${install_dir}/redis-node${service_id}/logs/redis.log#" ${conf_dir}/redis.conf
 		sed -i "s#^dir .*#dir ${redis_data_dir}/node${service_id}#" ${conf_dir}/redis.conf
-		sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
+		if [[ -n ${redis_password} ]];then
+			sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
+		fi
 		sed -i "s/# cluster-enabled yes/cluster-enabled yes/" ${conf_dir}/redis.conf
 		sed -i "s/# cluster-config-file nodes-6379.conf/cluster-config-file nodes-${redis_port}.conf/" ${conf_dir}/redis.conf
 		sed -i "s/# cluster-node-timeout 15000/cluster-node-timeout 15000/" ${conf_dir}/redis.conf
@@ -192,7 +196,9 @@ redis_config(){
 		sed -i "s/^bind.*/bind ${now_host}/" ${conf_dir}/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/node${service_id}/redis-${redis_port}.pid#" ${conf_dir}/redis.conf
 		sed -i "s#^logfile .*#logfile ${install_dir}/redis-node${service_id}/logs/redis.log#" ${conf_dir}/redis.conf
-		sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
+		if [[ -n ${redis_password} ]];then
+			sed -i "s/^# masterauth <master-password>/masterauth ${redis_password}/" ${conf_dir}/redis.conf
+		fi
 		if [[ ${node_type} = 'M' && ${i} != '1' ]];then
 			sed -i "s/^# slaveof <masterip> <masterport>/slaveof ${mast_redis_ip} ${mast_redis_port}/" ${conf_dir}/redis.conf
 		elif [[  ${node_type} = 'S' ]];then
@@ -203,7 +209,9 @@ redis_config(){
 		sed -i "s/^port .*/port 2${redis_port}/" ${conf_dir}/sentinel.conf
 		sed -i "s#^dir .*#dir ${redis_data_dir}\nlogfile ${install_dir}/redis-node${service_id}/logs/sentinel.log\npidfile ${install_dir}/redis-node${service_id}/redis_sentinel.pid\ndaemonize yes#" ${conf_dir}/sentinel.conf
 		sed -i "s#^sentinel monitor mymaster 127.0.0.1 6379 2#sentinel monitor mymaster ${now_host} ${mast_redis_port} 2#" ${conf_dir}/sentinel.conf
-		sed -i 's!^# sentinel auth-pass mymaster.*!sentinel auth-pass mymaster '${redis_password}'!' ${conf_dir}/sentinel.conf
+		if [[ -n ${redis_password} ]];then
+			sed -i 's!^# sentinel auth-pass mymaster.*!sentinel auth-pass mymaster '${redis_password}'!' ${conf_dir}/sentinel.conf
+		fi
 		add_log_cut ${tmp_dir}/log_cut_redis-node${service_id} ${install_dir}/redis-node${service_id}/logs/*.log
 	fi
 
