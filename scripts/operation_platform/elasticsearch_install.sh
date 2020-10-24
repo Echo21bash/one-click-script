@@ -5,8 +5,16 @@ elasticsearch_env_load(){
 	soft_name=elasticsearch
 	program_version=('5.6' '6.1' '6.2')
 	url='https://mirrors.huaweicloud.com/elasticsearch'
-	down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz'
+	select_version
+	install_dir_set
+	online_version	
 
+}
+
+elasticsearch_down(){
+	down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/${soft_name}-${detail_version_number}.tar.gz ${tmp_dir}
 }
 
 elasticsearch_install_set(){
@@ -116,11 +124,7 @@ add_elasticsearch_service(){
 elasticsearch_install_ctl(){
 	elasticsearch_env_load
 	elasticsearch_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
+	elasticsearch_down
 	elasticsearch_install
 	clear_install
 }

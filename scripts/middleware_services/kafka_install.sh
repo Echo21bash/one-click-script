@@ -96,7 +96,8 @@ kafka_config(){
 	[[ -z `grep ^listeners ${conf_dir}/server.properties` ]] && sed -i "s%#listeners=.*%listeners=PLAINTEXT://${listeners_ip}:${kafka_port}%" ${conf_dir}/server.properties
 	[[ -n `grep ^listeners ${conf_dir}/server.properties` ]] && sed -i "s%listeners=.*%listeners=PLAINTEXT://${listeners_ip}:${kafka_port}%" ${conf_dir}/server.properties
 	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}/broker${broker_id}%" ${conf_dir}/server.properties
-	sed -i "s/zookeeper.connect=localhost:2181/zookeeper.connect=${zookeeper_connect}/" ${conf_dir}/server.properties
+	sed -i "s/zookeeper.connection.timeout.ms=.*/zookeeper.connection.timeout.ms=12000/" ${conf_dir}/server.properties
+
 }
 
 add_kafka_service(){
