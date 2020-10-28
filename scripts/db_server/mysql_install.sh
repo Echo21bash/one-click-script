@@ -55,6 +55,8 @@ mysql_install(){
 	#添加mysql用户
 	groupadd mysql >/dev/null 2>&1
 	useradd -M -s /sbin/nologin mysql -g mysql >/dev/null 2>&1
+	home_dir=${install_dir}/mysql
+	mkdir -p ${home_dir}
 	cp -rp ${tar_dir}/* ${home_dir}
 	#安装编译工具及库文件
 	echo -e "${info} 正在安装编译工具及库文件..."
@@ -175,21 +177,21 @@ add_mysql_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		User="mysql"
 		ExecStart="${home_dir}/bin/mysqld_safe --defaults-file=${home_dir}/my.cnf"
-		conf_system_service
-		add_system_service mysqld ${home_dir}/init y
+		conf_system_service	${home_dir}/mysqld.service
+		add_system_service mysqld ${home_dir}/mysqld.service y
 		service_control mysqld y
 	elif [[ ${deploy_mode} = '2' ]];then
 		if [[ ${os_release} > 6 ]];then
 			ExecStart="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf --log=/tmp/mysql_multi.log start %i"
 			ExecStop="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf stop %i"
-			conf_system_service
-			add_system_service mysqld@3306 ${home_dir}/init
+			conf_system_service ${home_dir}/mysqld.service
+			add_system_service mysqld@3306 ${home_dir}/mysqld.service
 			service_control mysqld@3306 y
 		else
 			ExecStart="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf start \$2"
 			ExecStop="${home_dir}/bin/mysqld_multi --defaults-file=${home_dir}/my.cnf stop \$2"
 			conf_system_service
-			add_system_service mysqld_multi ${home_dir}/init 
+			add_system_service mysqld_multi ${home_dir}/mysqld.service
 			service_control 'mysqld_multi 3306' y
 		fi
 	fi

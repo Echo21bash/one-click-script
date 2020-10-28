@@ -36,19 +36,21 @@ php_install_depend(){
 	system_optimize_yum
 	[[ ${os_release} < "7" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install  httpd httpd-devel mod_proxy_fcgi
 	[[ ${os_release} > "6" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install httpd httpd-devel
-	yum  -y install gcc gcc-c++ libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel
+	yum  -y install gcc gcc-c++ libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel sqlite-devel
 
 }
 
 php_install(){
 
-	cd ${tar_dir}
 	home_dir=${install_dir}/php
 	conf_dir=${home_dir}/etc
 	extra_conf_dir=${home_dir}/etc.d
 	mkdir -p ${home_dir}/{etc,etc.d}
 	#必要函数库
-	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ./libiconv-1.15.tar.gz && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install && cd ..
+	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ${tmp_dir}/libiconv-1.15.tar.gz
+	cd ${tmp_dir} && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install
+	cd ${tar_dir}	
+	
 	if [ $? = "0" ];then
 		info_log "libiconv库编译及编译安装成功..."
 	else

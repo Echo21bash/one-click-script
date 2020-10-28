@@ -1,5 +1,22 @@
 #!/bin/bash
 
+zabbix_env_load(){
+	tmp_dir=/tmp/zabbix_tmp
+	soft_name=zabbix
+	program_version=('4.0' '5.0')
+	url='https://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/'
+	select_version
+	install_dir_set
+	online_version	
+
+}
+
+zabbix_down(){
+	down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
+	online_down_file
+	unpacking_file ${tmp_dir}/${soft_name}-${detail_version_number}.tar.gz ${tmp_dir}
+}
+
 zabbix_set(){
 	output_option "请选择要安装的模块" "zabbix-server zabbix-agent zabbix-java zabbix-proxy" "install_module"
 	install_module_value=(${output_value[@]})
@@ -33,6 +50,8 @@ zabbix_install(){
 	diy_echo "正在安装编译工具及库文件..." "" "${info}"
 	yum -y install net-snmp-devel libxml2-devel libcurl-devel mysql-devel libevent-devel
 	cd ${tar_dir}
+	home_dir=${install_dir}/zabbix
+	mkdir -p ${home_dir}
 	./configure --prefix=${home_dir} ${module_configure} --with-mysql --with-net-snmp --with-libcurl --with-libxml2
 	make && make install
 	if [ $? = '0' ];then
@@ -83,30 +102,28 @@ add_zabbix_service(){
 		Environment="CONFFILE=${home_dir}/etc/zabbix_server.conf"
 		PIDFile="${home_dir}/logs/zabbix_server.pid"
 		ExecStart="${home_dir}/sbin/zabbix_server -c \$CONFFILE"
-		conf_system_service
-		add_system_service zabbix-serverd ${home_dir}/init
+		conf_system_service ${home_dir}/zabbix-serverd
+		add_system_service zabbix-serverd ${home_dir}/zabbix-serverd
 	fi
 	if [[ ${install_module[@]} =~ 'zabbix-agent' ]];then
 		Environment="CONFFILE=${home_dir}/etc/zabbix_agentd.conf"
 		PIDFile="${home_dir}/logs/zabbix_agentd.pid"
 		ExecStart="${home_dir}/sbin/zabbix_agentd -c \$CONFFILE"
-		conf_system_service
-		add_system_service zabbix-agentd ${home_dir}/init
+		conf_system_service ${home_dir}/zabbix-agentd
+		add_system_service zabbix-agentd ${home_dir}/zabbix-agentd
 	fi
 	if [[ ${install_module[@]} =~ 'zabbix-java' ]];then
 		PIDFile="${home_dir}/logs/zabbix_java.pid"
 		ExecStart="${home_dir}/sbin/zabbix_java/startup.sh"
-		conf_system_service
-		add_system_service zabbix-java-gateway ${home_dir}/init
+		conf_system_service ${home_dir}/zabbix-java-gateway
+		add_system_service zabbix-java-gateway ${home_dir}/zabbix-java-gateway
 	fi
 }
 
 zabbix_install_ctl(){
-	install_version zabbix
-	install_selcet
+	zabbix_env_load
 	zabbix_set
-	install_dir_set
-	download_unzip
+	zabbix_down
 	zabbix_install
 	zabbix_config
 	add_zabbix_service
