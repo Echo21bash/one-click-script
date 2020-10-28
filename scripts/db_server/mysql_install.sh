@@ -9,7 +9,7 @@ mysql_env_load(){
 	online_version
 	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
 	if [[ ${branch} = '1' ]];then
-		url='http://mirrors.163.com/mysql/Downloads'
+		url='https://mirrors.huaweicloud.com/mysql/Downloads'
 	else
 		if [[ ${os_bit} = '32' ]];then
 			diy_echo "不支持32位系统建议换成64系统" "${red}" "${error}"
