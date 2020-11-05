@@ -147,7 +147,7 @@ case "$tool" in
 	;;
 	6)multi_function_backup_script_set
 	;;
-	7)auto_ssh_keygen
+	7)auto_ssh_keygen_tool
 	;;
 esac
 }
