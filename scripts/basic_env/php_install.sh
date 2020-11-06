@@ -72,7 +72,7 @@ php_compile(){
 	[[ ${version_number} < '7.0' ]] && mysql="--with-mysql=mysqlnd"
 	[[ ${version_number} = '7.0' || ${version_number} > '7.0' ]] && mysql=""
 	./configure --prefix=${home_dir} --with-config-file-path=${home_dir}/etc --with-config-file-scan-dir=${home_dir}/etc.d ${fpm} ${apxs2} ${mysql} --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-mhash --with-openssl --with-zlib --with-bz2 --with-curl --with-libxml-dir --with-gd --with-jpeg-dir --with-png-dir --with-zlib --enable-mbstring --with-mcrypt --enable-sockets --with-iconv-dir --with-xsl --enable-zip --with-pcre-dir --with-pear --enable-session  --enable-gd-native-ttf --enable-xml --with-freetype-dir --enable-inline-optimization --enable-shared --enable-bcmath --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-mbregex --enable-pcntl --with-xmlrpc --with-gettext --enable-exif --with-readline --with-recode --with-tidy --enable-soap
-	make && make install
+	make -j 4 && make install
 	if [ $? = "0" ];then
 		info_log "php编译完成..."
 	else
@@ -88,10 +88,10 @@ php_modules_install(){
 	
 	if [[ ${php_modules[@]} =~ 'redis' ]];then
 
-		[[ ${version_number} > '5.6' ]] && wget ${php_redis}/archive/master.tar.gz -O  phpredis-master.tar.gz && tar zxf phpredis-master.tar.gz && cd phpredis-master
-		[[ ${version_number} < '7.0' ]] && wget ${php_redis}/archive/4.3.0.tar.gz -O  phpredis-4.3.0.tar.gz && tar zxf phpredis-4.3.0.tar.gz && cd phpredis-4.3.0
+		[[ ${version_number} > '5.6' ]] && down_file ${php_redis}/archive/master.tar.gz phpredis-master.tar.gz && tar zxf phpredis-master.tar.gz && cd phpredis-master
+		[[ ${version_number} < '7.0' ]] && down_file ${php_redis}/archive/4.3.0.tar.gz phpredis-4.3.0.tar.gz && tar zxf phpredis-4.3.0.tar.gz && cd phpredis-4.3.0
 		${home_dir}/bin/phpize
-		./configure --with-php-config=${home_dir}/bin/php-config && make && make install && cd ..
+		./configure --with-php-config=${home_dir}/bin/php-config && make -j 4 && make install && cd ..
 		if [[ $? = '0' ]];then
 			cat > ${extra_conf_dir}/redis.ini<<-EOF
 			[redis]
@@ -109,7 +109,7 @@ php_modules_install(){
 		[[ ${version_number} > '5.6' ]] && down_file ${php_memcached}/archive/master.tar.gz php-memcached-master.tar.gz && tar zxf php-memcached-master.tar.gz && cd php-memcached-master
 		[[ ${version_number} < '7.0' ]] && down_file ${php_memcached}/archive/2.2.0.tar.gz php-memcached-2.2.0.tar.gz && tar zxf php-memcached-2.2.0.tar.gz && cd php-memcached-2.2.0
 		${home_dir}/bin/phpize
-		./configure --with-php-config=${home_dir}/bin/php-config && make && make install && cd ..
+		./configure --with-php-config=${home_dir}/bin/php-config && make -j 4 && make install && cd ..
 		if [[ $? = '0' ]];then
 			cat > ${extra_conf_dir}/memcached.ini<<-EOF
 			[memcached]
