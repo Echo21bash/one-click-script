@@ -4,7 +4,7 @@ zabbix_env_load(){
 	tmp_dir=/tmp/zabbix_tmp
 	soft_name=zabbix
 	program_version=('4.0' '5.0')
-	url='https://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/'
+	url='https://mirrors.yangxingzhen.com/zabbix'
 	select_version
 	install_dir_set
 	online_version	
