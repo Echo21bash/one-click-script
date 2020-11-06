@@ -4,7 +4,7 @@ php_env_load(){
 	
 	tmp_dir=/tmp/php_tmp
 	soft_name=php
-	program_version=('5.6' '7.0' '7.1')
+	program_version=('5.6' '7.0' '7.1' '7.2')
 	url="http://mirrors.sohu.com/php/"
 	select_version
 	install_dir_set
@@ -106,8 +106,8 @@ php_modules_install(){
 	if [[ ${php_modules[@]} =~ 'memcached' ]];then
 		#安装依赖的库和头文件
 		yum install -y libmemcached libmemcached-devel
-		[[ ${version_number} > '5.6' ]] && wget ${php_memcached}/archive/master.tar.gz -O  php-memcached-master.tar.gz && tar zxf php-memcached-master.tar.gz && cd php-memcached-master
-		[[ ${version_number} < '7.0' ]] && wget ${php_memcached}/archive/2.2.0.tar.gz -O  php-memcached-2.2.0.tar.gz && tar zxf php-memcached-2.2.0.tar.gz && cd php-memcached-2.2.0
+		[[ ${version_number} > '5.6' ]] && down_file ${php_memcached}/archive/master.tar.gz php-memcached-master.tar.gz && tar zxf php-memcached-master.tar.gz && cd php-memcached-master
+		[[ ${version_number} < '7.0' ]] && down_file ${php_memcached}/archive/2.2.0.tar.gz php-memcached-2.2.0.tar.gz && tar zxf php-memcached-2.2.0.tar.gz && cd php-memcached-2.2.0
 		${home_dir}/bin/phpize
 		./configure --with-php-config=${home_dir}/bin/php-config && make && make install && cd ..
 		if [[ $? = '0' ]];then
