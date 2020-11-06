@@ -198,7 +198,7 @@ add_mysql_service(){
 }
 
 mysql_first_password_set(){
-	sleep 10
+	sleep 15
 	if [[ ${version_number} < '5.7' ]];then
 		${home_dir}/bin/mysql -uroot -S${mysql_data_dir}/mysql.sock -e "use mysql;update user set password=PASSWORD("\'${mysql_passwd}\'") where user='root';\nflush privileges;"
 		${home_dir}/bin/mysql -uroot -S${mysql_data_dir}/mysql.sock -p${mysql_passwd}<<-EOF

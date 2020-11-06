@@ -12,7 +12,7 @@ zabbix_env_load(){
 }
 
 zabbix_down(){
-	down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
+	down_url="${url}/${soft_name}-${detail_version_number}.tar.gz"
 	online_down_file
 	unpacking_file ${tmp_dir}/${soft_name}-${detail_version_number}.tar.gz ${tmp_dir}
 }
