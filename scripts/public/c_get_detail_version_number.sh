@@ -36,7 +36,7 @@ all_version_other(){
 		;;
 
 	esac
-	}
+}
 
 all_version_github(){
 

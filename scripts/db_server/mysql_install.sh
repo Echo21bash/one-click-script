@@ -6,7 +6,6 @@ mysql_env_load(){
 	program_version=('5.5' '5.6' '5.7')
 	select_version
 	install_dir_set
-	online_version
 	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
 	if [[ ${branch} = '1' ]];then
 		url='https://mirrors.huaweicloud.com/mysql/Downloads'
@@ -17,7 +16,7 @@ mysql_env_load(){
 		fi
 		url='http://releases.galeracluster.com'
 	fi
-
+	online_version
 }
 
 mysql_down(){
