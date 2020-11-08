@@ -77,25 +77,26 @@ zabbix_config(){
 	chown -R zabbix.zabbix ${home_dir}/logs
 	if [[ ${install_module_value[@]} =~ 'zabbix-server' ]];then
 	
-		sed -i 's#^LogFile.*#LogFile='${home_dir}'/logs/zabbix_server.log#' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^# PidFile=.*@PidFile='${home_dir}'/logs/zabbix_server.pid@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^# DBHost=.*@DBHost='${zabbix_db_host}'@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^DBName=.*@DBName='${zabbix_db_name}'@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^DBUser=.*@DBUser='${zabbix_db_user}'@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^# DBPassword=.*@DBPassword='${zabbix_db_passwd}'@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^# DBPort=.*@DBPort='${zabbix_db_port}'@' ${home_dir}/etc/zabbix_server.conf
-		sed -i 's@^# Include=/usr/local/etc/zabbix_server.conf.d/\*\.conf@Include='${home_dir}'/etc/zabbix_server.conf.d/*.conf@' ${home_dir}/etc/zabbix_server.conf
+		sed -i "s#^LogFile.*#LogFile=${home_dir}/logs/zabbix_server.log#" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# PidFile=.*@PidFile=${home_dir}/logs/zabbix_server.pid@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# DBHost=.*@DBHost=${zabbix_db_host}@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^DBName=.*@DBName=${zabbix_db_name}@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^DBUser=.*@DBUser=${zabbix_db_user}@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# DBPassword=.*@DBPassword=${zabbix_db_passwd}@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# DBPort=.*@DBPort=${zabbix_db_port}@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# CacheSize=.*@# CacheSize=512M@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# Include=/usr/local/etc/zabbix_server.conf.d/\*\.conf@Include=${home_dir}/etc/zabbix_server.conf.d/*.conf@" ${home_dir}/etc/zabbix_server.conf
 	fi
  
 	if [[ ${install_module_value[@]} =~ 'zabbix-agent' ]];then
 
-		sed -i 's@^# PidFile=.*@PidFile='${home_dir}'/logs/zabbix_agentd.pid@' ${home_dir}/etc/zabbix_agentd.conf
-		sed -i 's#^LogFile.*#LogFile='${home_dir}'/logs/zabbix_agentd.log#' ${home_dir}/etc/zabbix_agentd.conf
-		sed -i 's#^ServerActive=.*#ServerActive='${zabbix_server_host}'#' ${home_dir}/etc/zabbix_agentd.conf
-		sed -i 's#^Hostname=.*#Hostname='${zabbix_agent_host_name}'#' ${home_dir}/etc/zabbix_agentd.conf
-		sed -i 's@^# Timeout=.*@Timeout=20@' ${home_dir}/etc/zabbix_agentd.conf
-
-		sed -i 's@^# Include=/usr/local/etc/zabbix_agentd.conf.d/\*\.conf@Include='${home_dir}'/etc/zabbix_agentd.conf.d/*.conf@' ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s@^# PidFile=.*@PidFile=${home_dir}/logs/zabbix_agentd.pid@" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s#^LogFile.*#LogFile=${home_dir}/logs/zabbix_agentd.log#" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s#^Server=.*#Server=${zabbix_server_host}#" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s#^ServerActive=.*#ServerActive=${zabbix_server_host}#" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s#^Hostname=.*#Hostname=${zabbix_agent_host_name}#" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s@^# Timeout=.*@Timeout=20@" ${home_dir}/etc/zabbix_agentd.conf
+		sed -i "s@^# Include=/usr/local/etc/zabbix_agentd.conf.d/\*\.conf@Include=${home_dir}/etc/zabbix_agentd.conf.d/*.conf@" ${home_dir}/etc/zabbix_agentd.conf
 	fi
 	if [[ ${install_module_value[@]} =~ 'zabbix-java' ]];then
 		sed -i 's@^PID_FILE=.*@PID_FILE='${home_dir}'/logs/zabbix_java.pid@' ${home_dir}/sbin/zabbix_java/settings.sh
