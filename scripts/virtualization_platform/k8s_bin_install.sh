@@ -215,6 +215,7 @@ add_system(){
 	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
 	conf_system_service ${tmp_dir}/scheduler_init
 	##controller
+	Requires='kube-apiserver.service'
 	Type="simple"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"

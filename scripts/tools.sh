@@ -353,7 +353,8 @@ conf_system_service(){
 		[Unit]
 		Description=${soft_name}
 		After=syslog.target network.target
-
+		Requires=${Requires:-}
+		
 		[Service]
 		Type=${Type:-simple}
 		User=${User:-root}
