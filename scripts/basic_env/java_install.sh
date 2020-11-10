@@ -24,6 +24,7 @@ java_install_set(){
 	fi
 	
 }
+
 check_java(){
 	#检查旧版本
 	info_log "正在检查预装openjava..."
@@ -77,7 +78,7 @@ install_java(){
 			info_log "解压${down_file_name}..."
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			cd ${tmp_dir}
-			tar zxf down_file_name -C ${install_dir}/java
+			tar zxf --strip-components 1 down_file_name -C ${install_dir}/java
 			\cp ${tmp_dir}/java_profile.sh /etc/profile.d/
 			chmod +x /etc/profile.d/java_profile.sh
 			"
