@@ -55,7 +55,7 @@ ver_rule_general(){
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
 		;;
 		
-		php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|elasticsearch|logstash|kibana|filebeat)
+		php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|logstash|kibana|filebeat)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		mysql)
@@ -68,7 +68,7 @@ ver_rule_general(){
 		greenplum)
 			cat ${tmp_dir}/tmp_version | grep -Eio "/${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
-		*|node|openresty)
+		*|node|openresty|elasticsearch)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 	esac
