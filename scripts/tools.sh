@@ -19,7 +19,10 @@ down_file(){
 		fi
 		#获取下载完成路径及文件名
 		if [[ -d ${path_file} ]];then
-			full_path_file=${path_file}/${down_filename}
+			if [[ -z ${down_file_name} ]];then
+				down_file_name=${down_url##*/}
+			fi
+			full_path_file=${path_file}/${down_file_name}
 		else
 			full_path_file=${path_file}
 		fi
@@ -55,7 +58,7 @@ down_file(){
 				fi
 			fi
 		elif [[ -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
-			diy_echo "已经存在文件${path_file}/${down_filename}" "${info}"
+			diy_echo "已经存在文件${path_file}/${down_file_name}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
