@@ -286,6 +286,7 @@ apiserver_conf(){
 	--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction \\
 	--authorization-mode=RBAC,Node \\
 	--enable-bootstrap-token-auth \\
+	--enable-aggregator-routing=true \\
 	--service-node-port-range=30000-50000 \\
 	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \\
 	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \\
@@ -294,6 +295,8 @@ apiserver_conf(){
 	--etcd-cafile=${k8s_dir}/ssl/ca.pem \\
 	--etcd-certfile=${k8s_dir}/ssl/kubernetes.pem \\
 	--etcd-keyfile=${k8s_dir}/ssl/kubernetes-key.pem \\
+	--proxy-client-cert-file=${k8s_dir}/ssl/proxy-client.pem \\
+	--proxy-client-key-file=${k8s_dir}/ssl/proxy-client-key.pem \\
 	--kubelet-client-certificate=${k8s_dir}/ssl/kubernetes.pem \\
 	--kubelet-client-key=${k8s_dir}/ssl/kubernetes-key.pem "
 	EOF
@@ -399,7 +402,7 @@ master_node_install_ctl(){
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			info_log "正在向主节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
-			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
+			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem,proxy-client.pem,proxy-client-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
 			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml,corends.yaml}  root@${host}:${k8s_dir}/yml
 			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
