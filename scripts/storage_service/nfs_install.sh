@@ -5,7 +5,7 @@ nfs_install_ctl(){
 	nfs_dir=${input_value}
 	yum install -y nfs-utils
 	cat >>/etc/exports<<-EOF
-	${nfs_dir} *(rw,sync)
+	${nfs_dir} *(rw,insecure,async,no_root_squash,no_all_squash)
 	EOF
 	[[ -d ${nfs_dir} ]] && mkdir -p ${nfs_dir}
 	start_arg='y'
