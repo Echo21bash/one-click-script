@@ -4,6 +4,7 @@ minio_env_load(){
 
 	soft_name=minio
 	tmp_dir=/tmp/minio_tmp
+	mkdir -p ${tmp_dir}
 	url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
 	down_url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
 	install_dir_set
@@ -52,6 +53,7 @@ add_minio_service(){
 minio_install_ctl(){
 	minio_env_load
 	minio_install_set
+	minio_down
 	minio_config
 	add_minio_service
 	service_control minio
