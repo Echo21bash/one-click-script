@@ -6,7 +6,7 @@ minio_env_load(){
 	tmp_dir=/tmp/minio_tmp
 	url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
 	down_url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
-
+	install_dir_set
 }
 
 minio_install_set(){
@@ -20,12 +20,16 @@ minio_install_set(){
 	minio_secret=${input_value}
 }
 
+minio_down(){
+	online_down_file
+}
+
 minio_config(){
 
-	home_dir=${install_dir}
+	home_dir=${install_dir}/minio
 	mkdir -p ${home_dir}/{bin,etc}
 	mkdir -p ${data_dir}
-	mv ${tmp_dir}/minio-release ${home_dir}/bin/minio
+	cp ${tmp_dir}/minio ${home_dir}/bin/minio
 	chmod +x ${home_dir}/bin/minio
 	cat >${home_dir}/etc/minio<<-EOF
 	MINIO_ACCESS_KEY=${minio_access}
@@ -41,14 +45,13 @@ add_minio_service(){
 	WorkingDirectory="${home_dir}"
 	ExecStart="${home_dir}/bin/minio server \$MINIO_OPTS \$MINIO_VOLUMES"
 	#ARGS="&"
-	conf_system_service
-	add_system_service minio ${home_dir}/init
+	conf_system_service ${home_dir}/minio.service
+	add_system_service minio ${home_dir}/minio.service
 }
 
 minio_install_ctl(){
 	minio_env_load
 	minio_install_set
-	install_dir_set
 	minio_config
 	add_minio_service
 	service_control minio
