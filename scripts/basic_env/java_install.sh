@@ -73,7 +73,7 @@ install_java(){
 			mkdir -p ${tmp_dir}
 			"
 			info_log "正在向节点${now_host}分发java${service_id}安装程序和配置文件..."
-			scp -q -r -P ${ssh_port[$k]} ${down_file_name} ${host_ip[$k]}:${tmp_dir}
+			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/${down_file_name} ${host_ip[$k]}:${tmp_dir}
 			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/java_profile.sh ${host_ip[$k]}:${tmp_dir}
 			info_log "解压${down_file_name}..."
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
