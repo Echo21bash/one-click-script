@@ -58,13 +58,13 @@ install_java(){
 		cp -rp ${tar_dir}/* ${home_dir}
 		\cp ${workdir}/config/java/java_profile.sh /etc/profile.d/
 		chmod +x /etc/profile.d/java_profile.sh
-		sed -i "s/JAVA_HOME=.*/JAVA_HOME=${home_dir}/" /etc/profile.d/java_profile.sh
+		sed -i "s%JAVA_HOME=.*%JAVA_HOME=${home_dir}%" /etc/profile.d/java_profile.sh
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		\cp ${workdir}/config/java/java_profile.sh ${tmp_dir}
-		sed -i "s/JAVA_HOME=.*/JAVA_HOME=${home_dir}/" ${tmp_dir}/java_profile.sh
+		sed -i "s%JAVA_HOME=.*%JAVA_HOME=${home_dir}%" ${tmp_dir}/java_profile.sh
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
@@ -73,12 +73,12 @@ install_java(){
 			mkdir -p ${tmp_dir}
 			"
 			info_log "正在向节点${now_host}分发java${service_id}安装程序和配置文件..."
-			scp -q -r -P ${ssh_port[$k]} ${unpack_file_name} ${host_ip[$k]}:${tmp_dir}
+			scp -q -r -P ${ssh_port[$k]} ${down_file_name} ${host_ip[$k]}:${tmp_dir}
 			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/java_profile.sh ${host_ip[$k]}:${tmp_dir}
 			info_log "解压${down_file_name}..."
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			cd ${tmp_dir}
-			tar zxf --strip-components 1 down_file_name -C ${install_dir}/java
+			tar zxf --strip-components 1 ${down_file_name} -C ${install_dir}/java
 			\cp ${tmp_dir}/java_profile.sh /etc/profile.d/
 			chmod +x /etc/profile.d/java_profile.sh
 			"
