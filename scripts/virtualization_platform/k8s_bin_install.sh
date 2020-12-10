@@ -371,20 +371,32 @@ kubelet_conf(){
 	--cni-bin-dir=/opt/cni/bin \\
 	--cert-dir=${k8s_dir}/ssl \\
 	--fail-swap-on=false \\
+	--runtime-cgroups=/systemd/system.slice \\
+	--kubelet-cgroups=/systemd/system.slice \\
 	--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
 	EOF
 
 }
 
 proxy_conf(){
-
-	cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
-	KUBE_PROXY_OPTS="--logtostderr=true \\
-	--v=2 \\
-	--hostname-override=${host_ip[$i]} \\
-	--cluster-cidr=10.244.0.0/16 \\
-	--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
-	EOF
+	if [[ ${k8s_ver} > 1.8.0 ]];then
+		cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
+		KUBE_PROXY_OPTS="--logtostderr=true \\
+		--v=2 \\
+		--hostname-override=${host_ip[$i]} \\
+		--proxy-mode=ipvs \\
+		--cluster-cidr=10.244.0.0/16 \\
+		--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
+		EOF
+	else
+		cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
+		KUBE_PROXY_OPTS="--logtostderr=true \\
+		--v=2 \\
+		--hostname-override=${host_ip[$i]} \\
+		--cluster-cidr=10.244.0.0/16 \\
+		--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
+		EOF
+	fi
 }
 
 master_node_install_ctl(){
