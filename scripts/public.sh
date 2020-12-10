@@ -201,7 +201,7 @@ sys_info(){
 	#内核版本
 	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
 	http_code=`curl -k -I -m 10 -o /dev/null -s -w %{http_code} www.baidu.com`
-	if [ ${http_code} = '2000' ];then
+	if [ ${http_code} = '200' ];then
 		network_status="${green}connected${plain}"
 	else
 		network_status="${red}disconnected${plain}"
