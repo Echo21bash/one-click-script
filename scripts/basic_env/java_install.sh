@@ -78,7 +78,7 @@ install_java(){
 			info_log "解压${down_file_name}..."
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			cd ${tmp_dir}
-			tar zxf --strip-components 1 ${tmp_dir}/${down_file_name} -C ${install_dir}/java
+			tar --strip-components 1 zxf ${tmp_dir}/${down_file_name} -C ${install_dir}/java
 			\cp ${tmp_dir}/java_profile.sh /etc/profile.d/
 			chmod +x /etc/profile.d/java_profile.sh
 			"
