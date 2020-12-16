@@ -101,17 +101,20 @@ system_optimize_set(){
 	[ ! -f /etc/sysctl.conf.bakup ] && cp /etc/sysctl.conf /etc/sysctl.conf.bakup
 	
 	[[ -z `grep -E '^kernel.sem' /etc/sysctl.conf` ]] && echo 'kernel.sem = 500 1024000 200 4096'>>/etc/sysctl.conf
-	
+	#禁用ipv6
+	[[ -z `grep -E '^net.ipv6.conf.all.disable_ipv6' /etc/sysctl.conf` ]] && echo 'net.ipv6.conf.all.disable_ipv6 = 1'>>/etc/sysctl.conf
+	[[ -z `grep -E '^net.ipv6.conf.default.disable_ipv6' /etc/sysctl.conf` ]] && echo 'net.ipv6.conf.default.disable_ipv6 = 1'>>/etc/sysctl.conf
+
 	[[ -z `grep -E '^net.ipv4.tcp_fin_timeout' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_fin_timeout = 10'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_keepalive_time' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_keepalive_time = 600'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_tw_reuse' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_tw_reuse = 1'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_tw_recycle' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_tw_recycle = 0'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_syncookies' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_syncookies = 1'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_syn_retries' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_syn_retries = 1'>>/etc/sysctl.conf
-	[[ -z `grep -E '^net.ipv4.ip_local_port_range' /etc/sysctl.conf` ]] && echo 'net.ipv4.ip_local_port_range = 4000 65000'>>/etc/sysctl.conf
+	[[ -z `grep -E '^net.ipv4.ip_local_port_range' /etc/sysctl.conf` ]] && echo 'net.ipv4.ip_local_port_range = 1025 65535'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.tcp_max_syn_backlog' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_max_syn_backlog = 16384'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.core.somaxconn' /etc/sysctl.conf` ]] && echo 'net.core.somaxconn = 16384'>>/etc/sysctl.conf
-	[[ -z `grep -E '^net.ipv4.tcp_max_tw_buckets' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_max_tw_buckets = 36000'>>/etc/sysctl.conf
+	[[ -z `grep -E '^net.ipv4.tcp_max_tw_buckets' /etc/sysctl.conf` ]] && echo 'net.ipv4.tcp_max_tw_buckets = 1000'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.ipv4.route.gc_timeout' /etc/sysctl.conf` ]] && echo 'net.ipv4.route.gc_timeout = 100'>>/etc/sysctl.conf
 	[[ -z `grep -E '^net.core.netdev_max_backlog' /etc/sysctl.conf` ]] && echo 'net.core.netdev_max_backlog = 16384'>>/etc/sysctl.conf
 	[[ -z `grep -E '^vm.max_map_count' /etc/sysctl.conf` ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf
@@ -119,7 +122,7 @@ system_optimize_set(){
 	[[ -z `grep -E '^vm.dirty_background_ratio' /etc/sysctl.conf` ]] && echo 'vm.dirty_background_ratio = 5'>>/etc/sysctl.conf
 	[[ -z `grep -E '^vm.dirty_expire_centisecs' /etc/sysctl.conf` ]] && echo 'vm.dirty_expire_centisecs = 1500'>>/etc/sysctl.conf
 	[[ -z `grep -E '^vm.dirty_ratio' /etc/sysctl.conf` ]] && echo 'vm.dirty_ratio = 20'>>/etc/sysctl.conf
-
+	
 	sysctl -p>/dev/null 2>&1
 	success_log "完成内核参数调整"
 
