@@ -1,3 +1,5 @@
+# Warning: This is a file generated from the base underscore template file: coredns.yaml.base
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -61,11 +63,15 @@ data:
   Corefile: |
     .:53 {
         errors
-        health
+        health {
+            lameduck 5s
+        }
+        ready
         kubernetes cluster.local in-addr.arpa ip6.arpa {
             pods insecure
             upstream
             fallthrough in-addr.arpa ip6.arpa
+            ttl 30
         }
         prometheus :9153
         forward . /etc/resolv.conf
@@ -103,7 +109,7 @@ spec:
       labels:
         k8s-app: kube-dns
       annotations:
-        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+        seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
     spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: coredns
@@ -118,7 +124,7 @@ spec:
         imagePullPolicy: IfNotPresent
         resources:
           limits:
-            memory: 170Mi
+            memory: 200Mi
           requests:
             cpu: 100m
             memory: 70Mi
@@ -151,8 +157,8 @@ spec:
           failureThreshold: 5
         readinessProbe:
           httpGet:
-            path: /health
-            port: 8080
+            path: /ready
+            port: 8181
             scheme: HTTP
         securityContext:
           allowPrivilegeEscalation: false
