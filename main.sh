@@ -132,6 +132,18 @@ case "$platform" in
 esac
 }
 
+ha_load_balance_platform(){
+output_option '请选择要安装的平台' 'keepalived haproxy lvs' 'platform'
+case "$platform" in
+	1)keepalived_install_ctl
+	;;
+	2)haproxy_install_ctl
+	;;
+	3)lvs_install_ctl
+	;;
+esac
+}
+
 tools(){
 output_option '请选择进行的操作' '一键优化系统配置 查看系统详情 升级内核版本 创建用户并将其加入visudo 安装WireGuard-VPN 多功能备份脚本 主机ssh互信' 'tool'
 case "$tool" in
@@ -154,7 +166,7 @@ esac
 
 main(){
 
-output_option '请选择需要安装的服务' '基础环境 WEB服务 数据库服务 中间件服务 存储服务 运维平台 虚拟化 其他工具' 'mian'
+output_option '请选择需要安装的服务' '基础环境 WEB服务 数据库服务 中间件服务 存储服务 运维平台 虚拟化 集群负载 其他工具' 'mian'
 
 case "$mian" in
 	1)basic_environment
@@ -171,7 +183,9 @@ case "$mian" in
 	;;
 	7)virtualization_platform
 	;;
-	8)tools
+	8)ha_load_balance_platform
+	;;
+	9)tools
 	;;
 
 esac
