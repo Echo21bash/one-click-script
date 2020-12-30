@@ -5,7 +5,8 @@ wireguard_install(){
 		error_log "wireguard只支持Centos7"
 		exit 1
 	fi
-	if [[ `modprobe wireguard` ]];then
+	modprobe wireguard
+	if [[ $？ = 0 ]];then
 		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
 	else
 		error_log "缺少wireguard内核模块，请先升级高版本内核"
