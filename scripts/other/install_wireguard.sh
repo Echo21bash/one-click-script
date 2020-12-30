@@ -6,7 +6,7 @@ wireguard_install(){
 		exit 1
 	fi
 	modprobe wireguard
-	if [[ $？ = 0 ]];then
+	if [[ $? = 0 ]];then
 		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
 	else
 		error_log "缺少wireguard内核模块，请先升级高版本内核"
