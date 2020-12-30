@@ -12,7 +12,7 @@ wireguard_install(){
 		error_log "缺少wireguard内核模块，请先升级高版本内核"
 		exit
 	fi
-	system_optimize_yum
+
 	cat > /etc/yum.repos.d/wireguard.repo <<-EOF
 	[copr:copr.fedorainfracloud.org:jdoss:wireguard]
 	name=Copr repo for wireguard owned by jdoss
@@ -81,7 +81,7 @@ wireguard_config(){
 		sysctl -p > /dev/null
 	fi
 	systemctl start wg-quick@wg0
-	if [[ -n $(ip a | grep -Eo '^wg0') ]];then
+	if [[ -n $(ip a | grep -Eo 'wg0') ]];then
 		success_log "wireguard启动成功，请下载/etc/wireguard/client.conf客户端配置文件"
 	else
 		error_log "wireguard启动失败"
