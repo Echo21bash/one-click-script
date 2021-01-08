@@ -5,6 +5,13 @@ wireguard_env_check(){
 		error_log "wireguard支持Centos7+"
 		exit 1
 	fi
+	modprobe wireguard
+	if [[ $? = 0 ]];then
+		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
+	else
+		error_log "缺少wireguard内核模块，请先升级高版本内核"
+		exit
+	fi
 }
 
 wireguard_env_load(){
@@ -29,14 +36,6 @@ wireguard_ui_down(){
 }
 
 wireguard_install(){
-
-	modprobe wireguard
-	if [[ $? = 0 ]];then
-		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
-	else
-		error_log "缺少wireguard内核模块，请先升级高版本内核"
-		exit
-	fi
 
 	if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 		cp ${workdir}/config/public/epel-7.repo /etc/yum.repos.d/epel.repo
