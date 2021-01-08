@@ -10,7 +10,7 @@ wireguard_env_check(){
 		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
 	else
 		error_log "缺少wireguard内核模块，请先升级高版本内核"
-		exit
+		update_kernel
 	fi
 }
 
