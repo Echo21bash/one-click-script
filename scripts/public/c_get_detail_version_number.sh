@@ -92,7 +92,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		fastdfs|greenplum)
+		fastdfs|greenplum|wireguard-ui)
 			all_version_github
 		;;
 	esac
