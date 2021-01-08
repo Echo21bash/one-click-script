@@ -9,7 +9,7 @@ wireguard_env_check(){
 
 wireguard_env_load(){
 
-	tmp_dir=/tmp/wireguard_tmp\
+	tmp_dir=/tmp/wireguard_tmp
 	mkdir -p ${tmp_dir}
 	program_version=(0)
 	soft_name=wireguard-ui
