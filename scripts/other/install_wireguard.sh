@@ -1,10 +1,34 @@
 #!/bin/bash
 
-wireguard_install(){
+wireguard_env_check(){
 	if [[ ${os_release} < '7' ]];then
-		error_log "wireguard只支持Centos7"
+		error_log "wireguard支持Centos7+"
 		exit 1
 	fi
+}
+
+wireguard_env_load(){
+
+	tmp_dir=/tmp/wireguard_tmp\
+	mkdir -p ${tmp_dir}
+	soft_name=wireguard-ui
+	url='https://github.com/ngoduykhanh/wireguard-ui'
+	select_version
+	online_version
+	install_dir_set
+}
+
+wireguard_ui_down(){
+	if [[ ${os_bit} = '64' ]];then
+		down_url="${url}/releases/download/${detail_version_number}/wireguard-ui-${detail_version_number}-linux-amd64.tar.gz"
+	else
+		down_url="${url}/releases/download/${detail_version_number}/wireguard-ui-${detail_version_number}-linux-386.tar.gz"
+	fi
+	online_down_file
+}
+
+wireguard_install(){
+
 	modprobe wireguard
 	if [[ $? = 0 ]];then
 		echo wireguard >/etc/modules-load.d/wireguard-modules.conf
@@ -13,19 +37,14 @@ wireguard_install(){
 		exit
 	fi
 
-	cat > /etc/yum.repos.d/wireguard.repo <<-EOF
-	[copr:copr.fedorainfracloud.org:jdoss:wireguard]
-	name=Copr repo for wireguard owned by jdoss
-	baseurl=https://download.copr.fedorainfracloud.org/results/jdoss/wireguard/epel-7-$basearch/
-	type=rpm-md
-	skip_if_unavailable=True
-	gpgcheck=1
-	gpgkey=https://download.copr.fedorainfracloud.org/results/jdoss/wireguard/pubkey.gpg
-	repo_gpgcheck=0
-	enabled=1
-	enabled_metadata=1
-	EOF
-	yum install -y dkms iptables-services wireguard-dkms wireguard-tools
+	if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
+		cp ${workdir}/config/public/epel-7.repo /etc/yum.repos.d/epel.repo
+	fi
+	
+	if [[ ! -f /etc/yum.repos.d/wireguard.repo ]];then
+		cp ${workdir}/config/wireguard/wireguard.repo /etc/yum.repos.d/wireguard.repo
+	fi
+	yum install -y dkms wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
 		success_log "wireguard安装成功"
 	else
@@ -35,45 +54,6 @@ wireguard_install(){
 }
 
 wireguard_config(){
-	mkdir /etc/wireguard
-	cd /etc/wireguard
-	###生成私钥和公钥
-	wg genkey | tee server_private_key | wg pubkey > server_public_key
-	wg genkey | tee client_private_key | wg pubkey > client_public_key
-	s1=$(cat server_private_key)
-	s2=$(cat server_public_key)
-	c1=$(cat client_private_key)
-	c2=$(cat client_public_key)
-	get_public_ip
-	get_net_name
-	###配置文件
-	cat > /etc/wireguard/wg0.conf <<-EOF
-	[Interface]
-	PrivateKey = $s1
-	Address = 10.0.0.1/24 
-	PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o ${net_name} -j MASQUERADE
-	PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${net_name} -j MASQUERADE
-	ListenPort = 10111
-	DNS = 8.8.8.8
-	MTU = 1420
-
-	[Peer]
-	PublicKey = $c2
-	AllowedIPs = 10.0.0.2/32
-	EOF
-	cat > /etc/wireguard/client.conf <<-EOF
-	[Interface]
-	PrivateKey = $c1
-	Address = 10.0.0.2/24 
-	DNS = 8.8.8.8
-	MTU = 1420
-
-	[Peer]
-	PublicKey = $s2
-	Endpoint = $public_ip:10111
-	AllowedIPs = 0.0.0.0/0, ::0/0
-	PersistentKeepalive = 25
-	EOF
 
 	ip_forward=$(cat /etc/sysctl.conf | grep 'net.ipv4.ip_forward = 1')
 	if [[ -z ${ip_forward} ]];then
@@ -85,14 +65,31 @@ wireguard_config(){
 		success_log "wireguard启动成功，请下载/etc/wireguard/client.conf客户端配置文件"
 	else
 		error_log "wireguard启动失败"
+		exit 1
 	fi
+	cp ${workdir}/config/wireguard/wg-reload.service /etc/systemd/system
+	cp ${workdir}/config/wireguard/wg-reload.path /etc/systemd/system
+	systemctl daemon-reload
+	systemctl enable wg-reload.service wg-reload.path wg-quick@wg0
 }
 
-wireguard_install_ctl(){
+add_wireguard_ui_service(){
+	WorkingDirectory="${home_dir}/wireguard-ui"
+	ExecStart="${home_dir}/wireguard-ui"
+	conf_system_service	${home_dir}/wgui.service
+	add_system_service wgui ${home_dir}/wgui.service
+	service_control wgui y
 
+}
+
+
+wireguard_install_ctl(){
+	wireguard_env_check
+	wireguard_env_load
+	wireguard_ui_down
 	wireguard_install
 	wireguard_config
-	service_control wg-quick@wg0
+	add_wireguard_ui_service
 }
 
 
