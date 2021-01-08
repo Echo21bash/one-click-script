@@ -21,9 +21,9 @@ wireguard_env_load(){
 
 wireguard_ui_down(){
 	if [[ ${os_bit} = '64' ]];then
-		down_url="${url}/releases/download/${detail_version_number}/wireguard-ui-${detail_version_number}-linux-amd64.tar.gz"
+		down_url="${url}/releases/download/v${detail_version_number}/wireguard-ui-v${detail_version_number}-linux-amd64.tar.gz"
 	else
-		down_url="${url}/releases/download/${detail_version_number}/wireguard-ui-${detail_version_number}-linux-386.tar.gz"
+		down_url="${url}/releases/download/v${detail_version_number}/wireguard-ui-v${detail_version_number}-linux-386.tar.gz"
 	fi
 	online_down_file
 }
