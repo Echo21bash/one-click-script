@@ -42,7 +42,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			curl -sL -o ${tmp_dir}/tmp_version ${url}/tags >/dev/null 2>&1
+			curl -sL ${url}/tags | grep /tag/ >/tmp/wireguard_tmp/tmp_version
 		;;
 	esac
 	
@@ -66,7 +66,7 @@ ver_rule_general(){
 			fi
 		;;		
 		greenplum)
-			cat ${tmp_dir}/tmp_version | grep -Eio "/${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		wireguard-ui)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
