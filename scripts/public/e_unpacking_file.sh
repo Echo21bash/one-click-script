@@ -28,6 +28,10 @@ unpacking_file(){
 	fi
 	#解压文件
 	info_log "正在解压文件${unpack_file_name}到${unpack_dir}"
+	if [[ ! -d ${unpack_dir} ]];then
+		mkdir -p ${unpack_dir}
+	fi
+	
 	if [[	${file_type} = 'gzip' ]];then
 		tar -zxf ${unpack_file_name} -C ${unpack_dir}
 	elif [[ ${file_type} = 'zip' ]];then
@@ -36,7 +40,7 @@ unpacking_file(){
 	
 	if [[ $? = '0' ]];then
 		info_log "解压完成"
-		tar_dir=${tmp_dir}/${package_root_dir}
+		tar_dir=${unpack_dir}/${package_root_dir}
 	else
 		error_log "解压失败"
 		exit 1

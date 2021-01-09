@@ -68,7 +68,7 @@ ver_rule_general(){
 		greenplum)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
-		wireguard-ui)
+		wireguard-ui|anylink)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
 		;;
 		*|node|openresty|elasticsearch)
@@ -95,7 +95,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		fastdfs|greenplum|wireguard-ui)
+		fastdfs|greenplum|wireguard-ui|anylink)
 			all_version_github
 		;;
 	esac
