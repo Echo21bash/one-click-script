@@ -166,12 +166,12 @@ redis_config(){
 	if [[ ${deploy_mode} = '1' ]];then
 		get_ip
 		mkdir -p ${home_dir}/{logs,etc,data}
-		cp -rp ${make_home_dir}/redis/* ${home_dir}
+		cp -rp ${make_home_dir}/* ${home_dir}
 		cp ${conf_dir}/redis.conf ${home_dir}/etc/redis.conf
 		sed -i "s/^bind.*/bind ${local_ip}/" ${home_dir}/etc/redis.conf
 		sed -i "s#^pidfile .*#pidfile ${redis_data_dir}/redis-${redis_port}.pid#" ${home_dir}/etc/redis.conf
-		sed -i "s#^logfile .*#logfile ${home_dir}/logs/redis.log#" ${home_dir}/redis.conf
-		sed -i "s#^dir .*#dir ${redis_data_dir}#" ${conf_dir}/redis.conf
+		sed -i "s#^logfile .*#logfile ${home_dir}/logs/redis.log#" ${home_dir}/etc/redis.conf
+		sed -i "s#^dir .*#dir ${redis_data_dir}#" ${home_dir}/etc/redis.conf
 		add_log_cut ${home_dir}/log_cut_redis ${home_dir}/logs/redis.log
 	fi
 	
