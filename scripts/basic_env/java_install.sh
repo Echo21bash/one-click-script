@@ -6,9 +6,12 @@ java_env_load(){
 	url='https://repo.huaweicloud.com/java/jdk'
 	select_version
 	online_version
+
+}
+
+java_down(){
 	down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
 	online_down_file
-
 }
 
 java_install_set(){
@@ -91,6 +94,7 @@ install_java(){
 java_install_ctl(){
 	java_env_load
 	java_install_set
+	java_down
 	install_java
 	clear_install
 }
