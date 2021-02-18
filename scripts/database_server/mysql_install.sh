@@ -3,7 +3,7 @@
 mysql_env_load(){
 	tmp_dir=/tmp/mysql_tmp
 	soft_name=mysql
-	program_version=('5.5' '5.6' '5.7')
+	program_version=('5.5' '5.6' '5.7' '8.0')
 	select_version
 	install_dir_set
 	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
