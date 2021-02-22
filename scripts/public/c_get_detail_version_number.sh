@@ -85,7 +85,7 @@ online_version(){
 	diy_echo "正在获取在线版本..." "${info}"
 	#所有可用版本
 	case "$soft_name" in
-		java|nginx|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
+		java|nginx|openresty|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
 			all_version_general1
 		;;
 		ruby)
