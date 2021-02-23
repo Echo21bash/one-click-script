@@ -30,6 +30,8 @@ kibana_conf(){
 	sed -i "s/#server.port.*/server.port: ${kibana_port}/" ${conf_dir}/kibana.yml
 	sed -i "s/#server.host.*/server.host: ${local_ip}/" ${conf_dir}/kibana.yml
 	sed -i "s@#elasticsearch.url.*@elasticsearch.url: http://${elasticsearch_ip}@" ${conf_dir}/kibana.yml
+	sed -i "s@#elasticsearch.requestTimeout:.*@elasticsearch.requestTimeout: 60000@" ${conf_dir}/kibana.yml
+	
 }
 
 add_kibana_service(){
