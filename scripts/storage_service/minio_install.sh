@@ -6,7 +6,6 @@ minio_env_load(){
 	tmp_dir=/tmp/minio_tmp
 	mkdir -p ${tmp_dir}
 	url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
-	down_url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
 	install_dir_set
 }
 
@@ -22,6 +21,11 @@ minio_install_set(){
 }
 
 minio_down(){
+	#server
+	down_url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
+	online_down_file
+	#client
+	down_url='https://dl.min.io/client/mc/release/linux-amd64/mc'
 	online_down_file
 }
 
@@ -31,7 +35,9 @@ minio_config(){
 	mkdir -p ${home_dir}/{bin,etc}
 	mkdir -p ${data_dir}
 	cp ${tmp_dir}/minio ${home_dir}/bin/minio
+	cp ${tmp_dir}/mc ${home_dir}/bin/mc
 	chmod +x ${home_dir}/bin/minio
+	chmod +x ${home_dir}/bin/mc
 	cat >${home_dir}/etc/minio<<-EOF
 	MINIO_ACCESS_KEY=${minio_access}
 	MINIO_SECRET_KEY=${minio_secret}
