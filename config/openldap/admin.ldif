@@ -1,0 +1,11 @@
+dn: dc=alibaba,dc=com
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: Example Inc.
+dc: alibaba
+
+dn: cn=admin,dc=alibaba,dc=com
+objectClass: organizationalRole
+cn: admin
+description: Directory Administrator
