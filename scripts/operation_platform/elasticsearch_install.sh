@@ -18,7 +18,7 @@ elasticsearch_down(){
 		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
 	fi
 	online_down_file
-	unpacking_file ${tmp_dir}/${down_file_name}.tar.gz ${tmp_dir}
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 elasticsearch_install_set(){

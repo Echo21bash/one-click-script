@@ -14,6 +14,9 @@ unpacking_file(){
 		error_log "缺少变量unpack_dir，或者参数\$2解压至目录"
 	fi
 	#获取文件类型
+	if [[ ! -f ${unpack_file_name} ]];then
+		error_log "不存在文件${unpack_file_name}"
+	fi
 	file_type=$(file -b ${unpack_file_name} | grep -ioEw "gzip|zip|executable|text|bin" | tr [A-Z] [a-z])
 	#获取文件目录
 	info_log "正在获取压缩包根目录"
