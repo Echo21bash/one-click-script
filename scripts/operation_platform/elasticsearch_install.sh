@@ -141,7 +141,7 @@ add_elasticsearch_service(){
 	ExecStart="${home_dir}/bin/elasticsearch"
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
-	conf_system_service
+	conf_system_service ${home_dir}/init
 
 	if [[ ${deploy_mode} = '1' ]];then
 		add_system_service elsearch ${home_dir}/init
