@@ -29,15 +29,15 @@ system_optimize_set(){
 	
 	###系统limit限制优化
 	[[ ! -f /etc/security/limits.conf.bakup ]] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
-	if [[ -z `grep '*                  -        nofile         65536' /etc/security/limits.conf` ]];then
-		echo '*                  -        nofile         65536'>>/etc/security/limits.conf
+	if [[ -z `grep '*                  -        nofile         1024000' /etc/security/limits.conf` ]];then
+		echo '*                  -        nofile         1024000'>>/etc/security/limits.conf
 	fi
 		
 	if [[ -z `grep '*                  -        nproc          65536' /etc/security/limits.conf` ]];then
 		echo '*                  -        nproc          65536'>>/etc/security/limits.conf
 	fi
 	[[ -f /etc/security/limits.d/20-nproc.conf ]] && sed -i 's/*          soft    nproc     4096/*          soft    nproc     65536/' /etc/security/limits.d/20-nproc.conf
-	ulimit -HSn 65536
+	ulimit -HSn 1024000
 	
 	if [ $? -eq 0 ];then
 		success_log "完成最大进程数和最大打开文件数优化"
@@ -48,12 +48,12 @@ system_optimize_set(){
 	#Centos7对于systemd service的资源设置，则需修改全局配置，全局配置文件放在/etc/systemd/system.conf和/etc/systemd/user.conf，同时也会加载两个对应目录中的所有.conf文件/etc/systemd/system.conf.d/*.conf和/etc/systemd/user.conf.d/*.conf。system.conf是系统实例使用的，user.conf是用户实例使用的。
 	if [[ -f /etc/systemd/system.conf ]];then
 		[[ ! -f /etc/systemd/system.conf.bakup ]] && cp /etc/systemd/system.conf /etc/systemd/system.conf.bakup
-		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65536/' /etc/systemd/system.conf
+		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=1024000/' /etc/systemd/system.conf
 		sed -i 's/#DefaultLimitNPROC=/DefaultLimitNPROC=65536/' /etc/systemd/system.conf
 	fi
 	if [[ -f /etc/systemd/user.conf ]];then
 		[[ ! -f /etc/systemd/user.conf.bakup ]] && cp /etc/systemd/user.conf /etc/systemd/user.conf.bakup
-		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=65536/' /etc/systemd/user.conf
+		sed -i 's/#DefaultLimitNOFILE=/DefaultLimitNOFILE=1024000/' /etc/systemd/user.conf
 		sed -i 's/#DefaultLimitNPROC=/DefaultLimitNPROC=65536/' /etc/systemd/user.conf
 	fi
 
