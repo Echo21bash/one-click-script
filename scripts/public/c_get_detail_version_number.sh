@@ -52,7 +52,7 @@ ver_rule_general(){
 	
 	case "$soft_name" in
 		java)
-			if [[ ${version_number} < '9' ]];then
+			if [[ ${version_number} -lt '9' ]];then
 				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
 			else
 				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -u >${tmp_dir}/all_version

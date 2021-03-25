@@ -10,7 +10,12 @@ java_env_load(){
 }
 
 java_down(){
-	down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
+	if [[ ${version_number} -lt '9' ]];then
+		down_url="${url}/${detail_version_number}/jdk-${detail_version_number%-*}-linux-x64.tar.gz"
+	else
+		down_url="${url}/${detail_version_number}/jdk-${detail_version_number%+*}_linux-x64_bin.tar.gz"
+	fi
+	
 	online_down_file
 }
 
