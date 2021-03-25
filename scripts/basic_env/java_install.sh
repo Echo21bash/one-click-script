@@ -2,7 +2,7 @@
 java_env_load(){
 	tmp_dir=/tmp/java_tmp
 	soft_name=java
-	program_version=('7' '8')
+	program_version=('7' '8' '9' '10' '11')
 	url='https://repo.huaweicloud.com/java/jdk'
 	select_version
 	online_version
