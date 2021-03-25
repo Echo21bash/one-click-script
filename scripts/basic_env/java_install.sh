@@ -15,7 +15,6 @@ java_down(){
 	else
 		down_url="${url}/${detail_version_number}/jdk-${detail_version_number%+*}_linux-x64_bin.tar.gz"
 	fi
-	
 	online_down_file
 }
 
@@ -62,7 +61,7 @@ install_java(){
 	home_dir=${install_dir}/java
 	if [[ ${deploy_mode} = '1' ]];then
 		mkdir -p ${home_dir}
-		unpacking_file ${tmp_dir}/jdk-${detail_version_number%-*}-linux-x64.tar.gz ${tmp_dir}
+		unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 		cp -rp ${tar_dir}/* ${home_dir}
 		\cp ${workdir}/config/java/java_profile.sh /etc/profile.d/
 		chmod +x /etc/profile.d/java_profile.sh
