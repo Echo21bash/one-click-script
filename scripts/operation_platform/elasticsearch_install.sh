@@ -12,9 +12,13 @@ elasticsearch_env_load(){
 }
 
 elasticsearch_down(){
-	down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
+	if [[ ${version_number} = '7' ]];then
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz"
+	else
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
+	fi
 	online_down_file
-	unpacking_file ${tmp_dir}/${soft_name}-${detail_version_number}.tar.gz ${tmp_dir}
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 elasticsearch_install_set(){
@@ -137,7 +141,7 @@ add_elasticsearch_service(){
 	ExecStart="${home_dir}/bin/elasticsearch"
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
-	conf_system_service
+	conf_system_service ${home_dir}/init
 
 	if [[ ${deploy_mode} = '1' ]];then
 		add_system_service elsearch ${home_dir}/init
