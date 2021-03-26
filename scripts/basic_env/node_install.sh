@@ -11,7 +11,7 @@ node_env_load(){
 	online_version
 	down_url="${url}/v${detail_version_number}/node-v${detail_version_number}-linux-x64.tar.gz"
 	online_down_file
-	unpacking_file ${tmp_dir}/node-v${detail_version_number}-linux-x64.tar.gz ${tmp_dir}
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 node_install(){
