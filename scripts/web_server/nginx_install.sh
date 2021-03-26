@@ -84,6 +84,7 @@ nginx_config(){
 	conf_dir=${home_dir}/conf
 	\cp ${workdir}/config/nginx/nginx.conf ${conf_dir}/
 	\cp ${workdir}/config/nginx/default.conf ${home_dir}/conf.d
+	sed -i "s#conf.d#${home_dir}/conf.d#" ${conf_dir}/nginx.conf
 	if [[ ${add_module[*]} =~ '1' ]];then
 		\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	fi
