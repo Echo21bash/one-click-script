@@ -43,7 +43,7 @@ nginx_compile(){
 	home_dir=${install_dir}/nginx
 	mkdir -p ${home_dir}
 	cd ${tar_dir}
-	configure_arg="--prefix=${home_dir} --group=nginx --user=nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module"
+	configure_arg="--prefix=${home_dir} --group=nginx --user=nginx  --with-pcre --with-stream --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-http_geoip_module --with-stream_ssl_module"
 	if [[ ${add_module[*]} =~ '1' ]];then
 		diy_echo "请确保正确配置/etc/fdfs/mod_fastdfs.conf并启动fsatdfs,否则会无法访问文件！" "${yellow}" "${warning}"
 		down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
@@ -71,6 +71,7 @@ nginx_compile(){
 	./configure ${configure_arg}
 	make && make install
 	if [ $? = "0" ];then
+		mkdir -p ${home_dir}/conf.d
 		echo -e "${info} nginx安装成功."
 	else
 		echo -e "${error} nginx安装失败!!!"
@@ -81,7 +82,8 @@ nginx_compile(){
 
 nginx_config(){
 	conf_dir=${home_dir}/conf
-	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
+	\cp ${workdir}/config/nginx/nginx.conf ${conf_dir}/
+	\cp ${workdir}/config/nginx/default.conf ${home_dir}/conf.d
 	if [[ ${add_module[*]} =~ '1' ]];then
 		\cp ${tar_dir}/${add_module_value}-master/src/mod_fastdfs.conf /etc/fdfs/
 	fi
