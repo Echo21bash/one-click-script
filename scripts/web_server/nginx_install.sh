@@ -30,7 +30,7 @@ nginx_install(){
 
 	#安装编译工具及库文件
 	echo -e "${info} 正在安装编译工具及库文件..."
-	yum -y install make zlib zlib-devel gcc-c++ libtool  openssl openssl-devel pcre pcre-devel patch
+	yum -y install make zlib zlib-devel gcc-c++ libtool  openssl openssl-devel pcre pcre-devel patch GeoIP-devel
 	if [ $? = "0" ];then
 		echo -e "${info} 编译工具及库文件安装成功."
 	else
