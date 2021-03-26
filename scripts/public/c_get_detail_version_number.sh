@@ -49,34 +49,34 @@ all_version_github(){
 }
 
 ver_rule_general(){
-	
+	grep_version_number=`echo ${version_number} | sed 's/\./\\./'`
 	case "$soft_name" in
 		java)
 			if [[ ${version_number} -lt '9' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -u >${tmp_dir}/all_version
 			fi
 		;;
 		
 		php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|logstash|kibana|filebeat)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}-[0-9.]{5,}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,2}-[0-9.]{5,}" | sort -u >${tmp_dir}/all_version
 			fi
 		;;		
 		greenplum)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		wireguard-ui|anylink)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
 		;;
 		*|node|openresty|elasticsearch)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${grep_version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 	esac
 
