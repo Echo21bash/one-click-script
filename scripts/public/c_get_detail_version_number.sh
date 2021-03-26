@@ -49,7 +49,7 @@ all_version_github(){
 }
 
 ver_rule_general(){
-	grep_version_number=`echo ${version_number} | sed 's/\./\\./'`
+	grep_version_number=`echo ${version_number} | sed 's/\./\\./'` sed 's/\./\\\./'
 	case "$soft_name" in
 		java)
 			if [[ ${version_number} -lt '9' ]];then
