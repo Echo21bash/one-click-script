@@ -32,7 +32,7 @@ esac
 
 basic_environment(){
 
-output_option '请选择要安装的环境' 'JDK PHP Ruby Nodejs' 'num'
+output_option '请选择要安装的环境' 'JDK PHP Ruby Nodejs Go' 'num'
 case "$num" in
 	1)java_install_ctl
 	;;
@@ -41,6 +41,8 @@ case "$num" in
 	3)ruby_install_ctl
 	;;
 	4)node_install_ctl
+	;;
+	5)go_install_ctl
 	;;
 esac
 }

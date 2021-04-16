@@ -59,7 +59,7 @@ ver_rule_general(){
 			fi
 		;;
 		
-		php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|logstash|kibana|filebeat)
+		go|php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|logstash|kibana|filebeat)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		mysql)
@@ -89,7 +89,7 @@ online_version(){
 	diy_echo "正在获取在线版本..." "${info}"
 	#所有可用版本
 	case "$soft_name" in
-		java|nginx|openresty|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
+		java|go|nginx|openresty|node|redis|memcached|php|zookeeper|kafka|activemq|rocketmq|zabbix|elasticsearch|logstash|kibana|filebeat|grafana)
 			all_version_general1
 		;;
 		ruby)
