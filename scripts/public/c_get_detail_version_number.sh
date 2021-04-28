@@ -95,7 +95,9 @@ online_version(){
 		ruby)
 			all_version_general2
 		;;
-
+		tomcat)
+			all_version_general3
+		;;
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
