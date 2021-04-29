@@ -64,7 +64,7 @@ add_anylink_service(){
 
 
 anylink_install_ctl(){
-	anylink_env_check
+
 	anylink_env_load
 	anylink_set
 	anylink_down
