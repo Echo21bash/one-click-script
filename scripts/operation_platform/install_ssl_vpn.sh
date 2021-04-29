@@ -39,9 +39,9 @@ anylink_config(){
 	#openssl rsa -in vpn.key -out vpn.key
 	#openssl req -utf8 -x509 -new -nodes -key vpn.key -sha256 -days 36500 -out vpn.pem
 	#openssl pkcs12 -export -in vpn.pem -inkey vpn.key -out vpn.p12
-	admin_pass=`${home_dir}/anylink -passwd ${admin_passwd} | awk -F : '{print $2}'`
-	jwt_secret=`${home_dir}/anylink -secret | awk -F : '{print $2}'`
-	sed -i "s/issuer =.*/issuer = ${vpn_name}/" server.toml
+	admin_pass=`${home_dir}/anylink tool -p ${admin_passwd} | awk -F : '{print $2}'`
+	jwt_secret=`${home_dir}/anylink tool -s | awk -F : '{print $2}'`
+	sed -i "s/issuer =.*/issuer = \"${vpn_name}\"/" server.toml
 	sed -i "s/link_addr =.*/link_addr = \"${link_addr}\"/" server.toml
 	sed -i "s/server_addr =.*/server_addr = \"${server_addr}\"/" server.toml
 	sed -i "s/admin_addr =.*/admin_addr = \"${admin_addr}\"/" server.toml
@@ -55,7 +55,7 @@ anylink_config(){
 }
 
 add_anylink_service(){
-	WorkingDirectory="${home_dir}/anylink"
+	WorkingDirectory="${home_dir}"
 	ExecStart="${home_dir}/anylink"
 	conf_system_service	${home_dir}/anylink.service
 	add_system_service anylink ${home_dir}/anylink.service
