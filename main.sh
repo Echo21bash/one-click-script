@@ -110,7 +110,7 @@ esac
 }
 
 operation_platform(){
-output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控 LDAP统一认证 红帽服务器集群(RHCS)' 'platform'
+output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控 LDAP统一认证 红帽服务器集群(RHCS) VPN隧道' 'platform'
 case "$platform" in
 	1)elk_install_ctl
 	;;
@@ -119,6 +119,8 @@ case "$platform" in
 	3)openldap_install_ctl
 	;;
 	4)rhcs_install_ctl
+	;;
+	5)vpn_install_ctl
 	;;
 esac
 
