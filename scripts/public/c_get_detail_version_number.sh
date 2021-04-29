@@ -42,7 +42,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			curl -sL ${url}/tags | grep /tag/ >/tmp/wireguard_tmp/tmp_version
+			curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	

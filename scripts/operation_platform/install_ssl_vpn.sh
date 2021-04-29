@@ -19,7 +19,7 @@ anylink_set(){
 
 anylink_down(){
 	
-	down_url="${url}/releases/download/v${detail_version_number}/anylink-deploy-v${detail_version_number}.tar.gz"
+	down_url="${url}/releases/download/v${detail_version_number}/anylink-deploy.tar.gz"
 	online_down_file
 }
 
