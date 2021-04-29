@@ -1,21 +1,22 @@
 #!/bin/bash
 unpacking_file(){
 	##$1 待解压文件路径 $2解压至目录
-	if [[ -z ${unpack_file_name} && -n $1 ]];then
+	if [[ -n $1 ]];then
 		unpack_file_name=$1
 	fi
-	if [[ -z ${unpack_file_name} && -z $1 ]];then
-		error_log "缺少变量unpack_file_name，或者参数\$1待解压文件路径"
+	if [[ -z ${unpack_file_name} ]];then
+		error_log "函数unpacking_file缺少变量unpack_file_name，或者参数\$1待解压文件路径"
 	fi
-	if [[ -z ${unpack_dir} && -n $2 ]];then
+	if [[ && -n $2 ]];then
 		unpack_dir=$2
 	fi
-	if [[ -z ${unpack_dir} && -z $2 ]];then
+	if [[ -z ${unpack_dir} ]];then
 		error_log "缺少变量unpack_dir，或者参数\$2解压至目录"
 	fi
 	#获取文件类型
 	if [[ ! -f ${unpack_file_name} ]];then
 		error_log "不存在文件${unpack_file_name}"
+		exit 1
 	fi
 	file_type=$(file -b ${unpack_file_name} | grep -ioEw "gzip|zip|executable|text|bin" | tr [A-Z] [a-z])
 	#获取文件目录
