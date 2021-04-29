@@ -39,8 +39,8 @@ anylink_config(){
 	#openssl rsa -in vpn.key -out vpn.key
 	#openssl req -utf8 -x509 -new -nodes -key vpn.key -sha256 -days 36500 -out vpn.pem
 	#openssl pkcs12 -export -in vpn.pem -inkey vpn.key -out vpn.p12
-	admin_pass=`${home_dir}/bin/anylink -passwd ${admin_passwd} | awk -F : '{print $2}'`
-	jwt_secret=`${home_dir}/bin/anylink -secret | awk -F : '{print $2}'`
+	admin_pass=`${home_dir}/anylink -passwd ${admin_passwd} | awk -F : '{print $2}'`
+	jwt_secret=`${home_dir}/anylink -secret | awk -F : '{print $2}'`
 	sed -i "s/issuer =.*/issuer = ${vpn_name}/" server.toml
 	sed -i "s/link_addr =.*/link_addr = \"${link_addr}\"/" server.toml
 	sed -i "s/server_addr =.*/server_addr = \"${server_addr}\"/" server.toml
