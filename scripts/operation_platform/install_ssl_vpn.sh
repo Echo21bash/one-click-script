@@ -29,7 +29,7 @@ anylink_install(){
 	mkdir -p ${home_dir}
 	unpacking_file ${tmp_dir}/anylink-deploy-v${detail_version_number}.tar.gz ${tmp_dir}
 	cp -rp ${tar_dir}/* ${home_dir}
-	chmod -R +x ${home_dir}/bin
+
 }
 
 anylink_config(){
