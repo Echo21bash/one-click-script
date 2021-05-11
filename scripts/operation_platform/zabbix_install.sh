@@ -46,7 +46,7 @@ zabbix_set(){
 }
 
 zabbix_install(){
-
+	cd ${tar_dir}
 	diy_echo "正在安装编译工具及库文件..." "" "${info}"
 	if [[ ${install_module_value[@]} =~ 'zabbix-server' || ${install_module_value[@]} =~ 'zabbix-proxy' ]];then
 		yum -y install gcc make net-snmp-devel libxml2-devel libcurl-devel mysql-devel libevent-devel
@@ -55,7 +55,6 @@ zabbix_install(){
 		yum -y install gcc make net-snmp-devel libxml2-devel libcurl-devel libevent-devel
 		./configure --prefix=${home_dir} ${module_configure} --with-net-snmp --with-libcurl --with-libxml2
 	fi
-	cd ${tar_dir}
 	home_dir=${install_dir}/zabbix
 	mkdir -p ${home_dir}
 	
