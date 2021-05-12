@@ -83,7 +83,7 @@ zabbix_config(){
 		sed -i "s@^# DBPassword=.*@DBPassword=${zabbix_db_passwd}@" ${home_dir}/etc/zabbix_server.conf
 		sed -i "s@^# DBPort=.*@DBPort=${zabbix_db_port}@" ${home_dir}/etc/zabbix_server.conf
 		sed -i "s@^# StartPingers=.*@StartPingers=3@" ${home_dir}/etc/zabbix_server.conf
-		sed -i "s@^# CacheSize=.*@# CacheSize=512M@" ${home_dir}/etc/zabbix_server.conf
+		sed -i "s@^# CacheSize=.*@CacheSize=512M@" ${home_dir}/etc/zabbix_server.conf
 		sed -i "s@^# Include=/usr/local/etc/zabbix_server.conf.d/\*\.conf@Include=${home_dir}/etc/zabbix_server.conf.d/*.conf@" ${home_dir}/etc/zabbix_server.conf
 	fi
  
