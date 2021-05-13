@@ -119,7 +119,7 @@ php_config(){
 }
 
 php_extra_install(){
-	info_log "安装pecl扩展管理工具"
+	info_log "安装pecl扩展管理工具，示例：pecl install redis"
 	down_file http://pear.php.net/go-pear.phar ${tmp_dir}/go-pear.phar
 	info_log "请确认后输入回车继续"
 	${home_dir}/bin/php ${tmp_dir}/go-pear.phar
