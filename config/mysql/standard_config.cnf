@@ -86,6 +86,7 @@ myisam_sort_buffer_size = 64M
 binlog_format = row
 expire_logs_days = 15
 max_binlog_size = 512M
+log_slave_updates = 1
 sync_binlog = 200
 log-bin = mysql-bin
 log-bin-index = mysql-bin.index
