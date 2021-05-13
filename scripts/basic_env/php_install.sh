@@ -19,14 +19,7 @@ php_down(){
 }
 
 php_install_set(){
-	output_option '请选择安装模式' 'PHP作为httpd模块 FastCGI(php-fpm)模式 PHP同时开启两个种模式' 'php_mode'
-	input_option '是否添加额外模块' 'n' 'add'
-	add=${input_value}
-	yes_or_no ${add}
-	if [[ $? = '0' ]];then
-		output_option '请选择需要安装的php模块(可多选)' 'redis memcached' 'php_modules'
-		php_modules=(${output_value[@]})
-	fi
+	output_option '请选择安装模式' 'FastCGI(php-fpm)模式 PHP作为httpd模块 PHP同时开启两个种模式' 'php_mode'
 
 }
 
@@ -35,16 +28,8 @@ php_install_depend(){
 	info_log "正在安装编译工具及库文件..."
 	[[ ${os_release} < "7" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install  httpd httpd-devel mod_proxy_fcgi
 	[[ ${os_release} > "6" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install httpd httpd-devel
-	yum  -y install gcc gcc-c++ openldap-devel libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel sqlite-devel
+	yum  -y install gcc gcc-c++ autoconf openldap-devel libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel sqlite-devel
 
-}
-
-php_install(){
-
-	home_dir=${install_dir}/php
-	conf_dir=${home_dir}/etc
-	extra_conf_dir=${home_dir}/etc.d
-	mkdir -p ${home_dir}/{etc,etc.d}
 	#必要函数库
 	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ${tmp_dir}/libiconv-1.15.tar.gz
 	cd ${tmp_dir} && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install
@@ -56,71 +41,36 @@ php_install(){
 		error_log "libiconv库编译及编译安装失败..."
 		exit 1
 	fi
-	php_compile
-	php_config
-	if [[ ${php_modules[@]} != '' ]];then
-		php_modules_install
-	fi
+
 }
 
 php_compile(){
+
+	home_dir=${install_dir}/php
+	conf_dir=${home_dir}/etc
+	extra_conf_dir=${home_dir}/etc.d
+	mkdir -p ${home_dir}/{etc,etc.d}
+	
 	#编译参数获取
 	[ ${php_mode} = 1 ] && fpm="" && apxs2="--with-apxs2=`find / -name apxs`"
 	[ ${php_mode} = 2 ] && fpm="--enable-fpm" && apxs2=""
 	[ ${php_mode} = 3 ] && fpm="--enable-fpm" && apxs2="--with-apxs2=`which apxs`"
 	[[ ${version_number} < '7.0' ]] && mysql="--with-mysql=mysqlnd"
 	[[ ${version_number} = '7.0' || ${version_number} > '7.0' ]] && mysql=""
-	#建立ldap库如软链
-	ln -sf  /usr/lib64/libldap* /usr/lib
+	#建立ldap库相关软链
+	if [[ -d /usr/lib64 ]];then
+		ln -sf  /usr/lib64/libldap* /usr/lib
+		ln -sf /usr/lib64/liblber* /usr/lib
+	fi
 	./configure --prefix=${home_dir} --with-config-file-path=${home_dir}/etc --with-config-file-scan-dir=${home_dir}/etc.d ${fpm} ${apxs2} ${mysql} --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-mhash --with-openssl --with-zlib --with-bz2 --with-curl --with-libxml-dir --with-ldap --with-gd --with-jpeg-dir --with-png-dir --with-zlib --enable-mbstring --with-mcrypt --enable-sockets --with-iconv-dir --with-xsl --enable-zip --with-pcre-dir --with-pear --enable-session  --enable-gd-native-ttf --enable-xml --with-freetype-dir --enable-inline-optimization --enable-shared --enable-bcmath --enable-sysvmsg --enable-sysvsem --enable-sysvshm --enable-mbregex --enable-pcntl --with-xmlrpc --with-gettext --enable-exif --with-readline --with-recode --with-tidy --enable-soap
 	make -j 4 && make install
 	if [ $? = "0" ];then
-		info_log "php编译完成..."
+		success_log "php编译完成..."
 	else
 		error_log "php编译失败..."
 		exit 1
 	fi
 
-}
-
-php_modules_install(){
-	php_redis='https://github.com/phpredis/phpredis'
-	php_memcached='https://github.com/php-memcached-dev/php-memcached'
-	
-	if [[ ${php_modules[@]} =~ 'redis' ]];then
-
-		[[ ${version_number} > '5.6' ]] && down_file ${php_redis}/archive/master.tar.gz phpredis-master.tar.gz && tar zxf phpredis-master.tar.gz && cd phpredis-master
-		[[ ${version_number} < '7.0' ]] && down_file ${php_redis}/archive/4.3.0.tar.gz phpredis-4.3.0.tar.gz && tar zxf phpredis-4.3.0.tar.gz && cd phpredis-4.3.0
-		${home_dir}/bin/phpize
-		./configure --with-php-config=${home_dir}/bin/php-config && make -j 4 && make install && cd ..
-		if [[ $? = '0' ]];then
-			cat > ${extra_conf_dir}/redis.ini<<-EOF
-			[redis]
-			extension = redis.so
-			EOF
-		else
-			error_log "redis模块编译失败"
-			exit
-		fi
-	fi
-
-	if [[ ${php_modules[@]} =~ 'memcached' ]];then
-		#安装依赖的库和头文件
-		yum install -y libmemcached libmemcached-devel
-		[[ ${version_number} > '5.6' ]] && down_file ${php_memcached}/archive/master.tar.gz php-memcached-master.tar.gz && tar zxf php-memcached-master.tar.gz && cd php-memcached-master
-		[[ ${version_number} < '7.0' ]] && down_file ${php_memcached}/archive/2.2.0.tar.gz php-memcached-2.2.0.tar.gz && tar zxf php-memcached-2.2.0.tar.gz && cd php-memcached-2.2.0
-		${home_dir}/bin/phpize
-		./configure --with-php-config=${home_dir}/bin/php-config && make -j 4 && make install && cd ..
-		if [[ $? = '0' ]];then
-			cat > ${extra_conf_dir}/memcached.ini<<-EOF
-			[memcached]
-			extension = memcached.so
-			EOF
-		else
-			error_log "memcached模块编译失败"
-			exit
-		fi
-	fi
 }
 
 php_config(){
@@ -168,11 +118,21 @@ php_config(){
 	add_sys_env "PATH=${home_dir}/bin:\$PATH PATH=${home_dir}/sbin:\$PATH"
 }
 
+php_extra_install(){
+	info_log "安装pecl扩展管理工具"
+	down_file http://pear.php.net/go-pear.phar ${tmp_dir}/go-pear.phar
+	info_log "请确认后输入回车继续"
+	${home_dir}/bin/php ${tmp_dir}/go-pear.phar
+}
+
 php_install_ctl(){
 	php_env_load
 	php_install_set
 	php_down
 	php_install_depend
 	php_install
+	php_compile
+	php_config
+	php_extra_install
 	clear_install
 }
