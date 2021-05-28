@@ -48,7 +48,7 @@ openssh_down(){
 openssh_updata(){
 
 	info_log "正在安装"
-	rpm -Uvh ${tmp_dir}/openssh*${version_number}*el${os_release}*.rpm
+	yum install -y ${tmp_dir}/openssh*${version_number}*el${os_release}*.rpm
 	if [[ $? = 0 ]];then
 		cd /etc/ssh/
 		chmod 400 ssh_host_ecdsa_key ssh_host_ed25519_key ssh_host_rsa_key
