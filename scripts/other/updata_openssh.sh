@@ -25,22 +25,22 @@ openssh_bak(){
 
 openssh_down(){
 	info_log "正在下载安装包"
-	down_url="${url}/raw/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
 }
