@@ -151,7 +151,7 @@ esac
 }
 
 tools(){
-output_option '请选择进行的操作' '一键优化系统配置 查看系统详情 升级内核版本 创建用户并将其加入visudo 安装WireGuard-VPN 多功能备份脚本 主机ssh互信' 'tool'
+output_option '请选择进行的操作' '一键优化系统配置 查看系统详情 升级内核版本 创建用户并将其加入visudo 安装WireGuard-VPN 多功能备份脚本 主机ssh互信 升级openssh' 'tool'
 case "$tool" in
 	1)system_optimize_set
 	;;
@@ -166,6 +166,8 @@ case "$tool" in
 	6)multi_function_backup_script_set
 	;;
 	7)auto_ssh_keygen_tool
+	;;
+	8)updata_openssh_ctl
 	;;
 esac
 }

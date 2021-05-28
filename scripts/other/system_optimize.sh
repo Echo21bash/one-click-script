@@ -170,7 +170,10 @@ system_optimize_set(){
 	chmod +x /etc/profile.d/bash_history.sh
 	source /etc/profile
 	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log"
-
+	
+	[[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]] && sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  lock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
+	success_log "增加登录失败策略"
+	
 	#锁定关键文件系统
 	#chattr +i /etc/passwd
 	#chattr +i /etc/inittab
