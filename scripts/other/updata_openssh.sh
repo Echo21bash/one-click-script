@@ -8,7 +8,7 @@ openssh_env_load(){
 	select_version
 
 	ssh_ver=`rpm -qa openssh | grep -oE "[0-9]{1}\.[0-9]{1}"`
-	if [[ ${ssh_ver} -gt ${detail_version_number} ]];then
+	if [[ ${ssh_ver} -gt ${version_number} ]];then
 		info_log "无需升级"
 	fi
 }
@@ -25,22 +25,22 @@ openssh_bak(){
 
 openssh_down(){
 	info_log "正在下载安装包"
-	down_url="${url}/raw/master/el${os_release}/openssh-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-gnome-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-clients-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-debuginfo-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-server-${detail_version_number}p1-1.el${os_release}.centos.x86_64.rpm"
+	down_url="${url}/raw/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.centos.x86_64.rpm"
 	online_down_file
 	
 }
@@ -48,7 +48,7 @@ openssh_down(){
 openssh_updata(){
 
 	info_log "正在安装"
-	rpm -Uvh ${tmp_dir}/openssh*${detail_version_number}*el${os_release}*.rpm
+	rpm -Uvh ${tmp_dir}/openssh*${version_number}*el${os_release}*.rpm
 	if [[ $? = 0 ]];then
 		cd /etc/ssh/
 		chmod 400 ssh_host_ecdsa_key ssh_host_ed25519_key ssh_host_rsa_key
