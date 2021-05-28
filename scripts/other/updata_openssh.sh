@@ -54,6 +54,8 @@ openssh_updata(){
 		chmod 400 ssh_host_ecdsa_key ssh_host_ed25519_key ssh_host_rsa_key
 		cat /etc/pam.d/sshd-bak >/etc/pam.d/sshd
 		cat	/etc/ssh/sshd_config-bak >/etc/ssh/sshd_config
+		sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
+		sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 		success_log "升级完成请重启sshd服务验证"
 	fi
 }
