@@ -8,7 +8,7 @@ openssh_env_load(){
 	select_version
 
 	ssh_ver=`rpm -qa openssh | grep -oE "[0-9]{1}\.[0-9]{1}"`
-	if [[ ${ssh_ver} -gt ${version_number} ]];then
+	if [[ ${ssh_ver} > ${version_number} ]];then
 		info_log "无需升级"
 	fi
 }
