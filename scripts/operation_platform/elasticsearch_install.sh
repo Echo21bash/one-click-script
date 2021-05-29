@@ -135,7 +135,10 @@ add_elasticsearch_service(){
 	else
 		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
 	fi
-	
+	if [[ ${version_number} > '6' && x${JAVA_HOME} = 'x' ]];then
+		JAVA_HOME=${home_dir}/jdk
+	fi
+
 	Type=forking
 	User=elsearch
 	ExecStart="${home_dir}/bin/elasticsearch"
