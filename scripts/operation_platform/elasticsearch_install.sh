@@ -116,16 +116,20 @@ elasticsearch_conf(){
 		if [[ ! -f ${conf_dir}/elasticsearch.yml.bak ]];then
 			cp ${conf_dir}/elasticsearch.yml ${conf_dir}/elasticsearch.yml.bak
 		fi
-		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml
+		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml   
 		sed -i "s/#cluster.name.*/cluster.name: ${cluster_name}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#node.name.*/node.name: node${service_id}\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#discovery.zen.ping.unicast.hosts.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/## -Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		if [[ "$version_number" -le 6 ]]; then
+			sed -i "s/#discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
+        else
+			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
+			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
+        fi
 	fi
 
 }
