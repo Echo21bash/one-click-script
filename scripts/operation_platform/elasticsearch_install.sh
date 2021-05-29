@@ -35,11 +35,11 @@ elasticsearch_install_set(){
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		useradd -M elsearch
-		home_dir=${install_dir}/elsearch
-		mkdir -p ${install_dir}/elsearch
+		useradd -M elasticsearch
+		home_dir=${install_dir}/elasticsearch
+		mkdir -p ${install_dir}/elasticsearch
 		mv ${tar_dir}/* ${home_dir}
-		chown -R elsearch.elsearch ${home_dir}
+		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
 	fi
@@ -59,18 +59,18 @@ elasticsearch_install(){
 				let elsearch_port=9200+$j
 				let elsearch_tcp_port=9300+$j
 				elasticsearch_conf
-				home_dir=${install_dir}/elsearch-node${service_id}
+				home_dir=${install_dir}/elasticsearch-node${service_id}
 				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/elsearch-node${service_id}
+				mkdir -p ${install_dir}/elasticsearch-node${service_id}
 				mkdir -p ${elsearch_data_dir}/node${service_id}
 				"
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
-				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elasticsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${install_dir}/elsearch-node${service_id}/elsearch-node${i}.service /etc/systemd/system/elsearch-node${i}.service
+				\cp ${install_dir}/elasticsearch-node${service_id}/elasticsearch-node${i}.service /etc/systemd/system/elasticsearch-node${i}.service
 				systemctl daemon-reload
 				"
 				((i++))
@@ -139,15 +139,15 @@ add_elasticsearch_service(){
 	fi
 
 	Type=forking
-	User=elsearch
+	User=elasticsearch
 	ExecStart="${home_dir}/bin/elasticsearch"
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${home_dir}/elsearch.service
-		add_system_service elsearch ${home_dir}/elsearch.service
+		conf_system_service ${home_dir}/elasticsearch.service
+		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 	else
-		conf_system_service ${tmp_dir}/elsearch-node${service_id}.service
+		conf_system_service ${tmp_dir}/elasticsearch-node${service_id}.service
 	fi
 }
 
