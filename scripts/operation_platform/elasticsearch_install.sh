@@ -120,10 +120,10 @@ elasticsearch_conf(){
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${ES_CLUSTER_HOSTS}\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#discovery.zen.ping.unicast.hosts.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
-		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		sed -i "s/## -Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
+		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
 	fi
 
 }
