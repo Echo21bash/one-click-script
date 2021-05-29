@@ -115,7 +115,7 @@ elasticsearch_conf(){
 			cp ${conf_dir}/elasticsearch.yml ${conf_dir}/elasticsearch.yml.bak
 		fi
 		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml
-		sed -i "s/#cluster.name.*/cluster.name: ${elsearch-cluster}/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#cluster.name.*/cluster.name: ${cluster_name}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#node.name.*/node.name: node${service_id}\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
