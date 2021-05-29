@@ -59,19 +59,18 @@ elasticsearch_install(){
 				let elsearch_port=9200+$j
 				let elsearch_tcp_port=9300+$j
 				elasticsearch_conf
-				home_dir=${install_dir}/elsearch-node${service_id}				
-				add_elsearch_service
+				home_dir=${install_dir}/elsearch-node${service_id}
+				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${install_dir}/elsearch-node${service_id}
 				mkdir -p ${elsearch_data_dir}/node${service_id}
 				"
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elsearch-node${i}.service,myid_node${service_id},log_cut_elsearch-node${i}} ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/elsearch-node${service_id}/elsearch-node${i}.service /etc/systemd/system/elsearch-node${i}.service
-				\cp ${install_dir}/elsearch-node${service_id}/log_cut_elsearch-node${i} /etc/logrotate.d/elsearch-node${i}
 				systemctl daemon-reload
 				"
 				((i++))
@@ -112,7 +111,7 @@ elasticsearch_conf(){
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
 	else
 		conf_dir=${tar_dir}/config
-		if [[ ! -f ${conf_dir}/elasticsearch.yml ]];then
+		if [[ ! -f ${conf_dir}/elasticsearch.yml.bak ]];then
 			cp ${conf_dir}/elasticsearch.yml ${conf_dir}/elasticsearch.yml.bak
 		fi
 		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml
@@ -144,12 +143,11 @@ add_elasticsearch_service(){
 	ExecStart="${home_dir}/bin/elasticsearch"
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
-	conf_system_service ${home_dir}/init
-
 	if [[ ${deploy_mode} = '1' ]];then
-		add_system_service elsearch ${home_dir}/init
+		conf_system_service ${home_dir}/elsearch.service
+		add_system_service elsearch ${home_dir}/elsearch.service
 	else
-		add_system_service elsearch-node${i} ${home_dir}/init
+		conf_system_service ${tmp_dir}/elsearch-node${service_id}.service
 	fi
 }
 
