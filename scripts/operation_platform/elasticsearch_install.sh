@@ -46,7 +46,9 @@ elasticsearch_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		elasticsearch_server_list
-		
+		if [[ ${version_number} > 6 ]]; then
+			elasticsearch_master_node_list
+		fi
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
@@ -104,6 +106,22 @@ elasticsearch_server_list(){
 
 }
 
+elasticsearch_master_node_list(){
+
+	node_total_num=${#host_ip[*]}
+	if [[ -z ${master_nodes_num} ]];then
+		master_nodes_num=${node_total_num}
+	fi
+
+	master_nodes=
+	for ((i=1;i<=${master_nodes_num};i++))
+	do
+		service_id=$i
+		master_nodes="node${service_id},${master_nodes}"
+	done
+
+}
+
 elasticsearch_conf(){
 	get_ip
 	if [[ ${deploy_mode} = '1' ]];then
@@ -124,11 +142,11 @@ elasticsearch_conf(){
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/## -Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
-		if [[ "$version_number" -le 6 ]]; then
+		if [[ ${version_number} < 6 ]]; then
 			sed -i "s/#discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
         else
 			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
-			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
+			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: ${master_nodes}/" ${conf_dir}/elasticsearch.yml
         fi
 	fi
 
