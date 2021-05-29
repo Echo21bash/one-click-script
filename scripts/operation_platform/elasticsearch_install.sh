@@ -62,6 +62,7 @@ elasticsearch_install(){
 				home_dir=${install_dir}/elasticsearch-node${service_id}
 				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				useradd -M elasticsearch
 				mkdir -p ${install_dir}/elasticsearch-node${service_id}
 				mkdir -p ${elsearch_data_dir}/node${service_id}
 				"
@@ -70,6 +71,7 @@ elasticsearch_install(){
 				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elasticsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
 				\cp ${install_dir}/elasticsearch-node${service_id}/elasticsearch-node${i}.service /etc/systemd/system/elasticsearch-node${i}.service
 				systemctl daemon-reload
 				"
