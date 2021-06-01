@@ -4,11 +4,21 @@ kibana_env_load(){
 	soft_name=kibana
 	program_version=('5' '6' '7')
 	url='https://mirrors.huaweicloud.com/kibana'
+	select_version
+	install_dir_set
+	online_version
+	
+
+}
+
+kibana_down(){
 	if [[ ${os_bit} = '64' ]];then
 		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz'
 	else
 		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86.tar.gz'
 	fi
+	online_down_file
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 kibana_install_set(){
@@ -45,11 +55,6 @@ add_kibana_service(){
 kibana_install_ctl(){
 	kibana_env_load
 	kibana_install_set
-	select_version
-	install_dir_set
-	online_version
-	online_down_file
-	unpacking_file
 	kibana_install
 	clear_install
 }
