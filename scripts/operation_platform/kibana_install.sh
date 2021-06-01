@@ -55,6 +55,7 @@ add_kibana_service(){
 kibana_install_ctl(){
 	kibana_env_load
 	kibana_install_set
+	kibana_down
 	kibana_install
 	clear_install
 }
