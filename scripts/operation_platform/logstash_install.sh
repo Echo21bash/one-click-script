@@ -40,8 +40,8 @@ logstash_conf(){
 	conf_dir=${home_dir}/config
 	sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
 	sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
-	sed -i "s@# path.config.*@path.config: ${home_dir}/config.d@" ${conf_dir}/logstash.yml
-	sed -i "s/# http.host.*/http.host: \"${local_ip}\" " ${conf_dir}/logstash.yml
+	sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
+	sed -i "s%# http.host.*%http.host: \"${local_ip}\"%" ${conf_dir}/logstash.yml
 	sed -i "s/-Xms.*/-Xms512m/" ${conf_dir}/jvm.options
 	sed -i "s/-Xmx.*/-Xmx512m/" ${conf_dir}/jvm.options
 }
