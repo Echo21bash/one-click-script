@@ -28,7 +28,8 @@ kibana_install_set(){
 }
 
 kibana_install(){
-	
+	home_dir=${install_dir}/kibana
+	mkdir -p ${install_dir}/kibana
 	mv ${tar_dir}/* ${home_dir}
 	kibana_conf
 	add_kibana_service
