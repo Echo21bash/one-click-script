@@ -59,7 +59,7 @@ ver_rule_general(){
 			fi
 		;;
 		
-		go|php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix|logstash|kibana|filebeat)
+		go|php|ruby|nginx|mongodb|redis|zookeeper|kafka|zabbix)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		mysql)
@@ -75,7 +75,7 @@ ver_rule_general(){
 		wireguard-ui|anylink)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
 		;;
-		*|node|openresty|elasticsearch)
+		*|node|openresty|elasticsearch|logstash|kibana|filebeat)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 	esac
