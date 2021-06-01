@@ -30,7 +30,9 @@ kibana_install_set(){
 kibana_install(){
 	home_dir=${install_dir}/kibana
 	mkdir -p ${install_dir}/kibana
+	useradd kibana
 	mv ${tar_dir}/* ${home_dir}
+	chown -R kibana.kibana ${home_dir}
 	kibana_conf
 	add_kibana_service
 }
@@ -40,14 +42,16 @@ kibana_conf(){
 	conf_dir=${home_dir}/config
 	sed -i "s/#server.port.*/server.port: ${kibana_port}/" ${conf_dir}/kibana.yml
 	sed -i "s/#server.host.*/server.host: ${local_ip}/" ${conf_dir}/kibana.yml
-	sed -i "s@#elasticsearch.url.*@elasticsearch.url: ${elasticsearch_ip}@" ${conf_dir}/kibana.yml
-	sed -i "s@#elasticsearch.requestTimeout:.*@elasticsearch.requestTimeout: 60000@" ${conf_dir}/kibana.yml
-	
+	sed -i "s%#elasticsearch.url.*%elasticsearch.url: ${elasticsearch_ip}%" ${conf_dir}/kibana.yml
+	sed -i "s%##elasticsearch.hosts.*%elasticsearch.url: [${elasticsearch_ip}]%" ${conf_dir}/kibana.yml
+	sed -i "s%#elasticsearch.requestTimeout:.*%elasticsearch.requestTimeout: 60000%" ${conf_dir}/kibana.yml
+	sed -i "s%#i18n.locale:.*%i18n.locale: \"zh-CN\"%" ${conf_dir}/kibana.yml
 }
 
 add_kibana_service(){
 
 	Type=simple
+	User=kibana
 	ExecStart="${home_dir}/bin/kibana"
 	conf_system_service ${home_dir}/init
 	add_system_service kibana ${home_dir}/init
