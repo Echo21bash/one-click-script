@@ -80,6 +80,7 @@ kafka_install(){
 
 kafka_config(){
 	conf_dir=${tar_dir}/config
+	bin_dir=${tar_dir}/bin
 	if [[ ${deploy_mode} = '1' ]];then
 		get_ip
 		listeners_ip=${local_ip}
@@ -96,7 +97,10 @@ kafka_config(){
 	[[ -z `grep ^listeners ${conf_dir}/server.properties` ]] && sed -i "s%#listeners=.*%listeners=PLAINTEXT://${listeners_ip}:${kafka_port}%" ${conf_dir}/server.properties
 	[[ -n `grep ^listeners ${conf_dir}/server.properties` ]] && sed -i "s%listeners=.*%listeners=PLAINTEXT://${listeners_ip}:${kafka_port}%" ${conf_dir}/server.properties
 	sed -i "s%log.dirs=.*%log.dirs=${kafka_data_dir}/broker${broker_id}%" ${conf_dir}/server.properties
+	sed -i "s/zookeeper.connect=.*/zookeeper.connect=${zookeeper_connect}/" ${conf_dir}/server.properties
 	sed -i "s/zookeeper.connection.timeout.ms=.*/zookeeper.connection.timeout.ms=12000/" ${conf_dir}/server.properties
+	#堆内存配置
+	[[ -n ${jvm_heap} ]] && sed -i "s/1G/${jvm_heap}/g" ${bin_dir}/kafka-server-start.sh
 
 }
 

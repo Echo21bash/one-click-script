@@ -1,7 +1,7 @@
 #!/bin/bash
 install_dir_set(){
 
-	input_option "请输入安装路径" "/opt" "install_dir"
+	input_option "请输入安装路径" "/usr/local" "install_dir"
 	install_dir=${input_value}
 	pdir=$(dirname ${install_dir}) && bdir=$(basename ${install_dir})
 

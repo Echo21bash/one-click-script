@@ -35,18 +35,20 @@ elasticsearch_install_set(){
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		useradd -M elsearch
-		home_dir=${install_dir}/elsearch
-		mkdir -p ${install_dir}/elsearch
+		useradd -M elasticsearch
+		home_dir=${install_dir}/elasticsearch
+		mkdir -p ${install_dir}/elasticsearch
 		mv ${tar_dir}/* ${home_dir}
-		chown -R elsearch.elsearch ${home_dir}
+		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		elasticsearch_server_list
-		
+		if [[ ${version_number} > 6 ]]; then
+			elasticsearch_master_node_list
+		fi
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
@@ -59,19 +61,20 @@ elasticsearch_install(){
 				let elsearch_port=9200+$j
 				let elsearch_tcp_port=9300+$j
 				elasticsearch_conf
-				home_dir=${install_dir}/elsearch-node${service_id}				
-				add_elsearch_service
+				home_dir=${install_dir}/elasticsearch-node${service_id}
+				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/elsearch-node${service_id}
+				useradd -M elasticsearch
+				mkdir -p ${install_dir}/elasticsearch-node${service_id}
 				mkdir -p ${elsearch_data_dir}/node${service_id}
 				"
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
-				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elsearch-node${i}.service,myid_node${service_id},log_cut_elsearch-node${i}} ${host_ip[$k]}:${install_dir}/elsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elasticsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${install_dir}/elsearch-node${service_id}/elsearch-node${i}.service /etc/systemd/system/elsearch-node${i}.service
-				\cp ${install_dir}/elsearch-node${service_id}/log_cut_elsearch-node${i} /etc/logrotate.d/elsearch-node${i}
+				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
+				\cp ${install_dir}/elasticsearch-node${service_id}/elasticsearch-node${i}.service /etc/systemd/system/elasticsearch-node${i}.service
 				systemctl daemon-reload
 				"
 				((i++))
@@ -103,6 +106,22 @@ elasticsearch_server_list(){
 
 }
 
+elasticsearch_master_node_list(){
+
+	node_total_num=${#host_ip[*]}
+	if [[ -z ${master_nodes_num} ]];then
+		master_nodes_num=${node_total_num}
+	fi
+
+	master_nodes=
+	for ((i=1;i<=${master_nodes_num};i++))
+	do
+		service_id=$i
+		master_nodes="node${service_id},${master_nodes}"
+	done
+
+}
+
 elasticsearch_conf(){
 	get_ip
 	if [[ ${deploy_mode} = '1' ]];then
@@ -112,19 +131,23 @@ elasticsearch_conf(){
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
 	else
 		conf_dir=${tar_dir}/config
-		if [[ ! -f ${conf_dir}/elasticsearch.yml ]];then
+		if [[ ! -f ${conf_dir}/elasticsearch.yml.bak ]];then
 			cp ${conf_dir}/elasticsearch.yml ${conf_dir}/elasticsearch.yml.bak
 		fi
-		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml
-		sed -i "s/#cluster.name.*/cluster.name: ${elsearch-cluster}/" ${conf_dir}/elasticsearch.yml
+		\cp ${conf_dir}/elasticsearch.yml.bak ${conf_dir}/elasticsearch.yml   
+		sed -i "s/#cluster.name.*/cluster.name: ${cluster_name}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#node.name.*/node.name: node${service_id}\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${ES_CLUSTER_HOSTS}\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#discovery.zen.ping.unicast.hosts.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]\ndiscovery.zen.ping_timeout: 30s/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
-		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		sed -i "s/## -Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
+		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		if [[ ${version_number} < 6 ]]; then
+			sed -i "s/#discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
+        else
+			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
+			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: ${master_nodes}/" ${conf_dir}/elasticsearch.yml
+        fi
 	fi
 
 }
@@ -135,18 +158,20 @@ add_elasticsearch_service(){
 	else
 		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
 	fi
-	
+	if [[ ${version_number} > '6' && x${JAVA_HOME} = 'x' ]];then
+		JAVA_HOME=${home_dir}/jdk
+	fi
+
 	Type=forking
-	User=elsearch
+	User=elasticsearch
 	ExecStart="${home_dir}/bin/elasticsearch"
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
-	conf_system_service ${home_dir}/init
-
 	if [[ ${deploy_mode} = '1' ]];then
-		add_system_service elsearch ${home_dir}/init
+		conf_system_service ${home_dir}/elasticsearch.service
+		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 	else
-		add_system_service elsearch-node${i} ${home_dir}/init
+		conf_system_service ${tmp_dir}/elasticsearch-node${service_id}.service
 	fi
 }
 
