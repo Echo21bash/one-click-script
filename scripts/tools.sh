@@ -220,8 +220,9 @@ add_log_cut(){
 		fi
 		cat >${log_cut_config_file}<<-EOF
 		${logs_dir}{
-		daily
-		rotate 15
+		weekly
+		rotate 26
+		compress
 		missingok
 		notifempty
 		copytruncate
