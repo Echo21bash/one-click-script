@@ -149,37 +149,4 @@ system_optimize_set(){
 	fi
 	success_log "系统必要服务设置开机自启"
 
-	###系统用户操作记录配置/var/log/bash_history.log
-	cat >/etc/profile.d/bash_history.sh <<-'EOF'
-	#!/bin/bash
-	
-	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
-	export PROMPT_COMMAND='\
-	if [ -z "$OLD_PWD" ];then
-		export OLD_PWD=$(pwd);
-	fi;
-	if [ ! -z "$LAST_CMD" ] && [ "$(history 1)" != "$LAST_CMD" ]; then
-		echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
-	fi;
-	export LAST_CMD="$(history 1)";
-	export OLD_PWD=$(pwd);'
-	EOF
-	[[ -z `grep 'TMOUT=600' /etc/profile` ]] && echo 'TMOUT=600' >> /etc/profile
-	[[ ! -f /var/log/bash_history.log ]] && touch /var/log/bash_history.log
-	chmod a+w /var/log/bash_history.log
-	chmod +x /etc/profile.d/bash_history.sh
-	source /etc/profile
-	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log"
-	
-	[[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]] && sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  lock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
-	success_log "增加登录失败策略"
-	
-	#锁定关键文件系统
-	#chattr +i /etc/passwd
-	#chattr +i /etc/inittab
-	#chattr +i /etc/group
-	#chattr +i /etc/shadow
-	#chattr +i /etc/gshadow
-	#/bin/mv /usr/bin/chattr /usr/bin/lock
-	#success_log "完成系统关键文件锁定"
 }
