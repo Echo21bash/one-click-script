@@ -7,12 +7,12 @@ system_security_set(){
 	sed -i 's/PASS_MIN_LEN.*/PASS_MIN_LEN 12/' /etc/login.defs
 	sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 15/' /etc/login.defs
 	success_log "更新密码过期周期为90天。"
-	if [[ `grep 'pam_pwquality.so' /etc/pam.d/system-auth >/dev/null 2>&1` ]];then
+	if [[ `grep 'pam_pwquality.so' /etc/pam.d/system-auth 2>/dev/null` ]];then
 		sed -i 's/password    requisite.*/password    requisite     pam_pwquality.so minlen=12 dcredit=-2 ucredit=-1 lcredit=-1 ocredit=-1 try_first_pass local_users_only retry=3 authtok_type=/' /etc/pam.d/system-auth
 		success_log "更新密码复杂度策略"
 		info_log "密码复杂度策略为最小长度12位，至少包含2个数字，1个大写字母，1个小写字母，1个特殊字符"
 	fi
-	if [[ `grep 'pam_cracklib.so' /etc/pam.d/system-auth >/dev/null 2>&1` ]];then
+	if [[ `grep 'pam_cracklib.so' /etc/pam.d/system-auth 2>/dev/null` ]];then
 		sed -i 's/password    requisite.*/password    requisite     pam_cracklib.so minlen=12 dcredit=-2 ucredit=-1 lcredit=-1 ocredit=-1 try_first_pass retry=3 type=/' /etc/pam.d/system-auth
 		success_log "更新密码复杂度策略"
 		info_log "密码复杂度策略为最小长度12位，至少包含2个数字，1个大写字母，1个小写字母，1个特殊字符"
