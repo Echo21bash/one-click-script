@@ -2,10 +2,10 @@
 
 system_security_set(){
 	###密码更改周期配置
-	sed -i /PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/ /etc/login.defs
-	sed -i /PASS_MIN_DAYS.*/PASS_MIN_DAYS 80/ /etc/login.defs
-	sed -i /PASS_MIN_LEN.*/PASS_MIN_LEN 12/ /etc/login.defs
-	sed -i /PASS_WARN_AGE.*/PASS_WARN_AGE 15/ /etc/login.defs
+	sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
+	sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 80/' /etc/login.defs
+	sed -i 's/PASS_MIN_LEN.*/PASS_MIN_LEN 12/' /etc/login.defs
+	sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 15/' /etc/login.defs
 	success_log "更新密码过期周期为90天。"
 	if [[ `grep 'pam_pwquality.so' /etc/pam.d/system-auth >/dev/null 2>&1` ]];then
 		sed -i 's/password    requisite.*/password    requisite     pam_pwquality.so minlen=12 dcredit=-2 ucredit=-1 lcredit=-1 ocredit=-1 try_first_pass local_users_only retry=3 authtok_type=/' /etc/pam.d/system-auth
