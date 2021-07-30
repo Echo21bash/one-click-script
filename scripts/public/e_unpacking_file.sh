@@ -18,10 +18,10 @@ unpacking_file(){
 		error_log "不存在文件${unpack_file_name}"
 		exit 1
 	fi
-	file_type=$(file -b ${unpack_file_name} | grep -ioEw "gzip|zip|executable|text|bin" | tr [A-Z] [a-z])
+	file_type=$(file -b ${unpack_file_name} | grep -ioEw "gzip|XZ|zip|executable|text|bin" | tr [A-Z] [a-z])
 	#获取文件目录
 	info_log "正在获取压缩包根目录"
-	if [[	${file_type} = 'gzip' ]];then
+	if [[ ${file_type} = 'gzip' || ${file_type} = 'xz' ]];then
 		package_root_dir=$(tar -tf ${unpack_file_name}  | awk 'NR==1' | awk -F '/' '{print $1}' | sed 's#/##')
 	elif [[ ${file_type} = 'zip' ]];then
 		package_root_dir=$(unzip -v ${unpack_file_name} | awk '{print $8}'| awk 'NR==4' | sed 's#/##')
@@ -39,8 +39,8 @@ unpacking_file(){
 		mkdir -p ${unpack_dir}
 	fi
 	
-	if [[	${file_type} = 'gzip' ]];then
-		tar -zxf ${unpack_file_name} -C ${unpack_dir}
+	if [[ ${file_type} = 'gzip' || ${file_type} = 'xz' ]];then
+		tar -xf ${unpack_file_name} -C ${unpack_dir}
 	elif [[ ${file_type} = 'zip' ]];then
 		unzip -q ${unpack_file_name} -d ${unpack_dir}
 	fi
