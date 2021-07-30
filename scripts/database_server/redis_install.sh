@@ -283,5 +283,5 @@ redis_install_ctl(){
 	redis_install_set
 	redis_down
 	redis_install
-	clear_install
+	
 }

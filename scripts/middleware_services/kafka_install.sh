@@ -133,5 +133,5 @@ kafka_install_ctl(){
 	kafka_install_set
 	kafka_down
 	kafka_install
-	clear_install
+	
 }

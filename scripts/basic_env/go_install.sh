@@ -33,5 +33,5 @@ go_install(){
 go_install_ctl(){
 	go_env_load
 	go_install
-	clear_install
+	
 }

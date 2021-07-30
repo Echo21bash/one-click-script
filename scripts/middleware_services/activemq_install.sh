@@ -181,5 +181,5 @@ activemq_install_ctl(){
 	activemq_install_set
 	activemq_down
 	activemq_install
-	clear_install
+	
 }

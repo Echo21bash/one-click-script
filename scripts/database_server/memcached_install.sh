@@ -103,5 +103,5 @@ memcached_inistall_ctl(){
 	memcached_inistall_set
 	memcached_down
 	memcached_install
-	clear_install
+	
 }

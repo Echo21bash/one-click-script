@@ -106,5 +106,5 @@ tomcat_install_ctl(){
 	tomcat_set
 	tomcat_down
 	tomcat_install
-	clear_install
+	
 }

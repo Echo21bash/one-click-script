@@ -25,6 +25,6 @@ node_install(){
 node_install_ctl(){
 	node_env_load
 	node_install
-	clear_install
+	
 
 }

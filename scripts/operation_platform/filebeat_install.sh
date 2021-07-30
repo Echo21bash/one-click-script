@@ -45,5 +45,5 @@ filebeat_install_ctl(){
 	select_version
 	filebeat_down
 	filebeat_install
-	clear_install
+	
 }

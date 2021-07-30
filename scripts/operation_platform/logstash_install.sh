@@ -59,5 +59,5 @@ logstash_install_ctl(){
 	logstash_install_set
 	logstash_down
 	logstash_install
-	clear_install
+	
 }

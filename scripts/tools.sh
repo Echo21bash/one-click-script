@@ -451,7 +451,3 @@ add_sys_env(){
 	fi
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
-
-clear_install(){
-	echo
-}

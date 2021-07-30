@@ -62,5 +62,5 @@ mongodb_inistall_ctl(){
 	mongodb_install_set
 	mongodb_down
 	mongodb_install
-	clear_install
+	
 }

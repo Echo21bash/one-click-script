@@ -38,5 +38,5 @@ ruby_install(){
 ruby_install_ctl(){
 	ruby_env_load
 	ruby_install
-	clear_install
+	
 }

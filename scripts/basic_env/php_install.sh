@@ -134,5 +134,5 @@ php_install_ctl(){
 	php_compile
 	php_config
 	php_extra_install
-	clear_install
+	
 }

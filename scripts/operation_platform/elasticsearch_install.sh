@@ -180,5 +180,5 @@ elasticsearch_install_ctl(){
 	elasticsearch_install_set
 	elasticsearch_down
 	elasticsearch_install
-	clear_install
+	
 }

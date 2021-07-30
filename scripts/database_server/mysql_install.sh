@@ -226,5 +226,5 @@ mysql_install_ctl(){
 	mysql_install_set
 	mysql_down
 	mysql_install
-	clear_install
+	
 }

@@ -178,5 +178,5 @@ fastdfs_install_ctl(){
 	fastdfs_install
 	fastdfs_config
 	add_fastdfs_service
-	clear_install
+	
 }

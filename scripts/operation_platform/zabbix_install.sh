@@ -135,5 +135,5 @@ zabbix_install_ctl(){
 	zabbix_install
 	zabbix_config
 	add_zabbix_service
-	clear_install
+	
 }

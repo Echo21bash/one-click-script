@@ -110,5 +110,5 @@ nginx_install_ctl(){
 	nginx_compile
 	nginx_config
 	add_nginx_service
-	clear_install
+	
 }

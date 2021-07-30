@@ -159,5 +159,5 @@ greenplum_install_ctl(){
 	greenplum_install_env
 	greenplum_install
 	greenplum_config
-	clear_install
+	
 }

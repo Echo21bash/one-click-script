@@ -4,7 +4,7 @@ erlang_env_load(){
 	tmp_dir=/usr/local/src/erlang_tmp
 	soft_name=erlang
 	program_version=('20' '21' '22')
-	url="http://erlang.org/download"
+	url="http://distfiles.macports.org/erlang"
 	select_version
 	online_version
 
@@ -32,16 +32,21 @@ erlang_install_set(){
 }
 
 erlang_install(){
+	home_dir=${install_dir}/erlang
 	if [[ ${deploy_mode} = '1' ]];then
 		yum install -y which wget perl openssl-devel make automake autoconf ncurses-devel gcc
 		erlang_compile
+		add_sys_env "PATH=${home_dir}/bin:\$PATH"
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
 	fi
 
 }
 
 erlang_compile(){
 	cd ${tmp_dir}/${package_root_dir}
-	./configure --prefix=${install_dir} --with-ssl --enable-threads --enable-smp-support --enable-kernel-poll --enable-hipe
+	./configure --prefix=${home_dir} --with-ssl --enable-threads --enable-smp-support --enable-kernel-poll --enable-hipe
 	if [[ $? = '0' ]];then
 		success_log '编译检查通过'
 		make -j4 && make install
@@ -60,8 +65,8 @@ erlang_compile(){
 
 erlang_install_ctl(){
 	erlang_env_load
-	erlang_down
 	erlang_install_set
+	erlang_down
 	erlang_install
-	clear_install
+	
 }

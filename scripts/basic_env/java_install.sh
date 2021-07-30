@@ -100,5 +100,5 @@ java_install_ctl(){
 	java_install_set
 	java_down
 	install_java
-	clear_install
+	
 }

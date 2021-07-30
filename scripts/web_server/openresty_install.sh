@@ -72,5 +72,5 @@ openresty_install_ctl(){
 	openresty_compile
 	openresty_config
 	add_openresty_service
-	clear_install
+	
 }

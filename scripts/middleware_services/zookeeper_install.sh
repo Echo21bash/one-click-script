@@ -166,5 +166,5 @@ zookeeper_install_ctl(){
 	zookeeper_install_set
 	zookeeper_down
 	zookeeper_install
-	clear_install
+	
 }
