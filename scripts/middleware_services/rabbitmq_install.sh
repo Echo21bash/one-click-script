@@ -2,7 +2,7 @@
 rabbitmq_env_check(){
 	erl -version >/dev/null 2>&1
 	if [[ $? = 0 ]];then
-		success_log "erlang运行环境已具备"
+		success_log "erlang运行环境已具备注意与rabbitmq版本对应关系"
 	else
 		error_log "erlang运行环境没有安装请安装"
 		erlang_install_ctl
@@ -71,13 +71,13 @@ rabbitmq_config(){
 add_rabbitmq_service(){
 	Type="forking"
 	if [[ ${deploy_mode} = '1' ]];then
-		ExecStart="${home_dir}/sbin/rabbitmq-server -daemon"
+		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
 		conf_system_service ${home_dir}/rabbitmq.service
-		add_system_service rabbitmq ${home_dir}/rabbitmq-server.service
+		add_system_service rabbitmq ${home_dir}/rabbitmq.service
 		
 	elif [[ ${deploy_mode} = '2' ]];then
-		ExecStart="${home_dir}/sbin/rabbitmq-server -daemon"
+		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
 		conf_system_service ${tmp}/rabbitmq-node${i}.service
 	fi
