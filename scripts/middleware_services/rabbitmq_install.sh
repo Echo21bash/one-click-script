@@ -1,6 +1,6 @@
 #!/bin/bash
 rabbitmq_env_check(){
-	erl -versio >/dev/null 2>&1
+	erl -version >/dev/null 2>&1
 	if [[ $? = 0 ]];then
 		success_log "erlang运行环境已具备"
 	else
@@ -11,7 +11,7 @@ rabbitmq_env_check(){
 
 rabbitmq_env_load(){
 	
-	tmp_dir=/tmp/rabbitmq_tmp
+	tmp_dir=/usr/local/src/rabbitmq_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=rabbitmq
 	program_version=('3.7' '3.8')
