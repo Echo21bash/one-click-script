@@ -38,8 +38,8 @@ rabbitmq_install_set(){
 		input_option '请设置rabbitmq的主机名称' 'node1' 'rabbitmq_nodename'
 		rabbitmq_nodename=${input_value}
 	elif [[ ${deploy_mode} = '2' ]];then
-		vi ${workdir}/config/rabbitmq/rabbitmq.conf
-		. ${workdir}/config/rabbitmq/rabbitmq.conf
+		vi ${workdir}/config/rabbitmq/rabbitmq-cluster.conf
+		. ${workdir}/config/rabbitmq/rabbitmq-cluster.conf
 	fi
 
 }
@@ -51,6 +51,7 @@ rabbitmq_install(){
 		home_dir=${install_dir}/rabbitmq
 		mkdir -p ${home_dir}
 		cp -rp ${tar_dir}/* ${home_dir}
+		add_sys_env "PATH=${home_dir}/sbin:\$PATH"
 		rabbitmq_config
 		add_rabbitmq_service
 	fi
@@ -64,7 +65,7 @@ rabbitmq_config(){
 	fi
 	cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${home_dir}/etc/rabbitmq/rabbitmq-env.conf
 	sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@${rabbitmq_nodename}?" ${home_dir}/etc/rabbitmq/rabbitmq-env.conf
-
+	${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 }
 
 add_rabbitmq_service(){
