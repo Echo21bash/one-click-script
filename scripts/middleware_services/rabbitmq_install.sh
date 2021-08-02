@@ -49,7 +49,8 @@ rabbitmq_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/rabbitmq
-		mv ${tar_dir}/* ${home_dir}
+		mkdir -p ${home_dir}
+		cp -rp ${tar_dir}/* ${home_dir}
 		rabbitmq_config
 		add_rabbitmq_service
 	fi
@@ -58,7 +59,9 @@ rabbitmq_install(){
 
 
 rabbitmq_config(){
-
+	if [[ -z `grep ${rabbitmq_nodename} /etc/hosts` ]];then
+		echo 127.0.0.1   ${rabbitmq_nodename} >>/etc/hosts
+	fi
 	cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${home_dir}/etc/rabbitmq/rabbitmq-env.conf
 	sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@${rabbitmq_nodename}?" ${home_dir}/etc/rabbitmq/rabbitmq-env.conf
 
