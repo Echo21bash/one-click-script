@@ -81,7 +81,7 @@ esac
 
 middleware_services(){
 
-output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka' 'num'
+output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka RabbitMQ' 'num'
 case "$num" in
 	1)activemq_install_ctl
 	;;
@@ -90,6 +90,8 @@ case "$num" in
 	3)zookeeper_install_ctl
 	;;
 	4)kafka_install_ctl
+	;;
+	5)rabbitmq_install_ctl
 	;;
 esac
 }
