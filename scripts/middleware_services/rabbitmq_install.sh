@@ -77,13 +77,13 @@ rabbitmq_install(){
 				"
 				info_log "正在向节点${now_host}分发rabbitmq-node${broker_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/rabbitmq-node${i}.service ${host_ip[$k]}:${install_dir}/rabbitmq-node${i}.service
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/log_cut_rabbitmq_node${i} ${host_ip[$k]}:${install_dir}/log_cut_rabbitmq_node${i}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/rabbitmq-node${i}.service ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/log_cut_rabbitmq_node${i} ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i}
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
 				\cp ${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
 				systemctl daemon-reload
-				[[ -z `grep node${broker_id} /etc/hosts` ]] && echo 127.0.0.1    node${broker_id}>>/etc/hosts
+				[[ x = x`grep node${broker_id} /etc/hosts` ]] && echo 127.0.0.1    node${broker_id}>>/etc/hosts
 				"
 				((i++))
 			done
