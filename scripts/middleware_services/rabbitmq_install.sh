@@ -83,7 +83,7 @@ rabbitmq_install(){
 				\cp ${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
 				\cp ${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
 				systemctl daemon-reload
-				[[ x = "x`grep node${broker_id} /etc/hosts`" ]] && echo "127.0.0.1    node${broker_id}">>/etc/hosts
+				[[ x = "x`grep -o node${broker_id} /etc/hosts`" ]] && echo "127.0.0.1    node${broker_id}">>/etc/hosts
 				"
 				((i++))
 			done
