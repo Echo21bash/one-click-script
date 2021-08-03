@@ -104,7 +104,7 @@ rabbitmq_config(){
 		${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 		add_log_cut ${home_dir}/log_cut_rabbitmq ${home_dir}/var/log/rabbitmq/*.log
 		\cp ${home_dir}/log_cut_rabbitmq /etc/logrotate.d/rabbitmq
-
+	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		cat ${workdir}/config/rabbitmq/rabbitmq.conf >${tar_dir}/etc/rabbitmq/rabbitmq.conf
