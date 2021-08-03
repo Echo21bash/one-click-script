@@ -69,8 +69,8 @@ rabbitmq_install(){
 				broker_id=$i
 				let rabbitmq_port=5672+$j
 				let rabbitmq_management_port=15672+$j
-				rabbitmq_config
 				home_dir=${install_dir}/rabbitmq-node${broker_id}
+				rabbitmq_config
 				add_rabbitmq_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${install_dir}/rabbitmq-node${broker_id}
@@ -83,7 +83,7 @@ rabbitmq_install(){
 				\cp ${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
 				\cp ${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
 				systemctl daemon-reload
-				[[ x = x`grep node${broker_id} /etc/hosts` ]] && echo 127.0.0.1    node${broker_id}>>/etc/hosts
+				[[ x = "x`grep node${broker_id} /etc/hosts`" ]] && echo "127.0.0.1    node${broker_id}">>/etc/hosts
 				"
 				((i++))
 			done
@@ -108,9 +108,9 @@ rabbitmq_config(){
 	if [[ ${deploy_mode} = '2' ]];then
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		cat ${workdir}/config/rabbitmq/rabbitmq.conf >${tar_dir}/etc/rabbitmq/rabbitmq.conf
-		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@${rabbitmq_nodename}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
+		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@node${broker_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?listeners.tcp.default.*?listeners.tcp.default = ${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq.conf
-		sed -i "s?management.listener.port.*?management.listener.port = ${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq.
+		sed -i "s?management.listener.port.*?management.listener.port = ${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq.conf
 		add_log_cut ${tmp_dir}/log_cut_rabbitmq_node${i} ${home_dir}/var/log/rabbitmq/*.log
 	fi
 }
