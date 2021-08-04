@@ -82,6 +82,7 @@ rabbitmq_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
 				\cp ${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
+				${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 				systemctl daemon-reload
 				[[ x = "x`grep -o node${broker_id} /etc/hosts`" ]] && echo "127.0.0.1    node${broker_id}">>/etc/hosts
 				"
@@ -89,6 +90,7 @@ rabbitmq_install(){
 			done
 			((k++))
 		done
+		rabbitmq_cluster_init
 	fi
 	
 }
@@ -109,8 +111,8 @@ rabbitmq_config(){
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		cat ${workdir}/config/rabbitmq/rabbitmq.conf >${tar_dir}/etc/rabbitmq/rabbitmq.conf
 		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@node${broker_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
-		sed -i "s?listeners.tcp.default.*?listeners.tcp.default = ${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq.conf
-		sed -i "s?management.listener.port.*?management.listener.port = ${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq.conf
+		sed -i "s?RABBITMQ_NODE_PORT.*?RABBITMQ_NODE_PORT=${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
+		sed -i "s?15672?${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		add_log_cut ${tmp_dir}/log_cut_rabbitmq_node${i} ${home_dir}/var/log/rabbitmq/*.log
 	fi
 }
@@ -120,15 +122,51 @@ add_rabbitmq_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
+		SuccessExitStatus=69
 		conf_system_service ${home_dir}/rabbitmq.service
 		add_system_service rabbitmq ${home_dir}/rabbitmq.service
 		
 	elif [[ ${deploy_mode} = '2' ]];then
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
+		SuccessExitStatus=69
 		conf_system_service ${tmp_dir}/rabbitmq-node${i}.service
 	fi
 	
+}
+
+rabbitmq_cluster_init(){
+	local i=1
+	local k=0
+	for now_host in ${host_ip[@]}
+	do
+		for ((j=0;j<${node_num[$k]};j++))
+		do
+			if [[ $i = '1' ]];then
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				systemctl start rabbitmq-node$i
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass}
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator
+				"
+				scp -r ${host_ip[$i]}:/root/.erlang.cookie ${tmp_dir}
+			else
+				scp -r ${tmp_dir}/.erlang.cookie ${host_ip[$k]}:/root/
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				systemctl start rabbitmq-node$i && \
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl stop_app && \
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl join_cluster rabbit@node1 && \
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl start_app
+				"
+				if [[ $? = 0 ]];then
+					success_log "rabbitmq-node$i 加入集群"
+				else
+					error_log "rabbitmq-node$i 加入集群"
+				fi
+			fi
+			((i++))
+		done
+		((k++))
+	done
 }
 
 rabbitmq_install_ctl(){

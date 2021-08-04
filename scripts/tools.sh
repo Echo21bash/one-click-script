@@ -372,6 +372,7 @@ conf_system_service(){
 		ExecStartPost=${ExecStartPost:-}
 		ExecReload=${ExecReload:-/bin/kill -s HUP \$MAINPID}
 		ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}
+		SuccessExitStatus=${SuccessExitStatus:-}
 		TimeoutStopSec=5
 		Restart=${Restart:-on-failure}
 		LimitNOFILE=65536
@@ -381,11 +382,13 @@ conf_system_service(){
 		success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/systemd/system下"
 	fi
 	#删除空值
+	[[ -z ${Requires} ]] && sed -i /Requires=/d ${system_service_config_file}
 	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
 	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
 	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
 	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
 	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
+	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
 
 }
 #添加守护进程
