@@ -160,7 +160,8 @@ rabbitmq_cluster_init(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				systemctl start rabbitmq-broker$i && sleep 10 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass} && \
-				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator
+				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator && \
+				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_cluster_name ${cluster_name}
 				"
 				scp -r ${host_ip[$i]}:/root/.erlang.cookie ${tmp_dir}
 			else
@@ -170,6 +171,7 @@ rabbitmq_cluster_init(){
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl stop_app && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl join_cluster broker1@rabbitmq-node1 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl start_app
+
 				"
 				if [[ $? = 0 ]];then
 					success_log "rabbitmq-broker$i 加入集群"
@@ -183,7 +185,6 @@ rabbitmq_cluster_init(){
 		((k++))
 	done
 	success_log "完成rabbitmq集群初始化"
-
 }
 
 rabbitmq_install_ctl(){
