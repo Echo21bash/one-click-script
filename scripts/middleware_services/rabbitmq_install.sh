@@ -58,12 +58,14 @@ rabbitmq_install(){
 
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
+		rabbitmq_hosts
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
 			rabbitmq_port=5672
 			rabbitmq_management_port=15672
+			let host_id=$k+1
 			for ((j=0;j<${node_num[$k]};j++))
 			do
 				broker_id=$i
@@ -73,18 +75,17 @@ rabbitmq_install(){
 				rabbitmq_config
 				add_rabbitmq_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/rabbitmq-node${broker_id}
+				mkdir -p ${home_dir}
 				"
 				info_log "正在向节点${now_host}分发rabbitmq-node${broker_id}安装程序和配置文件..."
-				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/rabbitmq-node${i}.service ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/log_cut_rabbitmq_node${i} ${host_ip[$k]}:${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i}
+				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{rabbitmq-node${i}.service,log_cut_rabbitmq_node${i},hosts} ${host_ip[$k]}:${home_dir}/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${install_dir}/rabbitmq-node${broker_id}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
-				\cp ${install_dir}/rabbitmq-node${broker_id}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
+				\cp ${home_dir}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
+				\cp ${home_dir}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
 				${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 				systemctl daemon-reload
-				[[ x = "x`grep -o node${broker_id} /etc/hosts`" ]] && echo "127.0.0.1    node${broker_id}">>/etc/hosts
+				[[ x = "x`grep -o rabbitmq-node${host_id} /etc/hosts`" ]] && cat ${home_dir}/hosts >>/etc/hosts
 				"
 				((i++))
 			done
@@ -98,19 +99,21 @@ rabbitmq_install(){
 
 rabbitmq_config(){
 	if [[ ${deploy_mode} = '1' ]];then
+		get_ip
 		if [[ -z `grep ${rabbitmq_nodename} /etc/hosts` ]];then
-			echo 127.0.0.1   ${rabbitmq_nodename} >>/etc/hosts
+			echo ${local_ip}   ${rabbitmq_nodename} >>/etc/hosts
 		fi
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${home_dir}/etc/rabbitmq/rabbitmq-env.conf
-		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@${rabbitmq_nodename}?" ${home_dir}/etc/rabbitmq/rabbitmq-env.conf
+		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=${rabbitmq_nodename}?" ${home_dir}/etc/rabbitmq/rabbitmq-env.conf
 		${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 		add_log_cut ${home_dir}/log_cut_rabbitmq ${home_dir}/var/log/rabbitmq/*.log
 		\cp ${home_dir}/log_cut_rabbitmq /etc/logrotate.d/rabbitmq
 	fi
+
 	if [[ ${deploy_mode} = '2' ]];then
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		cat ${workdir}/config/rabbitmq/rabbitmq.conf >${tar_dir}/etc/rabbitmq/rabbitmq.conf
-		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=rabbit@node${broker_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
+		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=${broker_id}@rabbitmq-node${host_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?RABBITMQ_NODE_PORT.*?RABBITMQ_NODE_PORT=${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?15672?${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		add_log_cut ${tmp_dir}/log_cut_rabbitmq_node${i} ${home_dir}/var/log/rabbitmq/*.log
@@ -135,6 +138,16 @@ add_rabbitmq_service(){
 	
 }
 
+rabbitmq_hosts(){
+	rm -rf ${tmp_dir}/hosts
+	local i=1
+	for now_host in ${host_ip[@]}
+	do
+		echo "${now_host}    rabbitmq-node$i">>${tmp_dir}/hosts
+		((i++))
+	done
+}
+
 rabbitmq_cluster_init(){
 	local i=1
 	local k=0
@@ -144,15 +157,15 @@ rabbitmq_cluster_init(){
 		do
 			if [[ $i = '1' ]];then
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-node$i
-				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass}
+				systemctl start rabbitmq-node$i && sleep 10 && \
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass} && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator
 				"
 				scp -r ${host_ip[$i]}:/root/.erlang.cookie ${tmp_dir}
 			else
 				scp -r ${tmp_dir}/.erlang.cookie ${host_ip[$k]}:/root/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-node$i && \
+				systemctl start rabbitmq-node$i && sleep 10 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl stop_app && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl join_cluster rabbit@node1 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl start_app
