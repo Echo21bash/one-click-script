@@ -113,7 +113,7 @@ rabbitmq_config(){
 	if [[ ${deploy_mode} = '2' ]];then
 		cat ${workdir}/config/rabbitmq/rabbitmq-env.conf >${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		cat ${workdir}/config/rabbitmq/rabbitmq.conf >${tar_dir}/etc/rabbitmq/rabbitmq.conf
-		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=${broker_id}@rabbitmq-node${host_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
+		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=broker${broker_id}@rabbitmq-node${host_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?RABBITMQ_NODE_PORT.*?RABBITMQ_NODE_PORT=${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?15672?${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		add_log_cut ${tmp_dir}/log_cut_rabbitmq_node${i} ${home_dir}/var/log/rabbitmq/*.log
@@ -153,6 +153,7 @@ rabbitmq_cluster_init(){
 	local k=0
 	for now_host in ${host_ip[@]}
 	do
+		let host_id=$k+1
 		for ((j=0;j<${node_num[$k]};j++))
 		do
 			if [[ $i = '1' ]];then
@@ -167,7 +168,7 @@ rabbitmq_cluster_init(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				systemctl start rabbitmq-node$i && sleep 10 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl stop_app && \
-				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl join_cluster rabbit@node1 && \
+				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl join_cluster broker1@rabbitmq-node1 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl start_app
 				"
 				if [[ $? = 0 ]];then
