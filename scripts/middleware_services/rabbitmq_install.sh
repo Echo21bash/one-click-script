@@ -71,21 +71,21 @@ rabbitmq_install(){
 				broker_id=$i
 				let rabbitmq_port=5672+$j
 				let rabbitmq_management_port=15672+$j
-				home_dir=${install_dir}/rabbitmq-node${broker_id}
+				home_dir=${install_dir}/rabbitmq-broker${broker_id}
 				rabbitmq_config
 				add_rabbitmq_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				mkdir -p ${home_dir}
 				"
-				info_log "正在向节点${now_host}分发rabbitmq-node${broker_id}安装程序和配置文件..."
+				info_log "正在向节点${now_host}分发rabbitmq-broker${broker_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{rabbitmq-node${i}.service,log_cut_rabbitmq_node${i},hosts} ${host_ip[$k]}:${home_dir}/
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{rabbitmq-broker${i}.service,log_cut_rabbitmq_broker${i},hosts} ${host_ip[$k]}:${home_dir}/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${home_dir}/rabbitmq-node${i}.service /etc/systemd/system/rabbitmq-node${i}.service
-				\cp ${home_dir}/log_cut_rabbitmq_node${i} /etc/logrotate.d/rabbitmq-node${i}
+				\cp ${home_dir}/rabbitmq-broker${i}.service /etc/systemd/system/rabbitmq-broker${i}.service
+				\cp ${home_dir}/log_cut_rabbitmq_broker${i} /etc/logrotate.d/rabbitmq-broker${i}
 				${home_dir}/sbin/rabbitmq-plugins enable rabbitmq_management
 				systemctl daemon-reload
-				[[ x = "x`grep -o rabbitmq-node${host_id} /etc/hosts`" ]] && cat ${home_dir}/hosts >>/etc/hosts
+				grep -o rabbitmq-node${host_id} /etc/hosts || cat ${home_dir}/hosts >>/etc/hosts
 				"
 				((i++))
 			done
@@ -116,7 +116,7 @@ rabbitmq_config(){
 		sed -i "s?RABBITMQ_NODENAME=.*?RABBITMQ_NODENAME=broker${broker_id}@rabbitmq-node${host_id}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?RABBITMQ_NODE_PORT.*?RABBITMQ_NODE_PORT=${rabbitmq_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
 		sed -i "s?15672?${rabbitmq_management_port}?" ${tar_dir}/etc/rabbitmq/rabbitmq-env.conf
-		add_log_cut ${tmp_dir}/log_cut_rabbitmq_node${i} ${home_dir}/var/log/rabbitmq/*.log
+		add_log_cut ${tmp_dir}/log_cut_rabbitmq_broker${i} ${home_dir}/var/log/rabbitmq/*.log
 	fi
 }
 
@@ -133,7 +133,7 @@ add_rabbitmq_service(){
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
 		SuccessExitStatus=69
-		conf_system_service ${tmp_dir}/rabbitmq-node${i}.service
+		conf_system_service ${tmp_dir}/rabbitmq-broker${i}.service
 	fi
 	
 }
@@ -158,7 +158,7 @@ rabbitmq_cluster_init(){
 		do
 			if [[ $i = '1' ]];then
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-node$i && sleep 10 && \
+				systemctl start rabbitmq-broker$i && sleep 10 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass} && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator
 				"
@@ -166,21 +166,24 @@ rabbitmq_cluster_init(){
 			else
 				scp -r ${tmp_dir}/.erlang.cookie ${host_ip[$k]}:/root/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-node$i && sleep 10 && \
+				systemctl start rabbitmq-broker$i && sleep 10 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl stop_app && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl join_cluster broker1@rabbitmq-node1 && \
 				${install_dir}/rabbitmq-node$i/sbin/rabbitmqctl start_app
 				"
 				if [[ $? = 0 ]];then
-					success_log "rabbitmq-node$i 加入集群"
+					success_log "rabbitmq-broker$i 加入集群"
 				else
-					error_log "rabbitmq-node$i 加入集群"
+					error_log "rabbitmq-broker$i 加入集群"
+					exit 1
 				fi
 			fi
 			((i++))
 		done
 		((k++))
 	done
+	success_log "完成rabbitmq集群初始化"
+
 }
 
 rabbitmq_install_ctl(){
