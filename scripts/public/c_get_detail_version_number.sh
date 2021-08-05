@@ -59,7 +59,7 @@ ver_rule_general(){
 			fi
 		;;
 		
-		erlang|go|php|ruby|nginx|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix)
+		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${version_number}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
 		;;
 		mysql)

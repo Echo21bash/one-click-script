@@ -17,84 +17,127 @@ memcached_down(){
 }
 
 memcached_inistall_set(){
-
-	output_option "请选择安装版本" "普通版 集成repcached补丁版" "branch"
-	input_option "输入本机部署个数" "1" "deploy_num"
-	input_option "输入起始memcached端口号" "11211" "memcached_port"
-
-	if [[ ${branch} = '2' ]];then
-		diy_echo "集成repcached补丁,该补丁并非官方发布,目前最新补丁兼容1.4.13" "${yellow}" "${warning}"
-		input_option "输入memcached同步端口号" "11210" "syn_port"
+	output_option "请选择安装版本" "单机模式 双主模式(集成repcached补丁版)" "deploy_mode"
+	if [[ ${deploy_mode} = '2' ]];then
+		warning_log "集成repcached补丁,该补丁并非官方发布,目前最新补丁兼容1.4.13"
+		vi ${workdir}/config/memcached/memcached-cluster.conf
+		. ${workdir}/config/memcached/memcached-cluster.conf
 	fi
+
 }
 
 memcached_install(){
-	diy_echo "正在安装依赖库..." "" "${info}"
 	yum -y install make  gcc-c++ libevent libevent-devel
-	if [ $? = '0' ];then
-		echo -e "${info} 编译工具及库文件安装成功."
-	else
-		echo -e "${error} 编译工具及库文件安装失败请检查!!!" && exit 1
-	fi
-
-	cd ${tar_dir}
-	home_dir=${install_dir}/memcached
-	mkdir -p ${home_dir}
-	if [ ${branch} = '1' ];then
-		./configure --prefix=${home_dir} && make && make install
-	fi
-	if [ ${branch} = '2' ];then
-		repcached_url="http://mdounin.ru/files/repcached-2.3.1-1.4.13.patch.gz"
-		wget ${repcached_url} && gzip -d repcached-2.3.1-1.4.13.patch.gz && patch -p1 -i ./repcached-2.3.1-1.4.13.patch
-		./configure --prefix=${home_dir} --enable-replication && make && make install
-	fi
-	if [ $? = '0' ];then
-		echo -e "${info} memcached编译完成."
-	else
-		echo -e "${error} memcached编译失败" && exit 1
-	fi
-
-	if [ ${deploy_num} = '1'  ];then
+	make_home_dir=${tmp_dir}/memcached-bin
+	mkdir -p ${make_home_dir}/{etc,logs}
+	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/memcached
+		mkdir -p ${home_dir}
+		cp -rp ${make_home_dir}/* ${home_dir}
+		add_sys_env "PATH=${home_dir}/bin:\$PATH"
 		memcached_config
 		add_memcached_service
-		add_sys_env "PATH=${home_dir}/bin:$PATH"
 	fi
-	if [[ ${deploy_num} > '1' ]];then
-		mv ${home_dir} ${install_dir}/tmp
-		for ((i=1;i<=${deploy_num};i++))
+
+	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
+		local i=1
+		local k=0
+		for now_host in ${host_ip[@]}
 		do
-			\cp -rp ${install_dir}/tmp ${install_dir}/memcached-node${i}
-			home_dir=${install_dir}/memcached-node${i}
-			memcached_config
-			add_memcached_service
-			memcached_port=$((${memcached_port}+1))
+			memcached_port=11211
+			memcached_syn_port=11221
+			let host_id=$k+1
+			for ((j=0;j<${node_num[$k]};j++))
+			do
+				node_id=$i
+				let memcached_port=11211+$j
+				let memcached_syn_port=11221+$j
+				home_dir=${install_dir}/memcached-node${node_id}
+				memcached_config
+				add_memcached_service
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				mkdir -p ${home_dir}
+				yum -y install libevent libevent-devel
+				"
+				info_log "正在向节点${now_host}分发memcached-node${node_id}安装程序和配置文件..."
+				scp -q -r -P ${ssh_port[$k]} ${make_home_dir}/* ${host_ip[$k]}:${home_dir}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{memcached-node${i}.service,logrotate-node${i}} ${host_ip[$k]}:${home_dir}/
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				\cp ${home_dir}/memcached-node${i}.service /etc/systemd/system/memcached-node${i}.service
+				\cp ${home_dir}/logrotate-node${i} /etc/logrotate.d/memcached-node${i}
+				systemctl daemon-reload
+				"
+				((i++))
+			done
+			((k++))
 		done
-		add_sys_env "PATH=${home_dir}/bin:$PATH"
+		rabbitmq_cluster_init
 	fi
 		
 }
 
-memcached_config(){
-	mkdir -p ${home_dir}/etc ${home_dir}/logs
-	cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
+memcached_compile(){
+	cd ${tmp_dir}/${package_root_dir}
+	if [[ ${deploy_mode} = '1' ]];then
+		./configure --prefix=${make_home_dir} && make -j 4 && make install
+		if [[ $? = 0 ]];then
+			success_log "编译完成"
+		else
+			error_log "编译失败"
+			exit 1
+		fi
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		online_down_file "http://mdounin.ru/files/repcached-2.3.1-1.4.13.patch.gz"
+		unpacking_file ${tmp_dir} ${tmp_dir}/${package_root_dir}
+		patch -p1 -i ./repcached-2.3.1-1.4.13.patch
+		if [[ $? = 0 ]];then
+			success_log "打补丁完成"
+		else
+			error_log "打补丁失败"
+			exit 1
+		fi
+		./configure --prefix=${make_home_dir} --enable-replication && make -j 4 && make install
+		if [[ $? = 0 ]];then
+			success_log "编译完成"
+		else
+			error_log "编译失败"
+			exit 1
+		fi
+	fi
 
-	sed -i 's/PORT="11211"/PORT="'${memcached_port}'"/' ${home_dir}/etc/memcached
-	sed -i "s#/var/log#${home_dir}/logs#" ${home_dir}/etc/memcached
-	if [[ ${branch} = '2' ]];then
-		sed -i 's/OPTIONS="" /OPTIONS="-x 127.0.0.1 -X '${syn_port}'"/' ${home_dir}/etc/memcached
+
+}
+
+memcached_config(){
+	if [[ ${deploy_mode} = '1' ]];then
+		cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
+		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${home_dir}/etc/memcached
+		sed -i "s?/var/log?${home_dir}?logs#" ${home_dir}/etc/memcached
+	fi
+
+	if [[ ${deploy_mode} = '2' ]];then
+		cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
+		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
+		sed -i "s?/var/log?${home_dir}?logs?" ${make_home_dir}/etc/memcached
+		sed -i "s?OPTIONS=""?OPTIONS="-x ${host_id} -X ${memcached_syn_port}"?" ${make_home_dir}/etc/memcached
 	fi
 
 }
 
 add_memcached_service(){
-
-	EnvironmentFile="${home_dir}/etc/memcached"
-	ExecStart="${home_dir}/bin/memcached -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
-	conf_system_service
-	if [[ ${deploy_num} = '1' ]];then
-		add_system_service memcached "${home_dir}/init"
-	else
-		add_system_service memcached-node${i} "${home_dir}/init"
+	if [[ ${deploy_mode} = '1' ]];then
+		EnvironmentFile="${home_dir}/etc/memcached"
+		ExecStart="${home_dir}/bin/memcached -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
+		conf_system_service ${home_dir}/memcached.service
+		add_system_service memcached "${home_dir}/memcached.service"
+	if [[ ${deploy_num} = '2' ]];then
+		EnvironmentFile="${home_dir}/etc/memcached"
+		ExecStart="${home_dir}/bin/memcached -d -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
+		conf_system_service ${home_dir}/memcached.service
+		add_system_service memcached "${home_dir}/memcached.service"
+		add_system_service memcached-node${node_id} "${home_dir}/memcached-node${node_id}.service"
 	fi
 }
 
