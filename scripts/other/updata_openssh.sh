@@ -5,8 +5,8 @@ openssh_env_load(){
 	soft_name=openssh
 	program_version=('8.4' '8.5' '8.6')
 	url='https://github.com/hebaodanroot/rpm_package'
+	url='https://raw.githubusercontent.com/hebaodanroot/rpm_package'
 	select_version
-
 	ssh_ver=`rpm -qa openssh | grep -oE "[0-9]{1}\.[0-9]{1}"`
 	if [[ ${ssh_ver} > ${version_number} ]];then
 		info_log "无需升级"
@@ -25,22 +25,22 @@ openssh_bak(){
 
 openssh_down(){
 	info_log "正在下载安装包"
-	down_url="${url}/raw/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/raw/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/raw/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	down_url="${url}/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
 }
