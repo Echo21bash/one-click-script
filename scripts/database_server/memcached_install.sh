@@ -121,7 +121,7 @@ memcached_config(){
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
-		cp ${workdir}/config/memcached/memcached ${home_dir}/etc/memcached
+		cp ${workdir}/config/memcached/memcached ${make_home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs?" ${make_home_dir}/etc/memcached
 		sed -i "s?OPTIONS=""?OPTIONS='-x ${host_id} -X ${memcached_syn_port}'?" ${make_home_dir}/etc/memcached
