@@ -1,7 +1,7 @@
 #!/bin/bash
 rocketmq_env_load(){
 	
-	tmp_dir=/tmp/rocketmq_tmp
+	tmp_dir=/usr/local/src/rocketmq_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=rocketmq
 	program_version=('4')

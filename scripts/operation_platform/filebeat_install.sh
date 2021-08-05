@@ -1,7 +1,7 @@
 #!/bin/bash
 
 filebeat_env_load(){
-	tmp_dir=/tmp/filebeat_tmp
+	tmp_dir=/usr/local/src/filebeat_tmp
 	soft_name=filebeat
 	program_version=('5.6' '6.1' '6.2')
 	url='https://mirrors.huaweicloud.com/filebeat'

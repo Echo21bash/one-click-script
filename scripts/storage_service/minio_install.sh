@@ -3,7 +3,7 @@
 minio_env_load(){
 
 	soft_name=minio
-	tmp_dir=/tmp/minio_tmp
+	tmp_dir=/usr/local/src/minio_tmp
 	mkdir -p ${tmp_dir}
 	url='https://dl.minio.io/server/minio/release/linux-amd64/minio'
 	install_dir_set

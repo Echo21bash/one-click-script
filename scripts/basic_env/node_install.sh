@@ -1,7 +1,7 @@
 #!/bin/bash
 
 node_env_load(){
-	tmp_dir=/tmp/node_tmp
+	tmp_dir=/usr/local/src/node_tmp
 	soft_name=node
 	program_version=('10' '11' '12')
 	url="http://mirrors.ustc.edu.cn/node"

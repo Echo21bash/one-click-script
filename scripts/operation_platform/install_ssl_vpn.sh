@@ -2,7 +2,7 @@
 
 anylink_env_load(){
 
-	tmp_dir=/tmp/anylink_tmp
+	tmp_dir=/usr/local/src/anylink_tmp
 	mkdir -p ${tmp_dir}
 	program_version=(0)
 	soft_name=anylink

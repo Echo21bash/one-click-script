@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ruby_env_load(){
-	tmp_dir=/tmp/ruby_tmp
+	tmp_dir=/usr/local/src/ruby_tmp
 	soft_name=ruby
 	program_version=('2.3' '2.4')
 	url="http://cache.ruby-china.com/pub/ruby/"

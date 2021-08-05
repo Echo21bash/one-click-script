@@ -1,7 +1,7 @@
 #!/bin/bash
 
 redis_env_load(){
-	tmp_dir=/tmp/redis_tmp
+	tmp_dir=/usr/local/src/redis_tmp
 	soft_name=redis
 	program_version=('3.2' '4.0' '5.0')
 	url="https://mirrors.huaweicloud.com/redis"

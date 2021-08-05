@@ -1,6 +1,6 @@
 #!/bin/bash
 kibana_env_load(){
-	tmp_dir=/tmp/kibana_tmp
+	tmp_dir=/usr/local/src/kibana_tmp
 	soft_name=kibana
 	program_version=('5' '6' '7')
 	url='https://mirrors.huaweicloud.com/kibana'

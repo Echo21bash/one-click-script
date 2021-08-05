@@ -1,7 +1,7 @@
 #!/bin/bash
 
 tomcat_env_load(){
-	tmp_dir=/tmp/tomcat_tmp
+	tmp_dir=/usr/local/src/tomcat_tmp
 	soft_name=tomcat
 	program_version=('7' '8')
 	url="http://mirrors.ustc.edu.cn/apache/tomcat"

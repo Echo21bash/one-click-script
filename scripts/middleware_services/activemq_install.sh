@@ -1,7 +1,7 @@
 #!/bin/bash
 activemq_env_load(){
 	
-	tmp_dir=/tmp/activemq_tmp
+	tmp_dir=/usr/local/src/activemq_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=activemq
 	program_version=('5')

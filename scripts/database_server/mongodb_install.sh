@@ -1,6 +1,6 @@
 #!/bin/bash
 mongodb_env_load(){
-	tmp_dir=/tmp/mongodb_tmp
+	tmp_dir=/usr/local/src/mongodb_tmp
 	soft_name=mongodb
 	program_version=('3.4' '3.6' '4.0')
 	url='https://www.mongodb.org/dl/linux'

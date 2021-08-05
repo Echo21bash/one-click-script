@@ -1,7 +1,7 @@
 #!/bin/bash
 
 elasticsearch_env_load(){
-	tmp_dir=/tmp/elasticsearch_tmp
+	tmp_dir=/usr/local/src/elasticsearch_tmp
 	soft_name=elasticsearch
 	program_version=('5' '6' '7')
 	url='https://mirrors.huaweicloud.com/elasticsearch'

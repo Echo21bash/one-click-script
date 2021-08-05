@@ -1,7 +1,7 @@
 #!/bin/bash
 
 openresty_env_load(){
-	tmp_dir=/tmp/openresty_tmp
+	tmp_dir=/usr/local/src/openresty_tmp
 	soft_name=openresty
 	program_version=(1.13 1.14 1.15)
 	url="https://mirrors.huaweicloud.com/openresty"

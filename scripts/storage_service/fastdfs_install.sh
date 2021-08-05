@@ -3,7 +3,7 @@
 fastdfs_env_load(){
 
 	soft_name=fastdfs
-	tmp_dir=/tmp/fastdfs_tmp
+	tmp_dir=/usr/local/src/fastdfs_tmp
 	url='https://github.com/happyfish100/fastdfs'
 	down_url="${url}/archive/master.tar.gz"
 

@@ -2,7 +2,7 @@
 
 zookeeper_env_load(){
 	
-	tmp_dir=/tmp/zookeeper_tmp
+	tmp_dir=/usr/local/src/zookeeper_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=zookeeper
 	program_version=('3.4' '3.5')

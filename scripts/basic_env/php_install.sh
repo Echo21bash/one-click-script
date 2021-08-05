@@ -2,7 +2,7 @@
 
 php_env_load(){
 	
-	tmp_dir=/tmp/php_tmp
+	tmp_dir=/usr/local/src/php_tmp
 	soft_name=php
 	program_version=('5.6' '7.0' '7.1' '7.2')
 	url="http://mirrors.sohu.com/php/"

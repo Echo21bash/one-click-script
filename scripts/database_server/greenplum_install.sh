@@ -2,7 +2,7 @@
 
 greenplum_env_load(){
 	
-	tmp_dir=/tmp/greenplum_tmp
+	tmp_dir=/usr/local/src/greenplum_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=greenplum
 	program_version=('6')

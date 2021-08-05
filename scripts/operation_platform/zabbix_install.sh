@@ -1,7 +1,7 @@
 #!/bin/bash
 
 zabbix_env_load(){
-	tmp_dir=/tmp/zabbix_tmp
+	tmp_dir=/usr/local/src/zabbix_tmp
 	soft_name=zabbix
 	program_version=('4.0' '5.0')
 	url='https://mirrors.yangxingzhen.com/zabbix'

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 logstash_env_load(){
-	tmp_dir=/tmp/logstash_tmp
+	tmp_dir=/usr/local/src/logstash_tmp
 	soft_name=logstash
 	program_version=('5' '6' '7')
 	url='https://mirrors.huaweicloud.com/logstash'

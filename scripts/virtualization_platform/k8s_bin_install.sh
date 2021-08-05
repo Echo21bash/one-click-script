@@ -4,7 +4,7 @@ env_load(){
 	vi ${workdir}/config/k8s/k8s.conf
 	. ${workdir}/config/k8s/k8s.conf
 	auto_ssh_keygen
-	tmp_dir=/tmp/k8s_install_tmp
+	tmp_dir=/usr/local/src/k8s_install_tmp
 	mkdir -p ${tmp_dir}/{soft,ssl,conf}
 	cd ${tmp_dir}
 	info_log "正在配置k8s基础环境......"

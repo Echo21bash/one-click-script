@@ -1,6 +1,6 @@
 #!/bin/bash
 openssh_env_load(){
-	tmp_dir=/tmp/openssh_tmp
+	tmp_dir=/usr/local/src/openssh_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=openssh
 	program_version=('8.4' '8.5' '8.6')

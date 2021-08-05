@@ -1,7 +1,7 @@
 #!/bin/bash
 
 go_env_load(){
-	tmp_dir=/tmp/go_tmp
+	tmp_dir=/usr/local/src/go_tmp
 	soft_name=go
 	program_version=('1.11' '1.12' '1.13' '1.14' '1.15')
 	url="https://gomirrors.org/dl/go/"

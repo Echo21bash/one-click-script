@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mysql_env_load(){
-	tmp_dir=/tmp/mysql_tmp
+	tmp_dir=/usr/local/src/mysql_tmp
 	soft_name=mysql
 	program_version=('5.5' '5.6' '5.7' '8.0')
 	select_version

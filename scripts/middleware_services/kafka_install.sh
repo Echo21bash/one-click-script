@@ -1,7 +1,7 @@
 #!/bin/bash
 kafka_env_load(){
 	
-	tmp_dir=/tmp/kafka_tmp
+	tmp_dir=/usr/local/src/kafka_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=kafka
 	program_version=('2.1' '2.2' '2.3')

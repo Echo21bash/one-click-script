@@ -1,7 +1,7 @@
 #!/bin/bash
 
 nginx_env_load(){
-	tmp_dir=/tmp/nginx_tmp
+	tmp_dir=/usr/local/src/nginx_tmp
 	soft_name=nginx
 	program_version=('1.14' '1.15' '1.16')
 	url="https://mirrors.huaweicloud.com/nginx"
