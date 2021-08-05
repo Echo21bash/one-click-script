@@ -116,14 +116,12 @@ memcached_config(){
 	if [[ ${deploy_mode} = '1' ]];then
 		cp ${workdir}/config/memcached/memcached ${home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${home_dir}/etc/memcached
-		sed -i "s?/var/log?${home_dir}?logs#" ${home_dir}/etc/memcached
 		add_log_cut ${home_dir}/logrotate-memcached ${home_dir}/logs/*.log
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
 		cp ${workdir}/config/memcached/memcached ${make_home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
-		sed -i "s?LOG=.*?LOG=${home_dir}/logs?" ${make_home_dir}/etc/memcached
 		sed -i "s?OPTIONS=.*?OPTIONS='-x ${now_host} -X ${memcached_syn_port}'?" ${make_home_dir}/etc/memcached
 		add_log_cut ${tmp_dir}/logrotate-memcached-node${i} ${home_dir}/logs/*.log
 	fi
