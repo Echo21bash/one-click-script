@@ -41,6 +41,7 @@ memcached_install(){
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
+		memcached_compile
 		auto_ssh_keygen
 		local i=1
 		local k=0
