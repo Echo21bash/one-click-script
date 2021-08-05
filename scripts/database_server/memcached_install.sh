@@ -33,6 +33,7 @@ memcached_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/memcached
 		mkdir -p ${home_dir}
+		memcached_compile
 		cp -rp ${make_home_dir}/* ${home_dir}
 		add_sys_env "PATH=${home_dir}/bin:\$PATH"
 		memcached_config
@@ -112,13 +113,13 @@ memcached_compile(){
 
 memcached_config(){
 	if [[ ${deploy_mode} = '1' ]];then
-		cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
+		cp ${workdir}/config/memcached/memcached ${home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs#" ${home_dir}/etc/memcached
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
-		cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
+		cp ${workdir}/config/memcached/memcached ${home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs?" ${make_home_dir}/etc/memcached
 		sed -i "s?OPTIONS=""?OPTIONS='-x ${host_id} -X ${memcached_syn_port}'?" ${make_home_dir}/etc/memcached
