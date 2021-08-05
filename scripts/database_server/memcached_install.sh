@@ -64,10 +64,10 @@ memcached_install(){
 				"
 				info_log "正在向节点${now_host}分发memcached-node${node_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${make_home_dir}/* ${host_ip[$k]}:${home_dir}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{memcached-node${i}.service,logrotate-node${i}} ${host_ip[$k]}:${home_dir}/
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{memcached-node${i}.service,logrotate-memcached-node${i}} ${host_ip[$k]}:${home_dir}/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${home_dir}/memcached-node${i}.service /etc/systemd/system/memcached-node${i}.service
-				\cp ${home_dir}/logrotate-node${i} /etc/logrotate.d/memcached-node${i}
+				\cp ${home_dir}/logrotate-memcached-node${i} /etc/logrotate.d/memcached-node${i}
 				systemctl daemon-reload
 				"
 				((i++))
@@ -117,6 +117,7 @@ memcached_config(){
 		cp ${workdir}/config/memcached/memcached ${home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs#" ${home_dir}/etc/memcached
+		add_log_cut ${home_dir}/logrotate-memcached ${home_dir}/logs/*.log
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
@@ -124,22 +125,24 @@ memcached_config(){
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs?" ${make_home_dir}/etc/memcached
 		sed -i "s?OPTIONS=""?OPTIONS='-x ${host_id} -X ${memcached_syn_port}'?" ${make_home_dir}/etc/memcached
+		add_log_cut ${tmp_dir}/logrotate-memcached-node${i} ${home_dir}/logs/*.log
 	fi
 
 }
 
 add_memcached_service(){
+	Type="forking"
 	if [[ ${deploy_mode} = '1' ]];then
 		EnvironmentFile="${home_dir}/etc/memcached"
-		ExecStart="${home_dir}/bin/memcached -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
+		ExecStart="${home_dir}/bin/memcached -d -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
 		conf_system_service ${home_dir}/memcached.service
 		add_system_service memcached "${home_dir}/memcached.service"
 	fi
 
-	if [[ ${deploy_num} = '2' ]];then
+	if [[ ${deploy_mode} = '2' ]];then
 		EnvironmentFile="${home_dir}/etc/memcached"
 		ExecStart="${home_dir}/bin/memcached -d -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
-		conf_system_service ${tmp_dir}/memcached-node${node_id}
+		conf_system_service ${tmp_dir}/memcached-node${node_id}.service
 
 	fi
 }
