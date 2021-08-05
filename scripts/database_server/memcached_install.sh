@@ -138,9 +138,8 @@ add_memcached_service(){
 	if [[ ${deploy_num} = '2' ]];then
 		EnvironmentFile="${home_dir}/etc/memcached"
 		ExecStart="${home_dir}/bin/memcached -d -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
-		conf_system_service ${home_dir}/memcached.service
-		add_system_service memcached "${home_dir}/memcached.service"
-		add_system_service memcached-node${node_id} "${home_dir}/memcached-node${node_id}.service"
+		conf_system_service ${tmp_dir}/memcached-node${node_id}
+
 	fi
 }
 
