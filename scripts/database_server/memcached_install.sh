@@ -72,7 +72,7 @@ memcached_install(){
 			done
 			((k++))
 		done
-		rabbitmq_cluster_init
+		
 	fi
 		
 }
@@ -121,7 +121,7 @@ memcached_config(){
 		cp ${workdir}config/memcached/memcached ${home_dir}/etc/memcached
 		sed -i "s?PORT="11211"?PORT=${memcached_port}?" ${make_home_dir}/etc/memcached
 		sed -i "s?/var/log?${home_dir}?logs?" ${make_home_dir}/etc/memcached
-		sed -i "s?OPTIONS=""?OPTIONS="-x ${host_id} -X ${memcached_syn_port}"?" ${make_home_dir}/etc/memcached
+		sed -i "s?OPTIONS=""?OPTIONS='-x ${host_id} -X ${memcached_syn_port}'?" ${make_home_dir}/etc/memcached
 	fi
 
 }
@@ -133,7 +133,7 @@ add_memcached_service(){
 		conf_system_service ${home_dir}/memcached.service
 		add_system_service memcached "${home_dir}/memcached.service"
 	fi
-	
+
 	if [[ ${deploy_num} = '2' ]];then
 		EnvironmentFile="${home_dir}/etc/memcached"
 		ExecStart="${home_dir}/bin/memcached -d -u \$USER -p \$PORT -m \$CACHESIZE -c \$MAXCONN \$LOG \$OPTIONS"
