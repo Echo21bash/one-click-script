@@ -92,7 +92,7 @@ memcached_compile(){
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		online_down_file "http://mdounin.ru/files/repcached-2.3.1-1.4.13.patch.gz"
-		unpacking_file ${tmp_dir} ${tmp_dir}/${package_root_dir}
+		unpacking_file ${tmp_dir}/repcached-2.3.1-1.4.13.patch.gz ${tmp_dir}/${package_root_dir}
 		patch -p1 -i ./repcached-2.3.1-1.4.13.patch
 		if [[ $? = 0 ]];then
 			success_log "打补丁完成"
