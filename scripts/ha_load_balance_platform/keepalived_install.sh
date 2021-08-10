@@ -7,10 +7,14 @@ keepalived_env(){
 
 }
 
-keepalived_install(){
+keepalived_install_set(){
 	vi ${workdir}/config/keepalived/keepalived_cluster.conf
 	. ${workdir}/config/keepalived/keepalived_cluster.conf
 	auto_ssh_keygen
+}
+
+keepalived_install(){
+
 	local i=0
 	for now_host in ${host_ip[@]}
 	do
@@ -63,6 +67,7 @@ keepalived_check(){
 
 keepalived_install_ctl(){
 	keepalived_env
+	keepalived_install_set
 	keepalived_install
 	keepalived_check
 
