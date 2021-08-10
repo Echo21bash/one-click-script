@@ -14,9 +14,9 @@ keepalived_install(){
 	local i=0
 	for now_host in ${host_ip[@]}
 	do
-		info_log "正在节点${now_host}安装keepalived"
+		info_log "正在节点${now_host}安装keepalived及必要工具"
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
-		yum install -y keepalived
+		yum install -y keepalived telnet
 		"
 		if [[ $? != '0' ]];then
 			error_log "节点${now_host}安装keepalived失败请检查"
@@ -58,7 +58,7 @@ keepalived_config(){
 
 keepalived_check(){
 	ping -c 1 ${virtual_ip} >/dev/null 2>&1
-	success_log "VIP${virtual_ip}可达"
+	success_log "VIP ${virtual_ip}可达"
 }
 
 keepalived_install_ctl(){
