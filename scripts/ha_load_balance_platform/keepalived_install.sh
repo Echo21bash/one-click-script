@@ -51,7 +51,7 @@ keepalived_config(){
 		sed -i "s?http_url=.*?http_url="${url_type}://${now_host}:${url_port}"?" ${tmp_dir}/check_script.sh
 	fi
 	if [[ ${url_type} = 'tcp' && -n ${url_port} ]];then
-		sed -i "s?tcp_url=.*?tcp_url="${now_host} ${url_port}"?" ${tmp_dir}/check_script.sh
+		sed -i "s?tcp_url=.*?tcp_url='${now_host} ${url_port}'?" ${tmp_dir}/check_script.sh
 	fi
 
 }
