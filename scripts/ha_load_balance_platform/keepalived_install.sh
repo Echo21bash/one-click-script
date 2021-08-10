@@ -18,7 +18,7 @@ keepalived_install(){
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 		yum install -y keepalived
 		"
-		if [[ $? ! = '0' ]];then
+		if [[ $? != '0' ]];then
 			error_log "节点${now_host}安装keepalived失败请检查"
 			exit $?
 		fi
