@@ -11,7 +11,7 @@ keepalived_install(){
 	vi ${workdir}/config/keepalived/keepalived_cluster.conf
 	. ${workdir}/config/keepalived/keepalived_cluster.conf
 	auto_ssh_keygen
-	local i=1
+	local i=0
 	for now_host in ${host_ip[@]}
 	do
 		info_log "正在节点${now_host}安装keepalived"
