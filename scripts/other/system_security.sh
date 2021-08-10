@@ -19,7 +19,7 @@ system_security_set(){
 	fi
 	###ssh远程登录限制
 	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
-		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  lock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
+		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
 		success_log "更新本地登录失败策略"
 		info_log "登录失败策略为登录失败3次锁定10分钟"
 	else
@@ -27,7 +27,7 @@ system_security_set(){
 	fi
 	###本地登陆限制
 	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/system-auth` ]];then
-		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  lock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
+		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
 		success_log "更新远程登录失败策略"
 		info_log "登录失败策略为登录失败3次锁定10分钟"
 	else
