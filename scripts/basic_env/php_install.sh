@@ -52,8 +52,8 @@ php_compile(){
 	mkdir -p ${home_dir}/{etc,etc.d}
 	
 	#编译参数获取
-	[ ${php_mode} = 1 ] && fpm="" && apxs2="--with-apxs2=`find / -name apxs`"
-	[ ${php_mode} = 2 ] && fpm="--enable-fpm" && apxs2=""
+	[ ${php_mode} = 1 ] && fpm="--enable-fpm"
+	[ ${php_mode} = 2 ] && apxs2="--with-apxs2=`find / -name apxs`"
 	[ ${php_mode} = 3 ] && fpm="--enable-fpm" && apxs2="--with-apxs2=`which apxs`"
 	[[ ${version_number} < '7.0' ]] && mysql="--with-mysql=mysqlnd"
 	[[ ${version_number} = '7.0' || ${version_number} > '7.0' ]] && mysql=""
