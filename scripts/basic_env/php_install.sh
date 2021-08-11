@@ -26,8 +26,8 @@ php_install_set(){
 php_install_depend(){
 	#安装编译工具及库文件
 	info_log "正在安装编译工具及库文件..."
-	[[ ${os_release} < "7" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install  httpd httpd-devel mod_proxy_fcgi
-	[[ ${os_release} > "6" ]] && [[ ${php_mode} = 1 || ${php_mode} = 3 ]] && yum -y install httpd httpd-devel
+	[[ ${os_release} < "7" ]] && [[ ${php_mode} = 2 || ${php_mode} = 3 ]] && yum -y install  httpd httpd-devel mod_proxy_fcgi
+	[[ ${os_release} > "6" ]] && [[ ${php_mode} = 2 || ${php_mode} = 3 ]] && yum -y install httpd httpd-devel
 	yum  -y install gcc gcc-c++ autoconf openldap-devel libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel sqlite-devel
 
 	#必要函数库
