@@ -85,7 +85,7 @@ php_config(){
 	#其它
 	sed -i 's/;date.timezone =.*/date.timezone = PRC/g' ${conf_dir}/php.ini
   
-	if [[ ${php_mode} = 2 || ${php_mode} = 3 ]];then
+	if [[ ${php_mode} = 1 || ${php_mode} = 3 ]];then
 		if [[ ${version_number} > '5.6' ]];then
 			cp ${conf_dir}/php-fpm.d/www.conf.default ${conf_dir}/php-fpm.d/www.conf
 			cp ${conf_dir}/php-fpm.conf.default ${conf_dir}/php-fpm.conf
@@ -113,16 +113,21 @@ php_config(){
 			sed -i 's#${exec_prefix}#'${home_dir}'#' ./sapi/fpm/php-fpm.service
 			cp ./sapi/fpm/php-fpm.service ${home_dir}/php_fpm_init
 		fi
+		add_system_service php-fpm ${home_dir}/php_fpm_init
 	fi
-	add_system_service php-fpm ${home_dir}/php_fpm_init
 	add_sys_env "PATH=${home_dir}/bin:\$PATH PATH=${home_dir}/sbin:\$PATH"
 }
 
 php_extra_install(){
-	info_log "安装pecl扩展管理工具，示例：pecl install redis"
+	info_log "正在安装pecl扩展管理工具"
 	down_file http://pear.php.net/go-pear.phar ${tmp_dir}/go-pear.phar
-	info_log "请确认后输入回车继续"
 	${home_dir}/bin/php ${tmp_dir}/go-pear.phar
+	if [[ $? = '0' ]];then
+		success_log "pecl扩展管理工具安装成功，示例：pecl install redis"
+	else
+		error_log "pecl扩展管理工具安装失败！"
+		exit 1
+	fi
 }
 
 php_install_ctl(){
