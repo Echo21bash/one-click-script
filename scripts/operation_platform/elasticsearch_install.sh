@@ -68,7 +68,7 @@ elasticsearch_install(){
 				"
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{elasticsearch-node${i}.service,} ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/elasticsearch-node${i}.service ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
@@ -185,7 +185,7 @@ elasticsearch_conf(){
 		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
-		if [[ ${version_number} < 6 ]]; then
+		if [[ ${version_number} < 7 ]]; then
 			sed -i "s/#discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
         else
 			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
