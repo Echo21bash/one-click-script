@@ -168,12 +168,15 @@ elasticsearch_conf(){
 		sed -i "/cluster.name.*/acluster.max_shards_per_node: 100000" ${conf_dir}/elasticsearch.yml
 		###节点参数配置
 		sed -i "s/#node.name.*/node.name: node${service_id}\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
-		if [[ ${master_nodes_list[@]} =~ "node${service_id}" ]];then
+		if [[ ${master_nodes_list[@]} =~ "node${service_id}" && ! ${data_nodes_list[@]} =~ "node${service_id}" ]];then
 			sed -i "/node.name.*/anode.master: true\nnode.data: false" ${conf_dir}/elasticsearch.yml
 		fi
-		if [[ ${data_nodes_list[@]} =~ "node${service_id}" ]];then
+		if [[ ${data_nodes_list[@]} =~ "node${service_id}" && ! ${master_nodes_list[@]} =~ "node${service_id}" ]];then
 			sed -i "/node.name.*/anode.master: false\nnode.data: true" ${conf_dir}/elasticsearch.yml
-		fi		
+		fi
+		if [[ ${master_nodes_list[@]} =~ "node${service_id}" && ${data_nodes_list[@]} =~ "node${service_id}" ]];then
+			sed -i "/node.name.*/anode.master: true\nnode.data: true" ${conf_dir}/elasticsearch.yml
+		fi			
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
