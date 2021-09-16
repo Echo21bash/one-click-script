@@ -96,7 +96,7 @@ elasticsearch_master_server_list(){
 				break
 			fi
 			let elsearch_tcp_port=${elsearch_tcp_port}+$j
-			discovery_hosts="${now_host}:${elsearch_tcp_port},${discovery_hosts}"
+			discovery_hosts="\"${now_host}:${elsearch_tcp_port}\",${discovery_hosts}"
 
 			((i++))
 		done
@@ -134,7 +134,7 @@ elasticsearch_master_node_list(){
 		do
 			if [[ $i -le ${master_nodes_num} ]];then
 				service_id=$i
-				master_nodes="node${service_id},${master_nodes}"
+				master_nodes="\"node${service_id}\",${master_nodes}"
 				master_nodes_list[$j]="node${service_id}"
 				((j++))
 			else
