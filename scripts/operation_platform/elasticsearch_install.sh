@@ -127,7 +127,8 @@ elasticsearch_master_node_list(){
 		done
 	fi
 	###指定主节点数量后主节点不存储数据，其余节点配置为数据节点
-	if [[ -n ${master_nodes_num} ]];then
+	if [[ -n ${master_nodes_num} && ${node_total_num} > ${${master_nodes_num}} ]];then
+		data_nodes_num=$((node_total_num-master_nodes_num))
 		local j=0
 		local k=0
 		for ((i=1;i<=${node_total_num};i++))
@@ -143,10 +144,15 @@ elasticsearch_master_node_list(){
 				((k++))
 			fi
 		done
+	else
+		error_log "主节点数不能大于总节点数"
+		exit 1
 	fi
 
-
-
+	###最小启动的主节点数
+	minimum_master_nodes="$(((master_nodes_num+1+1)/2))"
+	###最小启动的数据节点数
+	minimum_data_nodes="$(((data_nodes_num+1+1)/2))"
 
 }
 
@@ -176,7 +182,7 @@ elasticsearch_conf(){
 		fi
 		if [[ ${master_nodes_list[@]} =~ "node${service_id}" && ${data_nodes_list[@]} =~ "node${service_id}" ]];then
 			sed -i "/node.name.*/anode.master: true\nnode.data: true" ${conf_dir}/elasticsearch.yml
-		fi			
+		fi
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
@@ -185,12 +191,18 @@ elasticsearch_conf(){
 		sed -i "s/## -Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		###自动发现节点配置
 		if [[ ${version_number} < 7 ]]; then
 			sed -i "s/#discovery.zen.ping.unicast.hosts:.*/discovery.zen.ping.unicast.hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
+			sed -i "/discovery.zen.ping.unicast.hosts:.*/adiscovery.zen.minimum_master_nodes: ${minimum_master_nodes}" ${conf_dir}/elasticsearch.yml
         else
-			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: ${discovery_hosts}/" ${conf_dir}/elasticsearch.yml
-			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: ${master_nodes}/" ${conf_dir}/elasticsearch.yml
+			sed -i "s/#discovery.seed_hosts:.*/discovery.seed_hosts: [${discovery_hosts}]/" ${conf_dir}/elasticsearch.yml
+			sed -i "/discovery.seed_hosts:.*/adiscovery.zen.minimum_master_nodes: ${minimum_master_nodes}" ${conf_dir}/elasticsearch.yml
+			sed -i "s/#cluster.initial_master_nodes:.*/cluster.initial_master_nodes: [${master_nodes}]/" ${conf_dir}/elasticsearch.yml
         fi
+        ###分片恢复需满足的条件
+        sed -i "/#gateway.recover_after_nodes:.*/agateway.recover_after_master_nodes: ${minimum_master_nodes}" ${conf_dir}/elasticsearch.yml
+        sed -i "/#gateway.recover_after_nodes:.*/agateway.recover_after_data_nodes: ${minimum_data_nodes}" ${conf_dir}/elasticsearch.yml
 	fi
 
 }
