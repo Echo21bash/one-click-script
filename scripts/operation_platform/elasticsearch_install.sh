@@ -127,7 +127,7 @@ elasticsearch_master_node_list(){
 		done
 	fi
 	###指定主节点数量后主节点不存储数据，其余节点配置为数据节点
-	if [[ -n ${master_nodes_num} && ${node_total_num} > ${${master_nodes_num}} ]];then
+	if [[ -n ${master_nodes_num} && ${node_total_num} > ${master_nodes_num} ]];then
 		data_nodes_num=$((node_total_num-master_nodes_num))
 		local j=0
 		local k=0
