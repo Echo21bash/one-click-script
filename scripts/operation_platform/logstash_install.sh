@@ -56,7 +56,7 @@ logstash_install(){
 		for now_host in ${host_ip[@]}
 		do
 			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-			if [[ ${java_status} = 1 ]]
+			if [[ ${java_status} = 1 ]];then
 				warning_log "主机${host_ip[$k]}java运行环境未就绪"
 			fi
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
