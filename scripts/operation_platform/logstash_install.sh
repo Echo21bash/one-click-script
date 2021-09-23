@@ -8,50 +8,115 @@ logstash_env_load(){
 	select_version
 	install_dir_set
 	online_version
-	down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz'
 
 }
 
 logstash_down(){
 
 	if [[ ${detail_version_number} > '7.10' ]];then
-		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz'
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}-linux-x86_64.tar.gz"
 	else
-		down_url='${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz'
+		down_url="${url}/${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
 	fi
 	online_down_file
 	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 logstash_install_set(){
-echo
+	output_option "选择安装模式" "单机 集群" "deploy_mode"
+	if [[ ${deploy_mode} = '2' ]];then
+		vi ${workdir}/config/elk/logstash.conf
+		. ${workdir}/config/elk/logstash.conf
+	fi
 }
 
 logstash_install(){
-	home_dir=${install_dir}/logstash
-	mkdir -p ${home_dir}/config.d
-	mv ${tar_dir}/* ${home_dir}
-	logstash_conf
-	add_logstash_service
+	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/logstash
+		mkdir -p ${home_dir}/config.d
+		useradd -M logstash
+		mv ${tar_dir}/* ${home_dir}
+		chown -R logstash.logstash ${home_dir}
+		logstash_conf
+		add_logstash_service
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
+		local i=1
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+			
+			logstash_conf
+			home_dir=${install_dir}/logstash
+			add_logstash_service
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			useradd -M logstash
+			mkdir -p ${install_dir}/logstash
+			"
+			info_log "正在向节点${now_host}分发logstash安装程序和配置文件..."
+			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/logstash
+			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/logstash.service ${host_ip[$k]}:${install_dir}/logstash
+				
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			chown -R logstash.logstash ${install_dir}/logstash
+			\cp ${install_dir}/logstash/logstash.service /etc/systemd/system/logstash.service
+			systemctl daemon-reload
+			"
+			((k++))
+		done
+	fi
 }
 
 logstash_conf(){
-	get_ip
-	conf_dir=${home_dir}/config
-	sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
-	sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
-	sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
-	sed -i "s%# http.host.*%http.host: \"${local_ip}\"%" ${conf_dir}/logstash.yml
-	sed -i "s/-Xms.*/-Xms512m/" ${conf_dir}/jvm.options
-	sed -i "s/-Xmx.*/-Xmx512m/" ${conf_dir}/jvm.options
+	if [[ ${deploy_mode} = '1' ]];then
+		get_ip
+		\cp ${workdir}/config/elk/logstash-http.conf ${home_dir}/config.d/
+		if [[ ! -f ${conf_dir}/logstash.yml.bak ]];then
+			cp ${conf_dir}/logstash.yml ${conf_dir}/logstash.yml.bak
+		fi
+		conf_dir=${home_dir}/config
+		sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
+		sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
+		sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
+		sed -i "s%# http.host.*%http.host: \"${local_ip}\"%" ${conf_dir}/logstash.yml
+		sed -i "s/-Xms.*/-Xms512m/" ${conf_dir}/jvm.options
+		sed -i "s/-Xmx.*/-Xmx512m/" ${conf_dir}/jvm.options
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		conf_dir=${tar_dir}/config
+		\cp ${workdir}/config/elk/logstash-http.conf ${tar_dir}/config.d/
+		if [[ ! -f ${conf_dir}/logstash.yml.bak ]];then
+			cp ${conf_dir}/logstash.yml ${conf_dir}/logstash.yml.bak
+		fi
+		sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
+		sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
+		sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
+		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
+		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+	fi
 }
 
 add_logstash_service(){
+	if [[ ${deploy_mode} = '1' ]];then
+		JAVA_HOME=${JAVA_HOME}
+	else
+		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
+	fi
 	Type=simple
+	User=logstash
 	ExecStart="${home_dir}/bin/logstash"
-	Environment="JAVA_HOME=$(echo $JAVA_HOME)"
-	conf_system_service ${home_dir}/init
-	add_system_service logstash ${home_dir}/init
+	Environment="JAVA_HOME=${JAVA_HOME}"
+	if [[ ${deploy_mode} = '1' ]];then
+		conf_system_service ${home_dir}/logstash.service
+		add_system_service logstash ${home_dir}/logstash.service
+	else
+		conf_system_service ${tmp_dir}/logstash.service
+	fi
+}
+
+logstash_readme(){
+	info_log "logstash已经安装完成。"
 }
 
 logstash_install_ctl(){
@@ -59,5 +124,6 @@ logstash_install_ctl(){
 	logstash_install_set
 	logstash_down
 	logstash_install
+	logstash_readme
 	
 }
