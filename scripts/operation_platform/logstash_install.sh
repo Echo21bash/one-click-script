@@ -32,6 +32,12 @@ logstash_install_set(){
 
 logstash_install(){
 	if [[ ${deploy_mode} = '1' ]];then
+		JAVA_HOME=${JAVA_HOME}
+		if [[ x${JAVA_HOME} = x ]];then
+			error_log "JAVA_HOME变量为空，请先确认JDK！"
+			exit 1
+
+		fi
 		home_dir=${install_dir}/logstash
 		mkdir -p ${home_dir}/config.d
 		useradd -M logstash
@@ -43,13 +49,16 @@ logstash_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		home_dir=${install_dir}/logstash
+		logstash_conf
+		add_logstash_service
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			
-			logstash_conf
-			add_logstash_service
+			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			if [[ ${java_status} = 1 ]]
+				warning_log "主机${host_ip[$k]}java运行环境未就绪"
+			fi
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			useradd -M logstash
 			mkdir -p ${install_dir}/logstash
@@ -99,11 +108,6 @@ logstash_conf(){
 }
 
 add_logstash_service(){
-	if [[ ${deploy_mode} = '1' ]];then
-		JAVA_HOME=${JAVA_HOME}
-	else
-		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
-	fi
 	Type=simple
 	User=logstash
 	ExecStart="${home_dir}/bin/logstash"
@@ -126,5 +130,4 @@ logstash_install_ctl(){
 	logstash_down
 	logstash_install
 	logstash_readme
-	
 }
