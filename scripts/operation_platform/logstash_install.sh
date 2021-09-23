@@ -42,13 +42,13 @@ logstash_install(){
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
+		home_dir=${install_dir}/logstash
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
 			
 			logstash_conf
-			home_dir=${install_dir}/logstash
 			add_logstash_service
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			useradd -M logstash
@@ -84,6 +84,7 @@ logstash_conf(){
 		sed -i "s/-Xmx.*/-Xmx512m/" ${conf_dir}/jvm.options
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
+		mkdir -p ${tar_dir}/config.d/
 		conf_dir=${tar_dir}/config
 		\cp ${workdir}/config/elk/logstash-http.conf ${tar_dir}/config.d/
 		if [[ ! -f ${conf_dir}/logstash.yml.bak ]];then
