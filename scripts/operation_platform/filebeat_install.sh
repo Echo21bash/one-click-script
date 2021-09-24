@@ -23,28 +23,66 @@ filebeat_down(){
 
 }
 
+filebeat_install_set(){
+	output_option "选择安装模式" "单机 批量" "deploy_mode"
+	if [[ ${deploy_mode} = '2' ]];then
+		vi ${workdir}/config/elk/filebeat.conf
+		. ${workdir}/config/elk/filebeat.conf
+	fi
+}
+
+
 filebeat_install(){
-	home_dir=${install_dir}/filebeat
-	mkdir -p ${install_dir}/filebeat
-	\cp -rp ${tar_dir}/* ${home_dir}
-	filebeat_conf
-	add_filebeat_service
+	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/filebeat
+		mkdir -p ${install_dir}/filebeat/inputs.d
+		\cp -rp ${tar_dir}/* ${home_dir}
+		filebeat_conf
+		add_filebeat_service
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
+		home_dir=${install_dir}/filebeat
+		filebeat_conf
+		add_filebeat_service
+		local i=1
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			mkdir -p ${install_dir}/filebeat/inputs.d
+			"
+			info_log "正在向节点${now_host}分发filebeat安装程序和配置文件..."
+			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/filebeat
+			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/filebeat.service ${host_ip[$k]}:${install_dir}/filebeat
+				
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			\cp ${install_dir}/filebeat/filebeat.service /etc/systemd/system/filebeat.service
+			systemctl daemon-reload
+			"
+			((k++))
+		done
+	fi
 }
 
 filebeat_conf(){
-	get_ip
 	conf_dir=${home_dir}/config
 }
 
 add_filebeat_service(){
 	WorkingDirectory=${home_dir}
 	ExecStart="${home_dir}/filebeat"
-	conf_system_service ${home_dir}/filebeat.service
-	add_system_service filebeat ${home_dir}/filebeat.service
+	if [[ ${deploy_mode} = '1' ]];then
+		conf_system_service ${home_dir}/filebeat.service
+		add_system_service filebeat ${home_dir}/filebeat.
+	else
+		conf_system_service ${tmp_dir}/filebeat.service
+	fi
 }
 
 filebeat_install_ctl(){
 	filebeat_env_load
+	filebeat_install_set
 	filebeat_down
 	filebeat_install
 	

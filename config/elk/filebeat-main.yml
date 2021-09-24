@@ -1,0 +1,13 @@
+###################### Filebeat Configuration Example #########################
+setup.ilm.enabled: auto
+# ============================== Filebeat inputs ===============================
+filebeat.config.inputs:
+  enable: true
+  path: ${path.config}/input.d/*.yml
+  reload.enabled: true
+  reload.period: 10s
+# ============================== Filebeat modules ==============================
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+  reload.period: 10s
