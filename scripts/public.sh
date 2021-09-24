@@ -490,6 +490,7 @@ conf_system_service(){
 
 		EnvironmentFile="${EnvironmentFile:-}"
 		Environment="${Environment:-}"
+		WorkingDirectory="${WorkingDirectory:-}"
 		Name="${Name:-${soft_name}}"
 		PidFile="${PidFile:-}"
 		User="${User:-root}"
@@ -501,6 +502,7 @@ conf_system_service(){
 		#EUV
 		[[ -f ${EnvironmentFile} ]] && . ${EnvironmentFile}
 		[[ -f ${Environment} ]] && export ${Environment}
+		[[ -d ${WorkingDirectory} ]] && cd ${WorkingDirectory}
 		_pid(){
 		  [[ -s $PidFile ]] && pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
 		  [[ -z $PidFile ]] && pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')

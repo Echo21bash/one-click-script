@@ -26,7 +26,7 @@ filebeat_down(){
 filebeat_install(){
 	home_dir=${install_dir}/filebeat
 	mkdir -p ${install_dir}/filebeat
-	mv ${tar_dir}/* ${home_dir}
+	\cp -rp ${tar_dir}/* ${home_dir}
 	filebeat_conf
 	add_filebeat_service
 }
@@ -37,6 +37,7 @@ filebeat_conf(){
 }
 
 add_filebeat_service(){
+	WorkingDirectory=${home_dir}
 	ExecStart="${home_dir}/filebeat"
 	conf_system_service ${home_dir}/filebeat.service
 	add_system_service filebeat ${home_dir}/filebeat.service
