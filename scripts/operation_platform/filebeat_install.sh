@@ -44,7 +44,6 @@ add_filebeat_service(){
 
 filebeat_install_ctl(){
 	filebeat_env_load
-	select_version
 	filebeat_down
 	filebeat_install
 	
