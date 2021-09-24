@@ -35,6 +35,14 @@ elasticsearch_install_set(){
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		if [[ ${version_number} > '6' ]];then
+			JAVA_HOME=${home_dir}/jdk
+		else
+			if [[ x${JAVA_HOME} = x ]];then
+				error_log "JAVA_HOME变量为空，java运行环境未就绪！"
+				exit 1
+			fi
+		fi
 		useradd -M elasticsearch
 		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
@@ -44,6 +52,9 @@ elasticsearch_install(){
 		add_elasticsearch_service
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
+		if [[ ${version_number} > '6' ]];then
+			JAVA_HOME=${home_dir}/jdk
+		fi
 		auto_ssh_keygen
 		elasticsearch_master_node_list
 		elasticsearch_master_server_list
@@ -55,6 +66,11 @@ elasticsearch_install(){
 			elsearch_tcp_port=9300
 			for ((j=0;j<${node_num[$k]};j++))
 			do
+				java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+				if [[ ${java_status} = 1 ]];then
+					error_log "主机${host_ip[$k]}java运行环境未就绪"
+					exit 1
+				fi
 				service_id=$i
 				let elsearch_port=9200+$j
 				let elsearch_tcp_port=9300+$j
@@ -208,14 +224,6 @@ elasticsearch_conf(){
 }
 
 add_elasticsearch_service(){
-	if [[ ${deploy_mode} = '1' ]];then
-		JAVA_HOME=${JAVA_HOME}
-	else
-		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
-	fi
-	if [[ ${version_number} > '6' && x${JAVA_HOME} = 'x' ]];then
-		JAVA_HOME=${home_dir}/jdk
-	fi
 
 	Type=forking
 	User=elasticsearch

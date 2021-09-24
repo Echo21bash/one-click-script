@@ -32,11 +32,9 @@ logstash_install_set(){
 
 logstash_install(){
 	if [[ ${deploy_mode} = '1' ]];then
-		JAVA_HOME=${JAVA_HOME}
 		if [[ x${JAVA_HOME} = x ]];then
-			error_log "JAVA_HOME变量为空，请先确认JDK！"
+			error_log "JAVA_HOME变量为空，java运行环境未就绪！"
 			exit 1
-
 		fi
 		home_dir=${install_dir}/logstash
 		mkdir -p ${home_dir}/config.d
@@ -57,7 +55,8 @@ logstash_install(){
 		do
 			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
 			if [[ ${java_status} = 1 ]];then
-				warning_log "主机${host_ip[$k]}java运行环境未就绪"
+				error_log "主机${host_ip[$k]}java运行环境未就绪"
+				exit 1
 			fi
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			useradd -M logstash
