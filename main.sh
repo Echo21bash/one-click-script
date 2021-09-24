@@ -8,7 +8,6 @@
 ###########################################################
 workdir=$(cd $(dirname $0); pwd)
 . ${workdir}/scripts/public.sh
-. ${workdir}/scripts/tools.sh
 
 for i in ${workdir}/scripts/*/*.sh; do
 	if [ -r "$i" ]; then
@@ -102,7 +101,7 @@ output_option '请选择要安装的软件' 'FTP SFTP 对象存储服务(OSS/min
 case "$num" in
 	1)ftp_install_ctl
 	;;
-	2)add_sysuser && add_sysuser_sftp
+	2)sftp_install_ctl
 	;;
 	3)minio_install_ctl
 	;;
@@ -155,7 +154,7 @@ esac
 }
 
 tools(){
-output_option '请选择进行的操作' '优化系统配置 系统安全加固 查看系统详情 升级内核版本 创建用户并将其加入visudo 安装WireGuard-VPN 多功能备份脚本 主机ssh互信 升级openssh' 'tool'
+output_option '请选择进行的操作' '优化系统配置 系统安全加固 查看系统详情 升级内核版本 安装WireGuard-VPN 多功能备份脚本 主机ssh互信 升级openssh' 'tool'
 case "$tool" in
 	1)system_optimize_set
 	;;
@@ -165,15 +164,13 @@ case "$tool" in
 	;;
 	4)update_kernel
 	;;
-	5)add_sysuser && add_sysuser_sudo
+	5)wireguard_install_ctl
 	;;
-	6)wireguard_install_ctl
+	6)multi_function_backup_script_set
 	;;
-	7)multi_function_backup_script_set
+	7)auto_ssh_keygen_tool
 	;;
-	8)auto_ssh_keygen_tool
-	;;
-	9)updata_openssh_ctl
+	8)updata_openssh_ctl
 	;;
 esac
 }
