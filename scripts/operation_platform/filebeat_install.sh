@@ -3,7 +3,7 @@
 filebeat_env_load(){
 	tmp_dir=/usr/local/src/filebeat_tmp
 	soft_name=filebeat
-	program_version=('5.6' '6.1' '6.2')
+	program_version=('5' '6' '7')
 	url='https://mirrors.huaweicloud.com/filebeat'
 	select_version
 	install_dir_set

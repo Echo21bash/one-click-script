@@ -22,7 +22,6 @@ kibana_down(){
 }
 
 kibana_install_set(){
-	input_option "输入http端口号" "5601" "kibana_port"
 	input_option "输入elasticsearch服务http地址" "http://127.0.0.1:9200,http://127.0.0.1:9200,http://127.0.0.1:9200" "elasticsearch_ip"
 	elasticsearch_ip=${input_value}
 }
@@ -40,10 +39,9 @@ kibana_install(){
 kibana_conf(){
 	get_ip
 	conf_dir=${home_dir}/config
-	sed -i "s/#server.port.*/server.port: ${kibana_port}/" ${conf_dir}/kibana.yml
 	sed -i "s/#server.host.*/server.host: ${local_ip}/" ${conf_dir}/kibana.yml
 	sed -i "s%#elasticsearch.url.*%elasticsearch.url: ${elasticsearch_ip}%" ${conf_dir}/kibana.yml
-	sed -i "s%##elasticsearch.hosts.*%elasticsearch.url: [${elasticsearch_ip}]%" ${conf_dir}/kibana.yml
+	sed -i "s%#elasticsearch.hosts.*%elasticsearch.hosts: [${elasticsearch_ip}]%" ${conf_dir}/kibana.yml
 	sed -i "s%#elasticsearch.requestTimeout:.*%elasticsearch.requestTimeout: 60000%" ${conf_dir}/kibana.yml
 	sed -i "s%#i18n.locale:.*%i18n.locale: \"zh-CN\"%" ${conf_dir}/kibana.yml
 }
@@ -53,8 +51,13 @@ add_kibana_service(){
 	Type=simple
 	User=kibana
 	ExecStart="${home_dir}/bin/kibana"
-	conf_system_service ${home_dir}/init
-	add_system_service kibana ${home_dir}/init
+	conf_system_service ${home_dir}/kibana.service
+	add_system_service kibana ${home_dir}/kibana.service
+}
+
+kibana_readme(){
+
+	info_log "安装完成访问地址是http://${local_ip}:5601"
 }
 
 kibana_install_ctl(){
@@ -62,5 +65,6 @@ kibana_install_ctl(){
 	kibana_install_set
 	kibana_down
 	kibana_install
+	kibana_readme
 	
 }
