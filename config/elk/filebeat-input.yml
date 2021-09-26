@@ -1,5 +1,6 @@
 # ============================== Filebeat inputs ===============================
 - type: log
+  # 多行合并
   multiline.pattern: '^[[:space:]]+(at|\.{3})[[:space:]]+\b|^Caused by:'
   multiline.negate: false
   multiline.match: after
@@ -9,14 +10,17 @@
 
   scan_frequency: 10s
   fields_under_root: true
+  
   json.keys_under_root: true
   json.overwrite_keys: true
   json.add_error_key: true
   json.message_key: message
-  tail_files: false
+
+  fields:
+      topic: xxxx
+  tail_files: true
   close_inactive: 2h
   close_eof: false
   close_removed: true
   clean_removed: true
   close_renamed: false
-  index: "test"

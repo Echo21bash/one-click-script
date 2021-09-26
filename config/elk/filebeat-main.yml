@@ -1,13 +1,40 @@
 ###################### Filebeat Configuration Example #########################
-setup.ilm.enabled: auto
+setup.ilm.enabled: false
 # ============================== Filebeat inputs ===============================
 filebeat.config.inputs:
-  enable: true
-  path: ${path.config}/input.d/*.yml
-  reload.enabled: true
-  reload.period: 10s
+    enable: true
+    path: ${path.config}/input.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
 # ============================== Filebeat modules ==============================
 filebeat.config.modules:
-  path: ${path.config}/modules.d/*.yml
-  reload.enabled: true
-  reload.period: 10s
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
+# ============================== Filebeat outputs ===============================
+output.elasticsearch:
+    enabled: false
+    hosts: ["192.168.1.1:9200"]
+    index: "%{[topic]}-%{+yyyy.MM.dd}"
+    #username: elastic
+    #password: password
+
+output.kafka:
+    enabled: false
+    hosts: ["192.168.1.1:9092"]
+    topic: "%{[topic]}"
+
+output.redis:
+    enabled: false
+    hosts: ["192.168.0.142:6379"]
+    key: "%{[topic]}"
+    #password: foobar2000
+    db: 0
+
+output.console:
+    enabled: false
+    codec.json:
+        # 漂亮输出（格式化）
+        pretty: true
+        #  转义HTML符号
+        escape_html: true
