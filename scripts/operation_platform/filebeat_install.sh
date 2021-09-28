@@ -101,7 +101,7 @@ filebeat_conf(){
 
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		mkdir -p ${tar_dir}/inputs.d
+		mkdir -p ${tar_dir}/input.d
 		if [[ ! -f ${tar_dir}/filebeat.yml.bak ]];then
 			cp ${tar_dir}/filebeat.yml ${tar_dir}/filebeat.yml.bak
 		fi
