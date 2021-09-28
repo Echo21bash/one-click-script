@@ -1,5 +1,6 @@
 ###################### Filebeat Configuration Example #########################
 setup.ilm.enabled: false
+setup.template.enabled: false
 # ============================== Filebeat inputs ===============================
 filebeat.config.inputs:
     enable: true
@@ -32,7 +33,7 @@ output.redis:
     db: 0
 
 output.console:
-    enabled: false
+    enabled: true
     codec.json:
         # 漂亮输出（格式化）
         pretty: true

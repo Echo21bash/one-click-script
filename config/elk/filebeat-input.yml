@@ -6,7 +6,7 @@
   multiline.match: after
   enabled: true
   paths:
-      - /var/log/*.log
+      - /var/log/messages
 
   scan_frequency: 10s
   fields_under_root: true
@@ -17,7 +17,8 @@
   json.message_key: message
 
   fields:
-      topic: xxxx
+      # 用于区分各个输入源
+      topic: test-messages
   tail_files: true
   close_inactive: 2h
   close_eof: false

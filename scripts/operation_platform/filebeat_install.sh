@@ -7,7 +7,7 @@ filebeat_env_load(){
 	url='https://mirrors.huaweicloud.com/filebeat'
 	select_version
 	install_dir_set
-	online_version	
+	online_version
 }
 
 filebeat_down(){
@@ -25,9 +25,13 @@ filebeat_down(){
 
 filebeat_install_set(){
 	output_option "选择安装模式" "单机 批量" "deploy_mode"
+	if [[ ${deploy_mode} = '1' ]];then
+		vi ${workdir}/config/elk/filebeat-single.conf
+		. ${workdir}/config/elk/filebeat-single.conf
+	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		vi ${workdir}/config/elk/filebeat.conf
-		. ${workdir}/config/elk/filebeat.conf
+		vi ${workdir}/config/elk/filebeat-batch.conf
+		. ${workdir}/config/elk/filebeat-batch.conf
 	fi
 }
 
@@ -66,7 +70,67 @@ filebeat_install(){
 }
 
 filebeat_conf(){
-	conf_dir=${home_dir}/config
+	if [[ ${deploy_mode} = '1' ]];then
+		if [[ ! -f ${home_dir}/filebeat.yml.bak ]];then
+			cp ${home_dir}/filebeat.yml ${home_dir}/filebeat.yml.bak
+		fi
+		\cp ${workdir}/config/elk/filebeat-input.yml ${home_dir}/inputs.d
+		\cp ${workdir}/config/elk/filebeat-main.yml ${home_dir}/filebeat.yml
+		if [[ ${output_type} = 'elasticsearch' ]];then
+			sed "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:9200\"/${es_url}/" ${home_dir}/filebeat.yml
+			if [[ -n ${es_name} && -n ${es_passwd} ]];then
+				sed -i "s/#username:/username: ${es_name}/" ${home_dir}/filebeat.yml
+				sed -i "s/#password:/#password: ${es_passwd}/" ${home_dir}/filebeat.yml
+			fi
+		fi
+		if [[ ${output_type} = 'kafka' ]];then
+			sed "/output.kafka/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:9092\"/${kafka_url}/" ${home_dir}/filebeat.yml
+		fi
+		if [[ ${output_type} = 'redis' ]];then
+			sed "/output.redis/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:6379\"/${redis_url}/" ${home_dir}/filebeat.yml
+			if [[ -n ${redis_passwd} ]];then
+				sed -i "s/#password:/password: ${redis_passwd}/" ${home_dir}/filebeat.yml
+			fi
+		fi
+
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		mkdir -p ${tar_dir}/inputs.d
+		if [[ ! -f ${tar_dir}/filebeat.yml.bak ]];then
+			cp ${tar_dir}/filebeat.yml ${tar_dir}/filebeat.yml.bak
+		fi
+		\cp ${workdir}/config/elk/filebeat-input.yml ${tar_dir}/inputs.d
+		\cp ${workdir}/config/elk/filebeat-main.yml ${tar_dir}/filebeat.yml
+		if [[ ${output_type} = 'elasticsearch' ]];then
+			sed "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:9200\"/${es_url}/" ${tar_dir}/filebeat.yml
+			if [[ -n ${es_name} && -n ${es_passwd} ]];then
+				sed -i "s/#username:/username: ${es_name}/" ${tar_dir}/filebeat.yml
+				sed -i "s/#password:/#password: ${es_passwd}/" ${tar_dir}/filebeat.yml
+			fi
+		fi
+		if [[ ${output_type} = 'kafka' ]];then
+			sed "/output.kafka/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:9092\"/${kafka_url}/" ${tar_dir}/filebeat.yml
+		fi
+		if [[ ${output_type} = 'redis' ]];then
+			sed "/output.redis/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "s/\"192.168.1.1:6379\"/${redis_url}/" ${tar_dir}/filebeat.yml
+			if [[ -n ${redis_passwd} ]];then
+				sed -i "s/#password:/password: ${redis_passwd}/" ${tar_dir}/filebeat.yml
+			fi
+		fi
+
+	fi
 }
 
 add_filebeat_service(){
@@ -85,5 +149,4 @@ filebeat_install_ctl(){
 	filebeat_install_set
 	filebeat_down
 	filebeat_install
-	
 }
