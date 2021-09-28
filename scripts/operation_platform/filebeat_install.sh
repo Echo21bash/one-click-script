@@ -108,8 +108,8 @@ filebeat_conf(){
 		\cp ${workdir}/config/elk/filebeat-input.yml ${tar_dir}/inputs.d
 		\cp ${workdir}/config/elk/filebeat-main.yml ${tar_dir}/filebeat.yml
 		if [[ ${output_type} = 'elasticsearch' ]];then
-			sed "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:9200\"/${es_url}/" ${tar_dir}/filebeat.yml
 			if [[ -n ${es_name} && -n ${es_passwd} ]];then
 				sed -i "s/#username:/username: ${es_name}/" ${tar_dir}/filebeat.yml
@@ -117,13 +117,13 @@ filebeat_conf(){
 			fi
 		fi
 		if [[ ${output_type} = 'kafka' ]];then
-			sed "/output.kafka/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.kafka/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:9092\"/${kafka_url}/" ${tar_dir}/filebeat.yml
 		fi
 		if [[ ${output_type} = 'redis' ]];then
-			sed "/output.redis/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.redis/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${tar_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:6379\"/${redis_url}/" ${tar_dir}/filebeat.yml
 			if [[ -n ${redis_passwd} ]];then
 				sed -i "s/#password:/password: ${redis_passwd}/" ${tar_dir}/filebeat.yml
