@@ -39,7 +39,7 @@ filebeat_install_set(){
 filebeat_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/filebeat
-		mkdir -p ${install_dir}/filebeat/inputs.d
+		mkdir -p ${install_dir}/filebeat/input.d
 		\cp -rp ${tar_dir}/* ${home_dir}
 		filebeat_conf
 		add_filebeat_service
@@ -54,7 +54,7 @@ filebeat_install(){
 		for now_host in ${host_ip[@]}
 		do
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-			mkdir -p ${install_dir}/filebeat/inputs.d
+			mkdir -p ${install_dir}/filebeat/input.d
 			"
 			info_log "正在向节点${now_host}分发filebeat安装程序和配置文件..."
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/filebeat
@@ -74,7 +74,7 @@ filebeat_conf(){
 		if [[ ! -f ${home_dir}/filebeat.yml.bak ]];then
 			cp ${home_dir}/filebeat.yml ${home_dir}/filebeat.yml.bak
 		fi
-		\cp ${workdir}/config/elk/filebeat-input.yml ${home_dir}/inputs.d
+		\cp ${workdir}/config/elk/filebeat-input.yml ${home_dir}/input.d
 		\cp ${workdir}/config/elk/filebeat-main.yml ${home_dir}/filebeat.yml
 		if [[ ${output_type} = 'elasticsearch' ]];then
 			sed "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
@@ -105,7 +105,7 @@ filebeat_conf(){
 		if [[ ! -f ${tar_dir}/filebeat.yml.bak ]];then
 			cp ${tar_dir}/filebeat.yml ${tar_dir}/filebeat.yml.bak
 		fi
-		\cp ${workdir}/config/elk/filebeat-input.yml ${tar_dir}/inputs.d
+		\cp ${workdir}/config/elk/filebeat-input.yml ${tar_dir}/input.d
 		\cp ${workdir}/config/elk/filebeat-main.yml ${tar_dir}/filebeat.yml
 		if [[ ${output_type} = 'elasticsearch' ]];then
 			sed -i "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${tar_dir}/filebeat.yml
