@@ -19,9 +19,9 @@ chmod -R +x ${workdir}/bin
 export PATH=${workdir}/bin:$PATH
 
 mysql_tool(){
-output_option 'MySQL常用脚本' '添加MySQL备份脚本  找回MySQLroot密码 ' 'num'
+output_option 'MySQL常用脚本' '添加MySQL备份脚本  找回MySQLroot密码 ' 'other_tool'
 
-case "$num" in
+case "$other_tool" in
 	1)multi_function_backup_script_set
 	;;
 	2)reset_mysql_passwd
@@ -31,8 +31,8 @@ esac
 
 basic_environment(){
 
-output_option '请选择要安装的环境' 'JDK PHP Ruby Nodejs Go Erlang' 'num'
-case "$num" in
+output_option '请选择要安装的环境' 'JDK PHP Ruby Nodejs Go Erlang' 'basic'
+case "$basic" in
 	1)java_install_ctl
 	;;
 	2)php_install_ctl
@@ -50,8 +50,8 @@ esac
 
 web_services(){
 
-output_option '请选择要安装的软件' 'Nginx Openresty Tomcat' 'num'
-case "$num" in
+output_option '请选择要安装的软件' 'Nginx Openresty Tomcat' 'web'
+case "$web" in
 	1)nginx_install_ctl
 	;;
 	2)openresty_install_ctl
@@ -63,8 +63,8 @@ esac
 
 database_services(){
 
-output_option '请选择要安装的软件' 'MySQL Mongodb Redis Memcached Greenplum' 'num'
-case "$num" in
+output_option '请选择要安装的软件' 'MySQL Mongodb Redis Memcached Greenplum' 'database'
+case "$database" in
 	1)mysql_install_ctl
 	;;
 	2)mongodb_inistall_ctl
@@ -80,8 +80,8 @@ esac
 
 middleware_services(){
 
-output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka RabbitMQ' 'num'
-case "$num" in
+output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka RabbitMQ' 'middleware'
+case "$middleware" in
 	1)activemq_install_ctl
 	;;
 	2)rocketmq_install_ctl
@@ -97,8 +97,8 @@ esac
 
 storage_service(){
 
-output_option '请选择要安装的软件' 'FTP SFTP 对象存储服务(OSS/minio) FastDFS NFS' 'num'
-case "$num" in
+output_option '请选择要安装的软件' 'FTP SFTP 对象存储服务(OSS/minio) FastDFS NFS' 'storage'
+case "$storage" in
 	1)ftp_install_ctl
 	;;
 	2)sftp_install_ctl
@@ -113,8 +113,8 @@ esac
 }
 
 operation_platform(){
-output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控 LDAP统一认证 红帽服务器集群(RHCS) VPN隧道' 'platform'
-case "$platform" in
+output_option '请选择要安装的平台' 'ELK日志平台 Zabbix监控 LDAP统一认证 红帽服务器集群(RHCS) VPN隧道' 'operation'
+case "$operation" in
 	1)elk_install_ctl
 	;;
 	2)zabbix_install_ctl
@@ -130,8 +130,8 @@ esac
 }
 
 virtualization_platform(){
-output_option '请选择要安装的平台' 'Docker K8S系统 Rancher平台(k8s集群管理)' 'platform'
-case "$platform" in
+output_option '请选择要安装的平台' 'Docker K8S系统 Rancher平台(k8s集群管理)' 'virtualizatio'
+case "$virtualizatio" in
 	1)docker_install_ctl
 	;;
 	2)k8s_install_ctl
@@ -142,8 +142,8 @@ esac
 }
 
 ha_load_balance_platform(){
-output_option '请选择要安装的平台' 'keepalived haproxy lvs' 'platform'
-case "$platform" in
+output_option '请选择要安装的平台' 'keepalived haproxy lvs' 'balance'
+case "$balance" in
 	1)keepalived_install_ctl
 	;;
 	2)haproxy_install_ctl
