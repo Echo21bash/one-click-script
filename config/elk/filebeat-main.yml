@@ -9,6 +9,7 @@ filebeat.config.inputs:
     reload.period: 10s
 # ============================== Filebeat modules ==============================
 filebeat.config.modules:
+    enable: true
     path: ${path.config}/modules.d/*.yml
     reload.enabled: true
     reload.period: 10s
@@ -37,5 +38,5 @@ output.console:
     codec.json:
         # 漂亮输出（格式化）
         pretty: true
-        #  转义HTML符号
+        # 转义HTML符号
         escape_html: true

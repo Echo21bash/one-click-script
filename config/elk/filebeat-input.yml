@@ -17,7 +17,7 @@
   json.message_key: message
 
   fields:
-      # 用于区分各个输入源
+      # 用于区分各个输入源作为索引名称、topic名称、redis键
       topic: test-messages
   tail_files: true
   close_inactive: 2h

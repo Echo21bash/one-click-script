@@ -63,6 +63,7 @@ filebeat_install(){
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			\cp ${install_dir}/filebeat/filebeat.service /etc/systemd/system/filebeat.service
 			systemctl daemon-reload
+			systemctl restart filebeat.service
 			"
 			((k++))
 		done
@@ -77,8 +78,8 @@ filebeat_conf(){
 		\cp ${workdir}/config/elk/filebeat-input.yml ${home_dir}/input.d
 		\cp ${workdir}/config/elk/filebeat-main.yml ${home_dir}/filebeat.yml
 		if [[ ${output_type} = 'elasticsearch' ]];then
-			sed "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "/output.elasticsearch/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:9200\"/${es_url}/" ${home_dir}/filebeat.yml
 			if [[ -n ${es_name} && -n ${es_passwd} ]];then
 				sed -i "s/#username:/username: ${es_name}/" ${home_dir}/filebeat.yml
@@ -86,13 +87,13 @@ filebeat_conf(){
 			fi
 		fi
 		if [[ ${output_type} = 'kafka' ]];then
-			sed "/output.kafka/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "/output.kafka/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:9092\"/${kafka_url}/" ${home_dir}/filebeat.yml
 		fi
 		if [[ ${output_type} = 'redis' ]];then
-			sed "/output.redis/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
-			sed "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
+			sed -i "/output.redis/{n;s/enabled: false/enabled: true/}" ${home_dir}/filebeat.yml
+			sed -i "/output.console/{n;s/enabled: true/enabled: false/}" ${home_dir}/filebeat.yml
 			sed -i "s/\"192.168.1.1:6379\"/${redis_url}/" ${home_dir}/filebeat.yml
 			if [[ -n ${redis_passwd} ]];then
 				sed -i "s/#password:/password: ${redis_passwd}/" ${home_dir}/filebeat.yml
@@ -144,9 +145,14 @@ add_filebeat_service(){
 	fi
 }
 
+filebeat_readme(){
+	info_log "filebeat 已经安装成功，输入配置文件目录为input.d目录"
+}
+
 filebeat_install_ctl(){
 	filebeat_env_load
 	filebeat_install_set
 	filebeat_down
 	filebeat_install
+	filebeat_readme
 }
