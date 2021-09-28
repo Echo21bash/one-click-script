@@ -100,8 +100,8 @@ logstash_conf(){
 			sed -i "s/topics_pattern => .*/topics_pattern => '${topics_pattern}-.*'/" ${home_dir}/config.d/logstash-kafka2es.conf
 			sed -i "s/hosts => .*/hosts => ['${output_es_url}']/" ${home_dir}/config.d/logstash-kafka2es.conf
 			if [[ -n ${output_es_name} && -n ${output_es_passwd} ]];then
-				sed -i "s/user => .*/user => '${output_es_name}'/" ${home_dir}/config.d/logstash-kafka2es.conf
-				sed -i "s/password => .*/password => '${output_es_passwd}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/#user => .*/user => '${output_es_name}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/#password => .*/password => '${output_es_passwd}'/" ${home_dir}/config.d/logstash-kafka2es.conf
 			fi
 		fi
 	fi
@@ -118,13 +118,13 @@ logstash_conf(){
 		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
 		if [[ ${input_type} = 'kafka' && ${output_type} = 'elasticsearch' ]];then
-			\cp ${workdir}/config/elk/logstash-kafka2es.conf ${home_dir}/config.d/
-			sed -i "s/bootstrap_servers => .*/bootstrap_servers => '${input_kafka_url}'/" ${home_dir}/config.d/logstash-kafka2es.conf
-			sed -i "s/topics_pattern => .*/topics_pattern => '${topics_pattern}-.*'/" ${home_dir}/config.d/logstash-kafka2es.conf
-			sed -i "s/hosts => .*/hosts => ['${output_es_url}']/" ${home_dir}/config.d/logstash-kafka2es.conf
+			\cp ${workdir}/config/elk/logstash-kafka2es.conf ${tar_dir}/config.d/
+			sed -i "s/bootstrap_servers => .*/bootstrap_servers => '${input_kafka_url}'/" ${tar_dir}/config.d//logstash-kafka2es.conf
+			sed -i "s/topics_pattern => .*/topics_pattern => '${topics_pattern}-.*'/" ${tar_dir}/config.d/logstash-kafka2es.conf
+			sed -i "s/hosts => .*/hosts => ['${output_es_url}']/" ${tar_dir}/config.d/logstash-kafka2es.conf
 			if [[ -n ${output_es_name} && -n ${output_es_passwd} ]];then
-				sed -i "s/user => .*/user => '${output_es_name}'/" ${home_dir}/config.d/logstash-kafka2es.conf
-				sed -i "s/password => .*/password => '${output_es_passwd}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/#user => .*/user => '${output_es_name}'/" ${tar_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/#password => .*/password => '${output_es_passwd}'/" ${tar_dir}/config.d/logstash-kafka2es.conf
 			fi
 		fi
 	fi
