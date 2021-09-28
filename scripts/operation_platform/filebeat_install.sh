@@ -139,7 +139,7 @@ add_filebeat_service(){
 	ExecStart="${home_dir}/filebeat"
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${home_dir}/filebeat.service
-		add_system_service filebeat ${home_dir}/filebeat.
+		add_system_service filebeat ${home_dir}/filebeat.service
 	else
 		conf_system_service ${tmp_dir}/filebeat.service
 	fi

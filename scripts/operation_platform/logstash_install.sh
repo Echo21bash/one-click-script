@@ -24,9 +24,13 @@ logstash_down(){
 
 logstash_install_set(){
 	output_option "选择安装模式" "单机 集群" "deploy_mode"
+	if [[ ${deploy_mode} = '1' ]];then
+		vi ${workdir}/config/elk/logstash-single.conf
+		. ${workdir}/config/elk/logstash-single.conf
+	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		vi ${workdir}/config/elk/logstash.conf
-		. ${workdir}/config/elk/logstash.conf
+		vi ${workdir}/config/elk/logstash-batch.conf
+		. ${workdir}/config/elk/logstash-batch.conf
 	fi
 }
 
@@ -90,6 +94,16 @@ logstash_conf(){
 		sed -i "s%# http.host.*%http.host: \"${local_ip}\"%" ${conf_dir}/logstash.yml
 		sed -i "s/-Xms.*/-Xms512m/" ${conf_dir}/jvm.options
 		sed -i "s/-Xmx.*/-Xmx512m/" ${conf_dir}/jvm.options
+		if [[ ${input_type} = 'kafka' && ${output_type} = 'elasticsearch' ]];then
+			\cp ${workdir}/config/elk/logstash-kafka2es.conf ${home_dir}/config.d/
+			sed -i "s/bootstrap_servers => .*/bootstrap_servers => '${input_kafka_url}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			sed -i "s/topics_pattern => .*/topics_pattern => '${topics_pattern}-.*'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			sed -i "s/hosts => .*/hosts => ['${output_es_url}']/" ${home_dir}/config.d/logstash-kafka2es.conf
+			if [[ -n ${output_es_name} && -n ${output_es_passwd} ]];then
+				sed -i "s/user => .*/user => '${output_es_name}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/password => .*/password => '${output_es_passwd}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			fi
+		fi
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		mkdir -p ${tar_dir}/config.d/
@@ -99,10 +113,20 @@ logstash_conf(){
 			cp ${conf_dir}/logstash.yml ${conf_dir}/logstash.yml.bak
 		fi
 		sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
-		sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
+		sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 4/" ${conf_dir}/logstash.yml
 		sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
 		sed -i "s/-Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
 		sed -i "s/-Xmx.*/-Xmx${jvm_heap}/" ${conf_dir}/jvm.options
+		if [[ ${input_type} = 'kafka' && ${output_type} = 'elasticsearch' ]];then
+			\cp ${workdir}/config/elk/logstash-kafka2es.conf ${home_dir}/config.d/
+			sed -i "s/bootstrap_servers => .*/bootstrap_servers => '${input_kafka_url}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			sed -i "s/topics_pattern => .*/topics_pattern => '${topics_pattern}-.*'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			sed -i "s/hosts => .*/hosts => ['${output_es_url}']/" ${home_dir}/config.d/logstash-kafka2es.conf
+			if [[ -n ${output_es_name} && -n ${output_es_passwd} ]];then
+				sed -i "s/user => .*/user => '${output_es_name}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+				sed -i "s/password => .*/password => '${output_es_passwd}'/" ${home_dir}/config.d/logstash-kafka2es.conf
+			fi
+		fi
 	fi
 }
 
