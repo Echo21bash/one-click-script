@@ -144,7 +144,7 @@ output_option(){
 	for item in ${output[@]}
 	do	
 		#选项数组
-		if [[ $item > ${item_option_len} ]];then
+		if [[ $item -gt ${item_option_len} ]];then
 			error_log "输入值大于选项总数"
 			exit 1
 		fi
