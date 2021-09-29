@@ -17,7 +17,7 @@ ruby_env_load(){
 
 ruby_install(){
 
-	yum install -y zlib-devel openssl-devel make
+	yum install -y zlib-devel openssl-devel make gcc
 	home_dir=${install_dir}/ruby
 	mkdir -p ${home_dir}
 	cd ${tar_dir}
