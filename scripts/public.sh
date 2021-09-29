@@ -129,10 +129,12 @@ output_option(){
 	fi
 
 	output=(${output})
+	#选项总数
+	item_option_len=${#item_option[@]}
 	#只允许
 	only_allow_numbers ${output[@]}
 	if [[ $? != '0' ]];then
-		diy_echo "输入错误请重新选择" "${red}" "${error}"
+		error_log "输入值存在非数字"
 		exit 1
 	fi
 	#清空output_value
@@ -142,6 +144,10 @@ output_option(){
 	for item in ${output[@]}
 	do	
 		#选项数组
+		if [[ $item > ${item_option_len} ]];then
+			error_log "输入值大于选项总数"
+			exit 1
+		fi
 		(($last_option[$k]=$item))
 		((item--))
 		#选项对应内容数组
@@ -155,11 +161,12 @@ output_option(){
 
 only_allow_numbers(){
 	#判断纯数字正确返回0
+	#支持多个字符
 	local j=0
 	for ((j=0;j<$#;j++))
 	do
 		tmp=($@)
-		if [ -z "$(echo ${tmp[$j]} | sed 's#[0-9]##g')" ];then
+		if [[ -z "$(echo ${tmp[$j]} | sed 's#[0-9]##g')" ]];then
 			continue
 		else
 			return 1
