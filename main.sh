@@ -34,7 +34,7 @@ basic_environment(){
 output_option '请选择要安装的环境' 'JDK PHP Ruby Nodejs Go Erlang' 'basic'
 
 for number in ${basic[@]}; do
-	case "$basic" in
+	case "$number" in
 		1)java_install_ctl
 		;;
 		2)php_install_ctl
