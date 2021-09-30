@@ -37,15 +37,26 @@ openldap_config(){
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/domain-dbadmin.ldif
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/basedomain.ldif
 	
+	#添加几个基础的 Schema
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/collective.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/corba.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/duaconf.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/dyngroup.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/java.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/misc.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/openldap.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/pmi.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/ppolicy.ldif
 	# 执行命令，修改ldap配置，通过-f执行文件
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/domain-dbadmin.ldif
 	info_log "请输入ldap管理员密码"
 	ldapadd -x -D cn=admin,dc=${dc},dc=com -W -f ${tmp_dir}/basedomain.ldif
-	#添加几个基础的 Schema
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+
+
 }
 
 openldap_install_ctl(){
