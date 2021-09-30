@@ -38,9 +38,9 @@ openldap_config(){
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/admin.ldif
 	
 	# 执行命令，修改ldap配置，通过-f执行文件
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/openldap/chrootpw.ldif
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/openldap/basedomain.ldif
-	ldapadd -x -D cn=admin,dc=${dc},dc=com -f /tmp/openldap/admin.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/basedomain.ldif
+	ldapadd -x -D cn=admin,dc=${dc},dc=com -f ${tmp_dir}/admin.ldif
 	#添加几个基础的 Schema
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
