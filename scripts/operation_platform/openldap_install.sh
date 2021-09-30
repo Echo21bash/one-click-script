@@ -18,6 +18,7 @@ openldap_install(){
 
 	yum install -y openldap openldap-clients openldap-servers
 	service_control slapd.service y
+	mkdir -p ${tmp_dir}
 
 }
 
@@ -27,7 +28,6 @@ openldap_config(){
 	chown ldap.ldap /var/lib/ldap/DB_CONFIG
 	ldap_pw_encrypt=`slappasswd -s ${ldap_pw}`
 	#新增修改密码文件
-	mkdir -p /tmp/openldap/
 	cp ${workdir}/config/openldap/chrootpw.ldif ${tmp_dir}
 	cp ${workdir}/config/openldap/domain-dbadmin.ldif ${tmp_dir}
 	cp ${workdir}/config/openldap/admin.ldif ${tmp_dir}
