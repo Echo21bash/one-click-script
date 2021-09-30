@@ -40,7 +40,8 @@ openldap_config(){
 	# 执行命令，修改ldap配置，通过-f执行文件
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/domain-dbadmin.ldif
-	ldapadd -x -D cn=admin,dc=${dc},dc=com -f ${tmp_dir}/basedomain.ldif
+	info_log "请输入ldap管理员密码"
+	ldapadd -x -D cn=admin,dc=${dc},dc=com -W -f ${tmp_dir}/basedomain.ldif
 	#添加几个基础的 Schema
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
