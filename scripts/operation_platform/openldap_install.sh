@@ -1,5 +1,11 @@
 #!/bin/bash
 
+openldap_env_load(){
+	tmp_dir=/usr/local/src/openldap_tmp
+	soft_name=openldap
+
+}
+
 openldap_set(){
 	input_option "输入ldap管理员密码" "123456" "ldap_pw"
 	ldap_pw=${input_value}
@@ -22,19 +28,18 @@ openldap_config(){
 	ldap_pw_encrypt=`slappasswd -s ${ldap_pw}`
 	#新增修改密码文件
 	mkdir -p /tmp/openldap/
-	cp ${workdir}/config/openldap/chrootpw.ldif /tmp/openldap/
-	cp ${workdir}/config/openldap/domain-dbadmin.ldif /tmp/openldap/
-	cp ${workdir}/config/openldap/admin.ldif /tmp/openldap/
+	cp ${workdir}/config/openldap/chrootpw.ldif ${tmp_dir}
+	cp ${workdir}/config/openldap/domain-dbadmin.ldif ${tmp_dir}
+	cp ${workdir}/config/openldap/admin.ldif ${tmp_dir}
 	
-	sed -i /olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/tmp/openldap/chrootpw.ldif
-	sed -i /olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/tmp/openldap/domain-dbadmin.ldif
-	sed -i /alibaba/${dc}/tmp/openldap/domain-dbadmin.ldif
-	sed -i /alibaba/${dc}/tmp/openldap/admin.ldif
+	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/chrootpw.ldif
+	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/domain-dbadmin.ldif
+	sed -i "s/alibaba/${dc}/" ${tmp_dir}/domain-dbadmin.ldif
+	sed -i "s/alibaba/${dc}/" ${tmp_dir}/admin.ldif
 	
 	# 执行命令，修改ldap配置，通过-f执行文件
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/openldap/chrootpw.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/openldap/basedomain.ldif
-	info_log "请输入设置的ldap密码"
 	ldapadd -x -D cn=admin,dc=${dc},dc=com -f /tmp/openldap/admin.ldif
 	#添加几个基础的 Schema
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
@@ -43,6 +48,7 @@ openldap_config(){
 }
 
 openldap_install_ctl(){
+	openldap_env_load
 	openldap_set
 	openldap_install
 	openldap_config

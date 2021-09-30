@@ -131,7 +131,7 @@ output_option(){
 	output=(${output})
 	#选项总数
 	item_option_len=${#item_option[@]}
-	#只允许
+	#判断输入类型
 	only_allow_numbers ${output[@]}
 	if [[ $? != '0' ]];then
 		error_log "输入值存在非数字"
