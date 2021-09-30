@@ -58,9 +58,9 @@ openldap_config(){
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/domain-dbadmin.ldif
 	# 启用memberof功能
-	ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add-memberof.ldif
-	ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f refint1.ldif
-	ldapadd -Q -Y EXTERNAL -H ldapi:/// -f refint2.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/add-memberof.ldif
+	ldapmodify -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/refint1.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/refint2.ldif
 
 	info_log "请输入ldap管理员密码"
 	ldapadd -x -D cn=admin,dc=${dc},dc=com -W -f ${tmp_dir}/basedomain.ldif
