@@ -4,7 +4,7 @@ objectClass: olcModuleList
 objectclass: top
 olcModuleload: memberof.la
 olcModulePath: /usr/lib64/openldap
- 
+
 dn: olcOverlay={0}memberof,olcDatabase={2}hdb,cn=config
 objectClass: olcConfig
 objectClass: olcMemberOf
