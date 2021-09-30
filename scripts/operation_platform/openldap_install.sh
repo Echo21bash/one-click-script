@@ -31,12 +31,16 @@ openldap_config(){
 	cp ${workdir}/config/openldap/chrootpw.ldif ${tmp_dir}
 	cp ${workdir}/config/openldap/domain-dbadmin.ldif ${tmp_dir}
 	cp ${workdir}/config/openldap/basedomain.ldif ${tmp_dir}
-	
+
+	cp ${workdir}/config/openldap/add-memberof.ldif ${tmp_dir}
+	cp ${workdir}/config/openldap/refint1.ldif ${tmp_dir}
+	cp ${workdir}/config/openldap/refint2.ldif ${tmp_dir}
+
 	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/chrootpw.ldif
 	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/domain-dbadmin.ldif
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/domain-dbadmin.ldif
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/basedomain.ldif
-	
+
 	#添加几个基础的 Schema
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
@@ -53,6 +57,11 @@ openldap_config(){
 	# 执行命令，修改ldap配置，通过-f执行文件
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/domain-dbadmin.ldif
+	# 启用memberof功能
+	ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add-memberof.ldif
+	ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f refint1.ldif
+	ldapadd -Q -Y EXTERNAL -H ldapi:/// -f refint2.ldif
+
 	info_log "请输入ldap管理员密码"
 	ldapadd -x -D cn=admin,dc=${dc},dc=com -W -f ${tmp_dir}/basedomain.ldif
 
