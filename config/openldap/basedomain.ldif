@@ -9,3 +9,11 @@ dn: cn=admin,dc=alibaba,dc=com
 objectClass: organizationalRole
 cn: admin
 description: Directory Administrator
+
+dn: ou=people,dc=alibaba,dc=com
+objectClass: organizationalUnit
+ou: user
+
+dn: ou=group,dc=alibaba,dc=com
+objectClass: organizationalUnit
+ou: group

@@ -30,17 +30,17 @@ openldap_config(){
 	#新增修改密码文件
 	cp ${workdir}/config/openldap/chrootpw.ldif ${tmp_dir}
 	cp ${workdir}/config/openldap/domain-dbadmin.ldif ${tmp_dir}
-	cp ${workdir}/config/openldap/admin.ldif ${tmp_dir}
+	cp ${workdir}/config/openldap/basedomain.ldif ${tmp_dir}
 	
 	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/chrootpw.ldif
 	sed -i "s/olcRootPW:.*/olcRootPW: ${ldap_pw_encrypt}/" ${tmp_dir}/domain-dbadmin.ldif
 	sed -i "s/alibaba/${dc}/" ${tmp_dir}/domain-dbadmin.ldif
-	sed -i "s/alibaba/${dc}/" ${tmp_dir}/admin.ldif
+	sed -i "s/alibaba/${dc}/" ${tmp_dir}/basedomain.ldif
 	
 	# 执行命令，修改ldap配置，通过-f执行文件
 	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/chrootpw.ldif
-	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/basedomain.ldif
-	ldapadd -x -D cn=admin,dc=${dc},dc=com -f ${tmp_dir}/admin.ldif
+	ldapadd -Y EXTERNAL -H ldapi:/// -f ${tmp_dir}/domain-dbadmin.ldif
+	ldapadd -x -D cn=admin,dc=${dc},dc=com -f ${tmp_dir}/basedomain.ldif
 	#添加几个基础的 Schema
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
