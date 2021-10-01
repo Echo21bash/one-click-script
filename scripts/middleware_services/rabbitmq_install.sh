@@ -179,7 +179,7 @@ rabbitmq_cluster_init(){
 		do
 			if [[ $i = '1' ]];then
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-broker$i && systemctl status rabbitmq-broker$i > /dev/null 2>&1 && sleep 10 && \
+				systemctl restart rabbitmq-broker$i && systemctl status rabbitmq-broker$i > /dev/null 2>&1 && sleep 10 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass} && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_cluster_name ${cluster_name}
@@ -188,7 +188,7 @@ rabbitmq_cluster_init(){
 			else
 				scp -r ${tmp_dir}/.erlang.cookie ${host_ip[$k]}:/root/
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-broker$i && systemctl status rabbitmq-broker$i > /dev/null 2>&1 && sleep 10 && \
+				systemctl restart rabbitmq-broker$i && systemctl status rabbitmq-broker$i > /dev/null 2>&1 && sleep 10 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl stop_app && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl join_cluster broker1@rabbitmq-node1 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl start_app
