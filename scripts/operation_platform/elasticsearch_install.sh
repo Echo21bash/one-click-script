@@ -32,17 +32,41 @@ elasticsearch_install_set(){
 	fi
 }
 
+elasticsearch_run_env_check(){
+
+	if [[ ${deploy_mode} = '1' ]];then
+		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
+		if [[ ${java_status} = 0 ]];then
+			success_log "java运行环境已就绪"
+		else
+			error "java运行环境未就绪"
+			exit 1
+		fi
+	fi
+
+	if [[ ${deploy_mode} = '2' ]];then
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+			java_status=java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			if [[ ${java_status} = 0 ]];then
+				success_log "主机${host_ip[$k]}java运行环境已就绪"
+			else
+				error "主机${host_ip[$k]}java运行环境未就绪"
+				exit 1
+			fi
+			((k++))
+		done
+	fi
+}
+
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		if [[ ${version_number} > '6' ]];then
 			JAVA_HOME=${home_dir}/jdk
-		else
-			if [[ x${JAVA_HOME} = x ]];then
-				error_log "JAVA_HOME变量为空，java运行环境未就绪！"
-				exit 1
-			fi
 		fi
+		elasticsearch_run_env_check
 		useradd -M elasticsearch
 		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
@@ -56,6 +80,7 @@ elasticsearch_install(){
 			JAVA_HOME=${home_dir}/jdk
 		fi
 		auto_ssh_keygen
+		elasticsearch_run_env_check
 		elasticsearch_master_node_list
 		elasticsearch_master_server_list
 		local i=1
@@ -66,11 +91,6 @@ elasticsearch_install(){
 			elsearch_tcp_port=9300
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-				if [[ ${java_status} = 1 ]];then
-					error_log "主机${host_ip[$k]}java运行环境未就绪"
-					exit 1
-				fi
 				service_id=$i
 				let elsearch_port=9200+$j
 				let elsearch_tcp_port=9300+$j

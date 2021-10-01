@@ -34,12 +34,37 @@ logstash_install_set(){
 	fi
 }
 
-logstash_install(){
+logstash_run_env_check(){
+
 	if [[ ${deploy_mode} = '1' ]];then
-		if [[ x${JAVA_HOME} = x ]];then
-			error_log "JAVA_HOME变量为空，java运行环境未就绪！"
+		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
+		if [[ ${java_status} = 0 ]];then
+			success_log "java运行环境已就绪"
+		else
+			error "java运行环境未就绪"
 			exit 1
 		fi
+	fi
+
+	if [[ ${deploy_mode} = '2' ]];then
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+			java_status=java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			if [[ ${java_status} = 0 ]];then
+				success_log "主机${host_ip[$k]}java运行环境已就绪"
+			else
+				error "主机${host_ip[$k]}java运行环境未就绪"
+				exit 1
+			fi
+			((k++))
+		done
+	fi
+}
+
+logstash_install(){
+	if [[ ${deploy_mode} = '1' ]];then
+		logstash_run_env_check
 		home_dir=${install_dir}/logstash
 		mkdir -p ${home_dir}/config.d
 		useradd -M logstash
@@ -50,6 +75,7 @@ logstash_install(){
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
+		logstash_run_env_check
 		home_dir=${install_dir}/logstash
 		logstash_conf
 		add_logstash_service
@@ -57,11 +83,6 @@ logstash_install(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-			if [[ ${java_status} = 1 ]];then
-				error_log "主机${host_ip[$k]}java运行环境未就绪"
-				exit 1
-			fi
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 			useradd -M logstash
 			mkdir -p ${install_dir}/logstash

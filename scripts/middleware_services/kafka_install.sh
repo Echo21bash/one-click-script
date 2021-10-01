@@ -49,6 +49,8 @@ kafka_run_env_check(){
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
+		kafka_run_env_check
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
@@ -67,6 +69,7 @@ kafka_run_env_check(){
 kafka_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		rabbitmq_run_env_check
 		home_dir=${install_dir}/kafka
 		mkdir -p ${home_dir}
 		kafka_config
@@ -156,7 +159,6 @@ kafka_install_ctl(){
 
 	kafka_env_load
 	kafka_install_set
-	kafka_run_env_check
 	kafka_down
 	kafka_install
 	
