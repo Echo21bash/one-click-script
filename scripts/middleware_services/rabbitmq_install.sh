@@ -41,9 +41,9 @@ rabbitmq_run_env_check(){
 	if [[ ${deploy_mode} = '1' ]];then
 		elang_status=`erl -version >/dev/null 2>&1  && echo 0 || echo 1`
 		if [[ ${elang_status} = 0 ]];then
-			success_log "elang运行环境已就绪"
+			success_log "erlang运行环境已就绪"
 		else
-			error "elang运行环境未就绪"
+			error_log "erlang运行环境未就绪"
 			exit 1
 		fi
 	fi
@@ -54,9 +54,9 @@ rabbitmq_run_env_check(){
 		do
 			elang_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "erl -version > /dev/null 2>&1  && echo 0 || echo 1"`
 			if [[ ${elang_status} = 0 ]];then
-				success_log "主机${host_ip[$k]}elang运行环境已就绪"
+				success_log "主机${host_ip[$k]}erlang运行环境已就绪"
 			else
-				error "主机${host_ip[$k]}elang运行环境未就绪"
+				error_log "主机${host_ip[$k]}erlang运行环境未就绪"
 				exit 1
 			fi
 			((k++))
