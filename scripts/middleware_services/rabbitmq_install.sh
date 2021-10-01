@@ -26,7 +26,6 @@ rabbitmq_install_set(){
 
 	output_option '请选择安装模式' '单机模式 集群模式' 'deploy_mode'
 	if [[ ${deploy_mode} = '1' ]];then
-		rabbitmq_env_check
 		input_option '请设置rabbitmq的主机名称' 'node1' 'rabbitmq_nodename'
 		rabbitmq_nodename=${input_value}
 	elif [[ ${deploy_mode} = '2' ]];then
@@ -36,12 +35,32 @@ rabbitmq_install_set(){
 
 }
 
-rabbitmq_env_check(){
-	erl -version >/dev/null 2>&1
-	if [[ $? = 0 ]];then
-		success_log "erlang运行环境已具备注意与rabbitmq版本对应关系"
-	else
-		error_log "erlang运行环境没有安装请安装"
+
+rabbitmq_run_env_check(){
+
+	if [[ ${deploy_mode} = '1' ]];then
+		elang_status=`erl -version >/dev/null 2>&1  && echo 0 || echo 1`
+		if [[ ${elang_status} = 0 ]];then
+			success_log "elang运行环境已就绪"
+		else
+			error "elang运行环境未就绪"
+			exit 1
+		fi
+	fi
+
+	if [[ ${deploy_mode} = '2' ]];then
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+			elang_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "erl -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			if [[ ${elang_status} = 0 ]];then
+				success_log "主机${host_ip[$k]}elang运行环境已就绪"
+			else
+				error "主机${host_ip[$k]}elang运行环境未就绪"
+				exit 1
+			fi
+			((k++))
+		done
 	fi
 }
 
@@ -190,6 +209,7 @@ rabbitmq_cluster_init(){
 rabbitmq_install_ctl(){
 	rabbitmq_env_load
 	rabbitmq_install_set
+	rabbitmq_run_env_check
 	rabbitmq_down
 	rabbitmq_install
 }
