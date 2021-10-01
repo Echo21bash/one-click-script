@@ -146,14 +146,12 @@ add_rabbitmq_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
-		SuccessExitStatus=69
 		conf_system_service ${home_dir}/rabbitmq.service
 		add_system_service rabbitmq ${home_dir}/rabbitmq.service
 		
 	elif [[ ${deploy_mode} = '2' ]];then
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
-		SuccessExitStatus=69
 		conf_system_service ${tmp_dir}/rabbitmq-broker${i}.service
 	fi
 	
@@ -179,7 +177,7 @@ rabbitmq_cluster_init(){
 		do
 			if [[ $i = '1' ]];then
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				systemctl start rabbitmq-broker$i && sleep 10 && \
+				systemctl start rabbitmq-broker$i && systemctl status rabbitmq-broker$i > /dev/null 2>&1 && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl add_user ${admin_user} ${admin_pass} && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_user_tags ${admin_user} administrator && \
 				${install_dir}/rabbitmq-broker$i/sbin/rabbitmqctl set_cluster_name ${cluster_name}
