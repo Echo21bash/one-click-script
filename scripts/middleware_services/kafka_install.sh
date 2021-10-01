@@ -43,7 +43,7 @@ kafka_run_env_check(){
 		if [[ ${java_status} = 0 ]];then
 			success_log "java运行环境已就绪"
 		else
-			error "java运行环境未就绪"
+			error_log "java运行环境未就绪"
 			exit 1
 		fi
 	fi
@@ -58,7 +58,7 @@ kafka_run_env_check(){
 			if [[ ${java_status} = 0 ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
-				error "主机${host_ip[$k]}java运行环境未就绪"
+				error_log "主机${host_ip[$k]}java运行环境未就绪"
 				exit 1
 			fi
 			((k++))
