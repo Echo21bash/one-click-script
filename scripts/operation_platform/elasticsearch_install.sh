@@ -24,11 +24,11 @@ elasticsearch_down(){
 elasticsearch_install_set(){
 	output_option "选择安装模式" "单机 集群" "deploy_mode"
 	if [[ ${deploy_mode} = '1' ]];then
-		input_option "输入http端口号" "9200" "elsearch_port"
-		input_option "输入tcp通信端口号" "9300" "elsearch_tcp_port"
+		vi ${workdir}/config/elk/elastic-single.conf
+		. ${workdir}/config/elk/elastic-single.conf
 	else
-		vi ${workdir}/config/elk/elastic.conf
-		. ${workdir}/config/elk/elastic.conf
+		vi ${workdir}/config/elk/elastic-cluster.conf
+		. ${workdir}/config/elk/elastic-cluster.conf
 	fi
 }
 
@@ -70,7 +70,7 @@ elasticsearch_install(){
 		useradd -M elasticsearch
 		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
-		\cp ${tar_dir}/* ${home_dir}
+		\cp -rp ${tar_dir}/* ${home_dir}
 		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
@@ -203,9 +203,11 @@ elasticsearch_conf(){
 	get_ip
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_dir=${home_dir}/config
-		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#node.name.*/node.name: node1\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\n#bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#bootstrap.system_call_filter.*/bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${local_ip}/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#http.port.*/http.port: 9200\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: 9300/" ${conf_dir}/elasticsearch.yml
 	else
 		conf_dir=${tar_dir}/config
 		if [[ ! -f ${conf_dir}/elasticsearch.yml.bak ]];then
@@ -226,7 +228,9 @@ elasticsearch_conf(){
 		if [[ ${master_nodes_list[@]} =~ "node${service_id}" && ${data_nodes_list[@]} =~ "node${service_id}" ]];then
 			sed -i "/node.name.*/anode.master: true\nnode.data: true" ${conf_dir}/elasticsearch.yml
 		fi
-		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\nbootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
+		
+		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\n#bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#bootstrap.system_call_filter.*/bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
 		###JVM内存配置
