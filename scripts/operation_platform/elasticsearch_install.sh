@@ -48,7 +48,7 @@ elasticsearch_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
 			if [[ ${java_status} = 0 ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
