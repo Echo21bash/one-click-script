@@ -17,7 +17,7 @@ openldap_set(){
 openldap_install(){
 
 	yum install -y openldap openldap-clients openldap-servers
-	service_control slapd.service y
+	service_control slapd.service start
 	mkdir -p ${tmp_dir}
 
 }

@@ -105,11 +105,13 @@ elasticsearch_install(){
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/elasticsearch-node${i}.service ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
-				
+				info_log "正在启动${now_host}实例elsearch-node${service_id}"
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
 				\cp ${install_dir}/elasticsearch-node${service_id}/elasticsearch-node${i}.service /etc/systemd/system/elasticsearch-node${i}.service
 				systemctl daemon-reload
+				systemctl enable elasticsearch-node${i}
+				systemctl restart elasticsearch-node${i}
 				"
 				((i++))
 			done
@@ -255,6 +257,35 @@ add_elasticsearch_service(){
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 	else
 		conf_system_service ${tmp_dir}/elasticsearch-node${service_id}.service
+	fi
+}
+
+
+elasticsearch_cluster_check(){
+
+	if [[ ${deploy_mode} = '1' ]];then
+		
+	fi
+	if [[ ${deploy_mode} = '2' ]];then
+		local i=1
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+
+			for ((j=0;j<${node_num[$k]};j++))
+			do
+				elasticsearch_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "systemctl is-active elasticsearch-node${i}"`
+				if [[ ${elasticsearch_status} = 'active' ]];then
+					success_log "elasticsearch-node${i}启动完成"
+				else
+					error_log "elasticsearch-node${i}启动失败"
+				fi
+				((i++))
+			done
+			((k++))
+		done
+		info_log "获取节点列表"
+		curl http://${host_ip[0]}:9200/_cat/nodes?pretty
 	fi
 }
 

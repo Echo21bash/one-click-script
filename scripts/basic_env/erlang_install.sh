@@ -37,6 +37,7 @@ erlang_install(){
 		yum install -y which wget perl openssl-devel make automake autoconf ncurses-devel gcc
 		erlang_compile
 		add_sys_env "PATH=${home_dir}/bin:\$PATH"
+		ln -snf ${home_dir}/bin/erl /usr/bin
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
@@ -49,7 +50,7 @@ erlang_compile(){
 	./configure --prefix=${home_dir} --with-ssl --enable-threads --enable-smp-support --enable-kernel-poll --enable-hipe
 	if [[ $? = '0' ]];then
 		success_log '编译检查通过'
-		make -j4 && make install
+		make -j 4 && make install
 		if [[ $? = '0' ]];then
 			success_log '编译安装完成'
 		else

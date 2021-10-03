@@ -78,7 +78,7 @@ add_wireguard_ui_service(){
 	ExecStart="${home_dir}/wireguard-ui"
 	conf_system_service	${home_dir}/wgui.service
 	add_system_service wgui ${home_dir}/wgui.service
-	service_control wgui y
+	service_control wgui start
 
 }
 

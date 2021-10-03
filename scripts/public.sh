@@ -654,22 +654,25 @@ service_control(){
 		service_name=$1
 	fi
 	if [[ "x$2" != 'x' ]];then
-		start_arg=$2
+		arg=$2
 	fi
 	if [[ ${os_release} -lt '7' ]];then
-		if [[ -f /etc/init.d/${service_name} ]];then
-			chmod +x /etc/init.d/${service_name}
-			chkconfig --add ${service_name}
+		service ${service_name} ${arg}
+		if [[ $? = '0' ]];then
+			success_log "操作完成"
+		error
+			error_log "操作失败"
 		fi
-		[[ ${start_arg} = 'y' ]] && service ${service_name} start && diy_echo "${service_name}启动完成." "" "${info}"
 	fi
 
 	if [[  ${os_release} -ge '7' ]];then
 		systemctl daemon-reload
-		if [[ -f /etc/systemd/system/${service_name} || -f /etc/systemd/system/${service_name}.service || -f /usr/lib/systemd/system/${service_name} || -f /usr/lib/systemd/system/${service_name}.service ]];then
-			systemctl enable ${service_name} >/dev/null
+		systemctl ${arg} ${service_name}
+		if [[ $? = '0' ]];then
+			success_log "操作完成"
+		error
+			error_log "操作失败"
 		fi
-		[[ ${start_arg} = 'y' ]] && systemctl start ${service_name} && diy_echo "${service_name}启动完成." "" "${info}"
 	fi
 }
 #添加环境变量

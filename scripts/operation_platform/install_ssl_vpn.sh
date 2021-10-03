@@ -60,7 +60,7 @@ add_anylink_service(){
 	ExecStart="${home_dir}/anylink"
 	conf_system_service	${home_dir}/anylink.service
 	add_system_service anylink ${home_dir}/anylink.service
-	service_control anylink y
+	service_control anylink start
 
 }
 
