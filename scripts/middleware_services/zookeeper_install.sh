@@ -73,6 +73,7 @@ zookeeper_install(){
 		zookeeper_config
 		cp -rp ${tar_dir}/* ${home_dir}
 		add_zookeeper_service
+		service_control zookeeper start
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
@@ -106,11 +107,14 @@ zookeeper_install(){
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
 				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/logrotate.d/zookeeper-node${i}
 				systemctl daemon-reload
+				systemctl restart zookeeper-node${i}
 				"
 				((i++))
 			done
 			((k++))
 		done
+		sleep 10
+		zookeeper_cluster_check
 	fi
 
 }
@@ -186,6 +190,30 @@ add_zookeeper_service(){
 		add_system_service zookeeper ${tmp_dir}/zookeeper.service
 	else
 		conf_system_service ${tmp_dir}/zookeeper-node${i}.service
+	fi
+}
+
+
+zookeeper_cluster_check(){
+
+	if [[ ${deploy_mode} = '2' ]];then
+		local i=1
+		local k=0
+		for now_host in ${host_ip[@]}
+		do
+
+			for ((j=0;j<${node_num[$k]};j++))
+			do
+				zookeeper_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "systemctl is-active zookeeper-node${i}"`
+				if [[ ${zookeeper_status} = 'active' ]];then
+					success_log "zookeeper-node${i}启动完成"
+				else
+					error_log "zookeeper-node${i}启动失败"
+				fi
+				((i++))
+			done
+			((k++))
+		done
 	fi
 }
 

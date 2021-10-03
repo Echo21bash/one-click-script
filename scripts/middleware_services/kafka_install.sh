@@ -37,7 +37,7 @@ kafka_install_set(){
 }
 
 kafka_run_env_check(){
-
+	###检测java环境
 	if [[ ${deploy_mode} = '1' ]];then
 		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
 		if [[ ${java_status} = 0 ]];then
@@ -61,6 +61,16 @@ kafka_run_env_check(){
 			fi
 			((k++))
 		done
+	fi
+	###检测zookeeper可用
+	zookeeper_ip1=`echo ${zookeeper_ip[0]} | awk -F : '{print$1}'`
+	zookeeper_port1=`echo ${zookeeper_ip[0]} | awk -F : '{print$2}'`
+	zookeeper_status=`exec 3<> /dev/tcp/${zookeeper_ip1}/${zookeeper_port1};echo "ruok" 1>&3;cat 0<&3`
+	if [[ ${zookeeper_status} = 'imok' ]];then
+		success_log "zookeeper运行环境已就绪"
+	else
+		success_log "zookeeper运行环境未就绪"
+		exit 1
 	fi
 }
 
@@ -101,6 +111,7 @@ kafka_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				\cp ${install_dir}/kafka-broker${broker_id}/kafka-broker${broker_id} /etc/systemd/system/kafka-broker${broker_id}.service
 				systemctl daemon-reload
+				systemctl restart kafka-broker${broker_id}
 				"
 				((i++))
 			done
