@@ -111,7 +111,7 @@ kafka_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				. /tmp/public.sh
 				Type=simple
-				ExecStart="${home_dir}/bin/kafka-server-start.sh ${home_dir}/config/server.properties"
+				ExecStart='${home_dir}/bin/kafka-server-start.sh ${home_dir}/config/server.properties'
 				ExecStop="${home_dir}/bin/kafka-server-stop.sh"
 				Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 				add_daemon_file ${home_dir}/kafka-broker${broker_id}.service
