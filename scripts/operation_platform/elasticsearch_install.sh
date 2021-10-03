@@ -74,6 +74,7 @@ elasticsearch_install(){
 		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
+		service_control elasticsearch start
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		if [[ ${version_number} > '6' ]];then
@@ -255,6 +256,7 @@ add_elasticsearch_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		conf_system_service ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
+
 	else
 		conf_system_service ${tmp_dir}/elasticsearch-node${service_id}.service
 	fi
@@ -264,7 +266,8 @@ add_elasticsearch_service(){
 elasticsearch_cluster_check(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		
+		info_log "节点列表"
+		curl http://${local_ip}:9200/_cat/nodes?pretty
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		local i=1
@@ -284,7 +287,7 @@ elasticsearch_cluster_check(){
 			done
 			((k++))
 		done
-		info_log "获取节点列表"
+		info_log "节点列表"
 		curl http://${host_ip[0]}:9200/_cat/nodes?pretty
 	fi
 }
