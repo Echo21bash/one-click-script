@@ -66,7 +66,8 @@ zookeeper_run_env_check(){
 zookeeper_install(){
 	
 	if [[ ${deploy_mode} = '1' ]];then
-		rabbitmq_run_env_check
+		zookeeper_run_env_check
+		zookeeper_down
 		home_dir=${install_dir}/zookeeper
 		mkdir -p ${install_dir}/zookeeper
 		zookeeper_config
@@ -77,6 +78,7 @@ zookeeper_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		zookeeper_run_env_check
+		zookeeper_down
 		add_zookeeper_server_list
 		
 		local i=1
@@ -190,7 +192,6 @@ add_zookeeper_service(){
 zookeeper_install_ctl(){
 	zookeeper_env_load
 	zookeeper_install_set
-	zookeeper_down
 	zookeeper_install
 	
 }

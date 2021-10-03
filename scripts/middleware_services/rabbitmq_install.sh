@@ -68,6 +68,7 @@ rabbitmq_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		rabbitmq_run_env_check
+		rabbitmq_down
 		home_dir=${install_dir}/rabbitmq
 		mkdir -p ${home_dir}
 		cp -rp ${tar_dir}/* ${home_dir}
@@ -79,6 +80,7 @@ rabbitmq_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		rabbitmq_run_env_check
+		rabbitmq_down
 		rabbitmq_hosts
 		local i=1
 		local k=0
@@ -211,6 +213,5 @@ rabbitmq_cluster_init(){
 rabbitmq_install_ctl(){
 	rabbitmq_env_load
 	rabbitmq_install_set
-	rabbitmq_down
 	rabbitmq_install
 }

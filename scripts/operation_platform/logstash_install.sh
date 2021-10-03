@@ -65,6 +65,7 @@ logstash_run_env_check(){
 logstash_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		logstash_run_env_check
+		logstash_down
 		home_dir=${install_dir}/logstash
 		mkdir -p ${home_dir}/config.d
 		useradd -M logstash
@@ -76,6 +77,7 @@ logstash_install(){
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
 		logstash_run_env_check
+		logstash_down
 		home_dir=${install_dir}/logstash
 		logstash_conf
 		add_logstash_service
@@ -171,7 +173,6 @@ logstash_readme(){
 logstash_install_ctl(){
 	logstash_env_load
 	logstash_install_set
-	logstash_down
 	logstash_install
 	logstash_readme
 }

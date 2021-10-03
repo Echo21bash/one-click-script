@@ -65,8 +65,10 @@ elasticsearch_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		if [[ ${version_number} > '6' ]];then
 			JAVA_HOME=${home_dir}/jdk
+		else
+			elasticsearch_run_env_check
 		fi
-		elasticsearch_run_env_check
+		elasticsearch_down
 		useradd -M elasticsearch
 		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
@@ -79,11 +81,13 @@ elasticsearch_install(){
 		elasticsearch_cluster_check
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
+		auto_ssh_keygen
 		if [[ ${version_number} > '6' ]];then
 			JAVA_HOME=${home_dir}/jdk
+		else
+			elasticsearch_run_env_check
 		fi
-		auto_ssh_keygen
-		elasticsearch_run_env_check
+		elasticsearch_down
 		elasticsearch_master_node_list
 		elasticsearch_master_server_list
 		local i=1
@@ -303,7 +307,6 @@ elasticsearch_cluster_check(){
 elasticsearch_install_ctl(){
 	elasticsearch_env_load
 	elasticsearch_install_set
-	elasticsearch_down
 	elasticsearch_install
 	
 }
