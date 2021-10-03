@@ -70,7 +70,7 @@ elasticsearch_install(){
 		useradd -M elasticsearch
 		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
-		mv ${tar_dir}/* ${home_dir}
+		\cp ${tar_dir}/* ${home_dir}
 		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
