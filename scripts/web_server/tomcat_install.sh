@@ -97,7 +97,7 @@ add_tomcat_service(){
 	Type="forking"
 	ExecStart="${home_dir}/bin/startup.sh"
 	Environment="JAVA_HOME=$(echo $JAVA_HOME)"
-	conf_system_service ${home_dir}/init
+	add_daemon_file ${home_dir}/init
 	add_system_service ${service_name} ${home_dir}/init
 }
 

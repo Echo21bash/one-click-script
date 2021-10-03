@@ -60,7 +60,7 @@ add_openresty_service(){
 	ExecStart="${home_dir}/bin/openresty -c ${home_dir}/nginx/conf/nginx.conf"
 	ExecReload="${home_dir}/bin/openresty -s reload"
 	ExecStop="${home_dir}/bin/openresty -s stop"
-	conf_system_service
+	add_daemon_file
 	add_system_service openresty ${home_dir}/init
 }
 

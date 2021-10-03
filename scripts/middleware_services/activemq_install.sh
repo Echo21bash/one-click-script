@@ -158,7 +158,7 @@ add_activemq_service(){
 	Environment="JAVA_HOME=$(echo $JAVA_HOME)"
 	ExecStart="${home_dir}/bin/activemq start"
 	ExecStop="${home_dir}/bin/activemq stop"
-	conf_system_service
+	add_daemon_file
 	if [[ ${deploy_mode} = '1' ]];then
 		add_system_service activemq ${home_dir}/init
 	fi

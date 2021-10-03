@@ -110,20 +110,20 @@ add_zabbix_service(){
 		Environment="CONFFILE=${home_dir}/etc/zabbix_server.conf"
 		PIDFile="${home_dir}/logs/zabbix_server.pid"
 		ExecStart="${home_dir}/sbin/zabbix_server -c \$CONFFILE"
-		conf_system_service ${home_dir}/zabbix-serverd
+		add_daemon_file ${home_dir}/zabbix-serverd
 		add_system_service zabbix-serverd ${home_dir}/zabbix-serverd
 	fi
 	if [[ ${install_module_value[@]} =~ 'zabbix-agent' ]];then
 		Environment="CONFFILE=${home_dir}/etc/zabbix_agentd.conf"
 		PIDFile="${home_dir}/logs/zabbix_agentd.pid"
 		ExecStart="${home_dir}/sbin/zabbix_agentd -c \$CONFFILE"
-		conf_system_service ${home_dir}/zabbix-agentd
+		add_daemon_file ${home_dir}/zabbix-agentd
 		add_system_service zabbix-agentd ${home_dir}/zabbix-agentd
 	fi
 	if [[ ${install_module_value[@]} =~ 'zabbix-java' ]];then
 		PIDFile="${home_dir}/logs/zabbix_java.pid"
 		ExecStart="${home_dir}/sbin/zabbix_java/startup.sh"
-		conf_system_service ${home_dir}/zabbix-java-gateway
+		add_daemon_file ${home_dir}/zabbix-java-gateway
 		add_system_service zabbix-java-gateway ${home_dir}/zabbix-java-gateway
 	fi
 }

@@ -149,14 +149,14 @@ add_rabbitmq_service(){
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
 		SuccessExitStatus=69
-		conf_system_service ${home_dir}/rabbitmq.service
+		add_daemon_file ${home_dir}/rabbitmq.service
 		add_system_service rabbitmq ${home_dir}/rabbitmq.service
 		
 	elif [[ ${deploy_mode} = '2' ]];then
 		ExecStart="${home_dir}/sbin/rabbitmq-server -detached"
 		ExecStop="${home_dir}/sbin/rabbitmqctl shutdown"
 		SuccessExitStatus=69
-		conf_system_service ${tmp_dir}/rabbitmq-broker${i}.service
+		add_daemon_file ${tmp_dir}/rabbitmq-broker${i}.service
 	fi
 	
 }

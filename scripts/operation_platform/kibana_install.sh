@@ -51,7 +51,7 @@ add_kibana_service(){
 	Type=simple
 	User=kibana
 	ExecStart="${home_dir}/bin/kibana"
-	conf_system_service ${home_dir}/kibana.service
+	add_daemon_file ${home_dir}/kibana.service
 	add_system_service kibana ${home_dir}/kibana.service
 }
 

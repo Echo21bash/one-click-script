@@ -186,10 +186,10 @@ add_zookeeper_service(){
 	Environment="JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs"
 	
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${tmp_dir}/zookeeper.service
+		add_daemon_file ${tmp_dir}/zookeeper.service
 		add_system_service zookeeper ${tmp_dir}/zookeeper.service
 	else
-		conf_system_service ${tmp_dir}/zookeeper-node${i}.service
+		add_daemon_file ${tmp_dir}/zookeeper-node${i}.service
 	fi
 }
 

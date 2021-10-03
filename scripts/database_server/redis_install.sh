@@ -222,14 +222,14 @@ add_redis_service(){
 	ExecStart="${home_dir}/bin/redis-server ${home_dir}/etc/redis.conf"
 
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${home_dir}/redis.service
+		add_daemon_file ${home_dir}/redis.service
 		add_system_service redis ${home_dir}/redis.service
 	elif [[ ${deploy_mode} = '2' ]];then
-		conf_system_service ${tmp_dir}/redis-node${service_id}.service
+		add_daemon_file ${tmp_dir}/redis-node${service_id}.service
 		service_control redis-node${service_id}.service
 		if [[ ${cluster_mode} = '2' ]];then
 			ExecStart="${home_dir}/bin/redis-sentinel ${home_dir}/etc/sentinel"
-			conf_system_service ${tmp_dir}/redis-sentinel-node${service_id}.service
+			add_daemon_file ${tmp_dir}/redis-sentinel-node${service_id}.service
 			add_system_service redis-sentinel-node${service_id} ${tmp_dir}/redis-sentinel-node${service_id}.service
 		fi
 	fi

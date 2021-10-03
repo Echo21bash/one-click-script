@@ -159,10 +159,10 @@ add_logstash_service(){
 	ExecStart="${home_dir}/bin/logstash"
 	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${home_dir}/logstash.service
+		add_daemon_file ${home_dir}/logstash.service
 		add_system_service logstash ${home_dir}/logstash.service
 	else
-		conf_system_service ${tmp_dir}/logstash.service
+		add_daemon_file ${tmp_dir}/logstash.service
 	fi
 }
 

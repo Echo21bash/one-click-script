@@ -107,11 +107,12 @@ kafka_install(){
 				"
 				info_log "正在向节点${now_host}分发kafka-broker${broker_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/kafka-broker${broker_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/kafka-broker${broker_id} ${host_ip[$k]}:${install_dir}/kafka-broker${broker_id}
+				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${install_dir}/kafka-broker${broker_id}/kafka-broker${broker_id} /etc/systemd/system/kafka-broker${broker_id}.service
-				systemctl daemon-reload
-				systemctl restart kafka-broker${broker_id}
+				. /tmp/public.sh
+				add_daemon_file ${home_dir}/kafka-broker${broker_id}.service
+				add_system_service kafka-broker${broker_id} ${home_dir}/kafka-broker${broker_id}.service
+				service_control kafka-broker${broker_id} restart
 				"
 				((i++))
 			done
@@ -159,10 +160,9 @@ add_kafka_service(){
 	ExecStop="${home_dir}/bin/kafka-server-stop.sh"
 	Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${home_dir}/kafka.service
+		add_daemon_file ${home_dir}/kafka.service
 		add_system_service kafka ${home_dir}/kafka.service
-	else
-		conf_system_service ${tmp_dir}/kafka-broker${broker_id}
+		service_control kafka restart
 	fi
 
 }

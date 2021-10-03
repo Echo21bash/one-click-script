@@ -148,17 +148,17 @@ add_rocketmq_service(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		ExecStart="${home_dir}/bin/mqbroker -c ${home_dir}/conf/broker.properties"
-		conf_system_service
+		add_daemon_file
 		add_system_service rocketmq-broker ${home_dir}/init
 		ExecStart="${home_dir}/bin/mqnamesrv -c ${home_dir}/conf/namesrv.properties"
-		conf_system_service
+		add_daemon_file
 		add_system_service rocketmq-namesrv ${home_dir}/init
 	elif [[ ${deploy_mode} = '2' ]];then
 		ExecStart="${home_dir}/bin/mqbroker -c ${home_dir}/conf/broker.properties"
-		conf_system_service
+		add_daemon_file
 		add_system_service rocketmq-${broker_name}-${node_type}-node${i} ${home_dir}/init
 		ExecStart="${home_dir}/bin/mqnamesrv -c ${home_dir}/conf/namesrv.properties"
-		conf_system_service
+		add_daemon_file
 		add_system_service rocketmq-namesrv-${broker_name}-${node_type}-node${i} ${home_dir}/init
 	fi
 	

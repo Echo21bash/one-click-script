@@ -266,11 +266,11 @@ add_elasticsearch_service(){
 	ARGS="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
-		conf_system_service ${home_dir}/elasticsearch.service
+		add_daemon_file ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 
 	else
-		conf_system_service ${tmp_dir}/elasticsearch-node${service_id}.service
+		add_daemon_file ${tmp_dir}/elasticsearch-node${service_id}.service
 	fi
 }
 

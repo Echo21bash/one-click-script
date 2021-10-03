@@ -98,7 +98,7 @@ add_nginx_service(){
 	ExecStart="${home_dir}/sbin/nginx -c ${home_dir}/conf/nginx.conf"
 	ExecReload="${home_dir}/sbin/nginx -s reload"
 	ExecStop="${home_dir}/sbin/nginx -s stop"
-	conf_system_service	${home_dir}/init
+	add_daemon_file	${home_dir}/init
 	add_system_service nginx ${home_dir}/init
 }
 

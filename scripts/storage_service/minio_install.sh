@@ -52,7 +52,7 @@ add_minio_service(){
 	WorkingDirectory="${home_dir}"
 	ExecStart="${home_dir}/bin/minio server \$MINIO_OPTS \$MINIO_VOLUMES"
 	#ARGS="&"
-	conf_system_service ${home_dir}/minio.service
+	add_daemon_file ${home_dir}/minio.service
 	add_system_service minio ${home_dir}/minio.service
 }
 

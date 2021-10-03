@@ -153,18 +153,18 @@ add_fastdfs_service(){
 	Type="forking"
 	ExecStart="${home_dir}/bin/start.sh fdfs_trackerd"
 	PIDFile="${file_dir}/data/fdfs_trackerd.pid"
-	conf_system_service
+	add_daemon_file
 	add_system_service fdfs_trackerd ${home_dir}/init
 
 	ExecStart="${home_dir}/bin/start.sh fdfs_storaged"
 	PIDFile="${file_dir}/data/fdfs_storaged.pid"
-	conf_system_service
+	add_daemon_file
 	add_system_service fdfs_storaged ${home_dir}/init
 
 	if [[ ${install_fastdht} = 'y' ]];then
 		ExecStart="${home_dir}/bin/start.sh fdhtd"
 		PIDFile="${file_dir}/data/fdhtd.pid.pid"
-		conf_system_service
+		add_daemon_file
 		add_system_service fdhtd ${home_dir}/init
 	fi
 }

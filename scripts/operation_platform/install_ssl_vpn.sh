@@ -58,7 +58,7 @@ anylink_config(){
 add_anylink_service(){
 	WorkingDirectory="${home_dir}"
 	ExecStart="${home_dir}/anylink"
-	conf_system_service	${home_dir}/anylink.service
+	add_daemon_file	${home_dir}/anylink.service
 	add_system_service anylink ${home_dir}/anylink.service
 	service_control anylink start
 
