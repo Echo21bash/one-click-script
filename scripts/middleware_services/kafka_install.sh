@@ -114,7 +114,7 @@ kafka_install(){
 				ExecStart="${home_dir}/bin/kafka-server-start.sh"
 				StartArgs="${home_dir}/config/server.properties"
 				ExecStop="${home_dir}/bin/kafka-server-stop.sh"
-				Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
+				Environment='JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}'
 				add_daemon_file ${home_dir}/kafka-broker${broker_id}.service
 				add_system_service kafka-broker${broker_id} ${home_dir}/kafka-broker${broker_id}.service
 				service_control kafka-broker${broker_id} restart
@@ -137,8 +137,8 @@ kafka_config(){
 		listeners_ip=${now_host}
 	fi
 	
-	zookeeper_ip="${zookeeper_ip[@]}"
-	zookeeper_connect=$(echo ${zookeeper_ip} | sed 's/ /,/g')
+	zookeeper_url="${zookeeper_ip[@]}"
+	zookeeper_connect=$(echo ${zookeeper_url} | sed 's/ /,/g')
 	[[ -n ${broker_id} ]] && sed -i "s/broker.id=.*/broker.id=${broker_id}/" ${conf_dir}/server.properties
 	[[ -z ${kafka_port} ]] && kafka_port=9092
 	[[ -z `grep ^port ${conf_dir}/server.properties` ]] && sed -i "/broker.id=.*/aport=${kafka_port}" ${conf_dir}/server.properties
