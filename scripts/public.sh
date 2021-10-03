@@ -660,7 +660,7 @@ service_control(){
 		service ${service_name} ${arg}
 		if [[ $? = '0' ]];then
 			success_log "操作完成"
-		error
+		else
 			error_log "操作失败"
 		fi
 	fi
@@ -670,7 +670,7 @@ service_control(){
 		systemctl ${arg} ${service_name}
 		if [[ $? = '0' ]];then
 			success_log "操作完成"
-		error
+		else
 			error_log "操作失败"
 		fi
 	fi
