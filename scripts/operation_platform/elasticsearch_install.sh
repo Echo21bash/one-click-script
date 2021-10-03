@@ -75,6 +75,8 @@ elasticsearch_install(){
 		elasticsearch_conf
 		add_elasticsearch_service
 		service_control elasticsearch start
+		sleep 20
+		elasticsearch_cluster_check
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		if [[ ${version_number} > '6' ]];then
@@ -118,6 +120,8 @@ elasticsearch_install(){
 			done
 			((k++))
 		done
+		sleep 20
+		elasticsearch_cluster_check
 	fi
 
 }
