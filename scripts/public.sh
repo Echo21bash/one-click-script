@@ -524,8 +524,9 @@ add_daemon_sysvinit_file(){
 	PidFile="${PidFile:-}"
 	User="${User:-root}"
 	ExecStart="${ExecStart:-}"
-	ARGS="${ARGS:-}"
+	StartArgs="${StartArgs:-}"
 	ExecStop="${ExecStop:-}"
+	StopArgs="${StopArgs:-}"
 	EOF
 	cat >>${system_service_config_file}<<-'EOF'
 	#EUV
@@ -535,6 +536,10 @@ add_daemon_sysvinit_file(){
 	_pid(){
 	  [[ -s $PidFile ]] && pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
 	  [[ -z $PidFile ]] && pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
+	  if [[ -z $PidFile ]];then
+	    dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
+	    pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
+	  fi
 	}
 
 	_start(){
@@ -545,7 +550,7 @@ add_daemon_sysvinit_file(){
 	    echo -e "\e[00;32mStarting ${Name}\e[00m"
 	    id -u ${User} >/dev/null
 	    if [ $? = 0 ];then
-	      su ${User} -c "${ExecStart} ${ARGS} >/dev/null 2>&1 &"
+	      su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
 	    fi
 	    _status
 	  fi
@@ -554,7 +559,7 @@ add_daemon_sysvinit_file(){
 	_stop(){
 	  _pid
 	  if [ -n "$pid" ]; then
-	    [[ -n "${ExecStop}" ]] && ${ExecStop}
+	    [[ -n "${ExecStop}" ]] && ${ExecStop} ${StopArgs}
 	    [[ -z "${ExecStop}" ]] && kill $pid
 	    for ((i=1;i<=5;i++));
 	    do
@@ -635,10 +640,10 @@ add_daemon_systemd_file(){
 
 	WorkingDirectory=${WorkingDirectory:-}
 	PIDFile=${PIDFile:-}
-	ExecStart=${ExecStart:-} ${ARGS:-}
+	ExecStart=${ExecStart:-} ${StartArgs:-}
 	ExecStartPost=${ExecStartPost:-}
 	ExecReload=${ExecReload:-/bin/kill -s HUP \$MAINPID}
-	ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID}
+	ExecStop=${ExecStop:-/bin/kill -s QUIT \$MAINPID} ${StopArgs}
 	SuccessExitStatus=${SuccessExitStatus:-}
 	TimeoutStopSec=5
 	Restart=${Restart:-on-failure}

@@ -263,7 +263,7 @@ add_elasticsearch_service(){
 	Type=forking
 	User=elasticsearch
 	ExecStart="${home_dir}/bin/elasticsearch"
-	ARGS="-d"
+	StartArgs="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/elasticsearch.service
