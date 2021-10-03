@@ -523,7 +523,7 @@ conf_system_service(){
 		    echo -e "\e[00;32mStarting ${Name}\e[00m"
 		    id -u ${User} >/dev/null
 		    if [ $? = 0 ];then
-		      su ${User} -c "${ExecStart} ${ARGS} &"
+		      su ${User} -c "${ExecStart} ${ARGS} >/dev/null 2>&1 &"
 		    fi
 		    _status
 		  fi
