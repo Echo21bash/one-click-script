@@ -535,11 +535,12 @@ add_daemon_sysvinit_file(){
 	[[ -d ${WorkingDirectory} ]] && cd ${WorkingDirectory}
 	_pid(){
 	  [[ -s $PidFile ]] && pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
-	  [[ -z $PidFile ]] && pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
 	  if [[ -z $PidFile ]];then
-	    dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
-	    pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
-	  fi
+	    pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
+	    if [[ -z $pid ]];then
+	      dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
+	      pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
+	    fi
 	}
 
 	_start(){
