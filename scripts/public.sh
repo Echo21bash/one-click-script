@@ -723,7 +723,3 @@ add_sys_env(){
 	fi
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
-
-#必须函数调用
-colour_keyword
-sys_info

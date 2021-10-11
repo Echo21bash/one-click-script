@@ -100,15 +100,21 @@ zookeeper_install(){
 				"
 				info_log "正在向节点${now_host}分发zookeeper-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{zookeeper-node${i}.service,myid_node${service_id},log_cut_zookeeper-node${i}} ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{myid_node${service_id},log_cut_zookeeper-node${i}} ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
+				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 				
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				\cp ${install_dir}/zookeeper-node${service_id}/zookeeper-node${i}.service /etc/systemd/system/zookeeper-node${i}.service
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				. /tmp/public.sh
+				Type="forking"
+				ExecStart="${home_dir}/bin/zkServer.sh start"
+				Environment="JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs"
+				add_daemon_file ${home_dir}/zookeeper-node${i}.service
+				add_system_service zookeeper ${home_dir}/zookeeper-node${i}.service
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
 				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/logrotate.d/zookeeper-node${i}
-				systemctl daemon-reload
-				systemctl restart zookeeper-node${i}
-				"
+				service_control zookeeper-node${i} restart
+				rm -rf /tmp/public.sh
+				EOF
 				((i++))
 			done
 			((k++))
@@ -188,8 +194,6 @@ add_zookeeper_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${tmp_dir}/zookeeper.service
 		add_system_service zookeeper ${tmp_dir}/zookeeper.service
-	else
-		add_daemon_file ${tmp_dir}/zookeeper-node${i}.service
 	fi
 }
 
