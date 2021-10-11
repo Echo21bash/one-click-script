@@ -112,14 +112,23 @@ elasticsearch_install(){
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/elasticsearch-node${i}.service ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
-				info_log "正在启动${now_host}实例elsearch-node${service_id}"
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+
+
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				. /tmp/public.sh
 				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
-				\cp ${install_dir}/elasticsearch-node${service_id}/elasticsearch-node${i}.service /etc/systemd/system/elasticsearch-node${i}.service
-				systemctl daemon-reload
-				systemctl enable elasticsearch-node${i}
-				systemctl restart elasticsearch-node${i}
-				"
+				Type=simple
+				User=elasticsearch
+				ExecStart="${home_dir}/bin/elasticsearch"
+				Environment="JAVA_HOME=${JAVA_HOME}"
+				elasticsearch-node${i}.service
+				add_daemon_file ${home_dir}/elasticsearch-node${service_id}
+				add_system_service elasticsearch-node${service_id} ${home_dir}/elasticsearch-node${service_id}.service
+				service_control elasticsearch-node${service_id} enable
+				service_control elasticsearch-node${service_id} restart
+				rm -rf /tmp/public.sh
+				EOF
 				((i++))
 			done
 			((k++))
@@ -260,17 +269,13 @@ elasticsearch_conf(){
 
 add_elasticsearch_service(){
 
-	Type=forking
+	Type=simple
 	User=elasticsearch
 	ExecStart="${home_dir}/bin/elasticsearch"
-	StartArgs="-d"
 	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
-
-	else
-		add_daemon_file ${tmp_dir}/elasticsearch-node${service_id}.service
 	fi
 }
 
