@@ -114,7 +114,7 @@ kafka_install(){
 				ExecStart="${home_dir}/bin/kafka-server-start.sh"
 				StartArgs="${home_dir}/config/server.properties"
 				ExecStop="${home_dir}/bin/kafka-server-stop.sh"
-				Environment='JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}'
+				Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 				add_daemon_file ${home_dir}/kafka-broker${broker_id}.service
 				add_system_service kafka-broker${broker_id} ${home_dir}/kafka-broker${broker_id}.service
 				service_control kafka-broker${broker_id} restart

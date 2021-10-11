@@ -207,7 +207,7 @@ sys_info(){
 	total_core=`cat /proc/cpuinfo | grep "processor"| wc -l`	
 	#内核版本
 	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
-	http_code=`curl -k -I -m 10 -o /dev/null -s -w %{http_code} www.baidu.com`
+	http_code=`curl -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
 	if [ ${http_code} = '200' ];then
 		network_status="${green}connected${plain}"
 	else
@@ -724,3 +724,4 @@ add_sys_env(){
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
 colour_keyword
+sys_info
