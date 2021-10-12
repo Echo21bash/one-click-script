@@ -82,9 +82,7 @@ elasticsearch_install(){
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
 		auto_ssh_keygen
-		if [[ ${version_number} > '6' ]];then
-			JAVA_HOME=${home_dir}/jdk
-		else
+		if [[ ${version_number} < '7' ]];then
 			elasticsearch_run_env_check
 		fi
 		elasticsearch_down
@@ -103,6 +101,9 @@ elasticsearch_install(){
 				let elsearch_tcp_port=9300+$j
 				elasticsearch_conf
 				home_dir=${install_dir}/elasticsearch-node${service_id}
+				if [[ ${version_number} > '6' ]];then
+					JAVA_HOME=${home_dir}/jdk
+				fi
 				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				useradd -M elasticsearch
@@ -111,9 +112,7 @@ elasticsearch_install(){
 				"
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
-				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/elasticsearch-node${i}.service ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-
 
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
@@ -122,8 +121,7 @@ elasticsearch_install(){
 				User=elasticsearch
 				ExecStart="${home_dir}/bin/elasticsearch"
 				Environment="JAVA_HOME=${JAVA_HOME}"
-				elasticsearch-node${i}.service
-				add_daemon_file ${home_dir}/elasticsearch-node${service_id}
+				add_daemon_file ${home_dir}/elasticsearch-node${service_id}.service
 				add_system_service elasticsearch-node${service_id} ${home_dir}/elasticsearch-node${service_id}.service
 				service_control elasticsearch-node${service_id} enable
 				service_control elasticsearch-node${service_id} restart
@@ -181,28 +179,29 @@ elasticsearch_master_node_list(){
 			data_nodes_list[$j]="node${service_id}"
 			((j++))
 		done
-	fi
 	###指定主节点数量后主节点不存储数据，其余节点配置为数据节点
-	if [[ -n ${master_nodes_num} && ${node_total_num} > ${master_nodes_num} ]];then
-		data_nodes_num=$((node_total_num-master_nodes_num))
-		local j=0
-		local k=0
-		for ((i=1;i<=${node_total_num};i++))
-		do
-			if [[ $i -le ${master_nodes_num} ]];then
-				service_id=$i
-				master_nodes="\"node${service_id}\",${master_nodes}"
-				master_nodes_list[$j]="node${service_id}"
-				((j++))
-			else
-				service_id=$i
-				data_nodes_list[$k]="node${service_id}"
-				((k++))
-			fi
-		done
 	else
-		error_log "主节点数不能大于总节点数"
-		exit 1
+		if [[ -n ${master_nodes_num} && ${node_total_num} > ${master_nodes_num} ]];then
+			data_nodes_num=$((node_total_num-master_nodes_num))
+			local j=0
+			local k=0
+			for ((i=1;i<=${node_total_num};i++))
+			do
+				if [[ $i -le ${master_nodes_num} ]];then
+					service_id=$i
+					master_nodes="\"node${service_id}\",${master_nodes}"
+					master_nodes_list[$j]="node${service_id}"
+					((j++))
+				else
+					service_id=$i
+					data_nodes_list[$k]="node${service_id}"
+					((k++))
+				fi
+			done
+		else
+			error_log "主节点数不能大于总节点数"
+			exit 1
+		fi
 	fi
 
 	###最小启动的主节点数
