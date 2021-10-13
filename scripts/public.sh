@@ -551,7 +551,7 @@ add_daemon_sysvinit_file(){
 
 	_start(){
 	    _pid
-	    if [ -n "$pid" ];then
+	    if [[ -n "$pid" ]];then
 	        echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
 	    else
 	        echo -e "\e[00;32mStarting ${Name}\e[00m"
@@ -592,11 +592,11 @@ add_daemon_sysvinit_file(){
 
 	_status(){
 	    _pid
-	    if [ -n "$pid" ]; then
+	    if [[ -n "$pid" ]]; then
 	        echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
-		else 
-		    echo -e "\e[00;31m${Name} is not running\e[00m"
-		fi
+	    else 
+	        echo -e "\e[00;31m${Name} is not running\e[00m"
+	    fi
 	}
 	_usage(){
 	    echo -e "Usage: $0 {\e[00;32mstart\e[00m|\e[00;31mstop\e[00m|\e[00;32mstatus\e[00m|\e[00;31mrestart\e[00m}"
