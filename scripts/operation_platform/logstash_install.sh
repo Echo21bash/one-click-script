@@ -50,7 +50,7 @@ logstash_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
 			if [[ ${java_status} = 0 ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
@@ -91,13 +91,20 @@ logstash_install(){
 			"
 			info_log "正在向节点${now_host}分发logstash安装程序和配置文件..."
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/logstash
-			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/logstash.service ${host_ip[$k]}:${install_dir}/logstash
+			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 				
-			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			. /tmp/public.sh
 			chown -R logstash.logstash ${install_dir}/logstash
-			\cp ${install_dir}/logstash/logstash.service /etc/systemd/system/logstash.service
-			systemctl daemon-reload
-			"
+			Type=simple
+			User=logstash
+			ExecStart="${home_dir}/bin/logstash"
+			Environment="JAVA_HOME=${JAVA_HOME}"
+			add_daemon_file ${home_dir}/logstash.service
+			add_system_service logstash ${home_dir}/logstash.service
+			service_control logstash restart
+			rm -rf /tmp/public.sh
+			EOF
 			((k++))
 		done
 	fi
@@ -161,8 +168,6 @@ add_logstash_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/logstash.service
 		add_system_service logstash ${home_dir}/logstash.service
-	else
-		add_daemon_file ${tmp_dir}/logstash.service
 	fi
 }
 

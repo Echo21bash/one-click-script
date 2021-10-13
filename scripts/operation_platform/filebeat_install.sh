@@ -48,7 +48,6 @@ filebeat_install(){
 		auto_ssh_keygen
 		home_dir=${install_dir}/filebeat
 		filebeat_conf
-		add_filebeat_service
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
@@ -59,12 +58,16 @@ filebeat_install(){
 			info_log "正在向节点${now_host}分发filebeat安装程序和配置文件..."
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/filebeat
 			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/filebeat.service ${host_ip[$k]}:${install_dir}/filebeat
-				
-			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-			\cp ${install_dir}/filebeat/filebeat.service /etc/systemd/system/filebeat.service
-			systemctl daemon-reload
-			systemctl restart filebeat.service
-			"
+			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			. /tmp/public.sh
+			WorkingDirectory=${home_dir}
+			ExecStart="${home_dir}/filebeat"
+			add_daemon_file ${home_dir}/filebeat.service
+			add_system_service filebeat ${home_dir}/filebeat.service
+			service_control filebeat restart
+			rm -rf /tmp/public.sh
+			EOF
 			((k++))
 		done
 	fi
@@ -140,8 +143,6 @@ add_filebeat_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/filebeat.service
 		add_system_service filebeat ${home_dir}/filebeat.service
-	else
-		add_daemon_file ${tmp_dir}/filebeat.service
 	fi
 }
 

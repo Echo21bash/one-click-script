@@ -5,13 +5,16 @@ elk_install_ctl(){
 	output_option "选择安装的组件" "elasticsearch logstash kibana filebeat" "elk_module"
 
 	elk_module=${output_value[@]}
-	if [[ ${output_value[@]} =~ 'elasticsearch' ]];then
+	if [[ ${elk_module[@]} =~ 'elasticsearch' ]];then
 		elasticsearch_install_ctl
-	elif [[ ${output_value[@]} =~ 'logstash' ]];then
+	fi
+	if [[ ${elk_module[@]} =~ 'logstash' ]];then
 		logstash_install_ctl
-	elif [[ ${output_value[@]} =~ 'kibana' ]];then
+	fi
+	if [[ ${elk_module[@]} =~ 'kibana' ]];then
 		kibana_install_ctl
-	elif [[ ${output_value[@]} =~ 'filebeat' ]];then
+	fi
+	if [[ ${elk_module[@]} =~ 'filebeat' ]];then
 		filebeat_install_ctl
 	fi	
 }
