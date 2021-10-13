@@ -534,71 +534,74 @@ add_daemon_sysvinit_file(){
 	[[ -f ${Environment} ]] && export ${Environment}
 	[[ -d ${WorkingDirectory} ]] && cd ${WorkingDirectory}
 	_pid(){
-	  if [[ -s $PidFile ]];then
-	    pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
-	  else
-	    pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
-	    if [[ -z $pid ]];then
-	      dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
-	      pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
+	    if [[ -s $PidFile ]];then
+	        pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
+	    else
+	        pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
+	        if [[ -z $pid ]];then
+	            dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
+	            pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
+	        fi
+	        if [[ -z $pid ]];then
+	            dirname=$(echo ${dirname} | grep -o .*${Name}.*/)
+	            pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
+	        fi
 	    fi
-	    if [[ -z $pid ]];then
-	      dirname=$(echo ${ExecStart} | awk '{print$1}' | xargs dirname)
-	      pid=$(ps aux | grep ${dirname} | grep -v grep | awk '{print $2}')
-	    fi
-	  fi
 	}
 
 	_start(){
-	  _pid
-	  if [ -n "$pid" ];then
-	    echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
-	  else
-	    echo -e "\e[00;32mStarting ${Name}\e[00m"
-	    id -u ${User} >/dev/null
-	    if [ $? = 0 ];then
-	      su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
+	    _pid
+	    if [ -n "$pid" ];then
+	        echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
+	    else
+	        echo -e "\e[00;32mStarting ${Name}\e[00m"
+	        id -u ${User} >/dev/null
+	        if [[ $? = 0 ]];then
+	            su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
+	            sleep 5
+	        else
+	            echo -e "\e[00;31mUser ${User} does not exist\e[00m\n";
+	        fi
+	        _status
 	    fi
-	    _status
-	  fi
 	}
 
 	_stop(){
-	  _pid
-	  if [ -n "$pid" ]; then
-	    [[ -n "${ExecStop}" ]] && ${ExecStop} ${StopArgs}
-	    [[ -z "${ExecStop}" ]] && kill $pid
-	    for ((i=1;i<=5;i++));
-	    do
-	      _pid
-	      if [ -n "$pid" ]; then
-	        echo -n -e "\e[00;31mWaiting for the program to exit\e[00m\n";
-	        sleep 3
-	      else
-	        echo -e "\e[00;32m${Name} stopped successfully\e[00m" && break
-	      fi
-	    done
 	    _pid
-	    if [ -n "$pid" ]; then
-	        kill -9 $pid && echo -e "\033[0;33m${Name} process is being forced to shutdown...(pid:$pid)\e[00m"
+	    if [[ -n "$pid" ]]; then
+	        [[ -n "${ExecStop}" ]] && ${ExecStop} ${StopArgs}
+	        [[ -z "${ExecStop}" ]] && kill $pid
+	        for ((i=1;i<=5;i++));
+	        do
+	            _pid
+	            if [ -n "$pid" ]; then
+	                echo -n -e "\e[00;31mWaiting for the program to exit\e[00m\n";
+	                sleep 3
+	            else
+	                echo -e "\e[00;32m${Name} stopped successfully\e[00m" && break
+	            fi
+	        done
+	        _pid
+	        if [[ -n "$pid" ]]; then
+	            kill -9 $pid && echo -e "\033[0;33m${Name} process is being forced to shutdown...(pid:$pid)\e[00m"
+	        fi
+	    else
+	        echo -e "\e[00;31m${Name} is not running\e[00m"
 	    fi
-	  else
-	    echo -e "\e[00;31m${Name} is not running\e[00m"
-	  fi
 	}
 
 	_status(){
-	  _pid
-		  if [ -n "$pid" ]; then
-		    echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
-		  else 
+	    _pid
+	    if [ -n "$pid" ]; then
+	        echo -e "\e[00;32m${Name} is running with pid: $pid\e[00m"
+		else 
 		    echo -e "\e[00;31m${Name} is not running\e[00m"
-		  fi
-		}
-		_usage(){
-		  echo -e "Usage: $0 {\e[00;32mstart\e[00m|\e[00;31mstop\e[00m|\e[00;32mstatus\e[00m|\e[00;31mrestart\e[00m}"
-		}
-		case $1 in
+		fi
+	}
+	_usage(){
+	    echo -e "Usage: $0 {\e[00;32mstart\e[00m|\e[00;31mstop\e[00m|\e[00;32mstatus\e[00m|\e[00;31mrestart\e[00m}"
+	}
+	case $1 in
 	    start)
 	    _start
 	    ;;
@@ -694,11 +697,16 @@ service_control(){
 	fi
 
 	if [[ ${os_release} < '7' ]];then
-		service ${service_name} ${arg}
-		if [[ $? = '0' ]];then
-			success_log "service ${service_name} ${arg} 操作完成"
+		if [[ ${arg} = 'enable' ]];then
+			chkconfig --add ${service_name}
+			chkconfig ${service_name} on
 		else
-			error_log "service ${service_name} ${arg} 操作失败"
+			service ${service_name} ${arg}
+			if [[ $? = '0' ]];then
+				success_log "service ${service_name} ${arg} 操作完成"
+			else
+				error_log "service ${service_name} ${arg} 操作失败"
+			fi
 		fi
 	fi
 

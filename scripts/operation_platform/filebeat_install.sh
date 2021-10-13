@@ -143,6 +143,9 @@ add_filebeat_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/filebeat.service
 		add_system_service filebeat ${home_dir}/filebeat.service
+		service_control filebeat enable
+		service_control filebeat restart
+
 	fi
 }
 

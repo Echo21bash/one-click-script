@@ -16,5 +16,5 @@ elk_install_ctl(){
 	fi
 	if [[ ${elk_module[@]} =~ 'filebeat' ]];then
 		filebeat_install_ctl
-	fi	
+	fi
 }

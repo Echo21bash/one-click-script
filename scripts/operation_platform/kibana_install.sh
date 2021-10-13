@@ -53,6 +53,8 @@ add_kibana_service(){
 	ExecStart="${home_dir}/bin/kibana"
 	add_daemon_file ${home_dir}/kibana.service
 	add_system_service kibana ${home_dir}/kibana.service
+	service_control kibana enable
+	service_control kibana restart
 }
 
 kibana_readme(){

@@ -104,7 +104,6 @@ elasticsearch_install(){
 				if [[ ${version_number} > '6' ]];then
 					JAVA_HOME=${home_dir}/jdk
 				fi
-				add_elasticsearch_service
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
 				useradd -M elasticsearch
 				mkdir -p ${install_dir}/elasticsearch-node${service_id}
@@ -275,6 +274,8 @@ add_elasticsearch_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		add_daemon_file ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
+		service_control elasticsearch enable
+		service_control elasticsearch restart
 	fi
 }
 
