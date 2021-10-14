@@ -11,8 +11,8 @@ env_load(){
 	local i=0
 	for host in ${host_ip[@]};
 	do
-	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/root
-	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/root
+	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
+	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/tmp
 	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
 	br_netfilter
@@ -37,11 +37,11 @@ env_load(){
 	net.bridge.bridge-nf-call-arptables = 1
 	EOF
 	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
-	. /root/public.sh
-	. /root/system_optimize.sh
+	. /tmp/public.sh
+	. /tmp/system_optimize.sh
 	system_optimize_set
 	yum install bash-completion ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
-	rm -rf /root/public.sh /root/system_optimize.sh"
+	rm -rf /tmp/public.sh /tmp/system_optimize.sh"
 	((i++))
 	done
 	
@@ -52,7 +52,7 @@ env_load(){
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			curl -Ls -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 			yum install -y docker-ce && mkdir /etc/docker"
-			scp -P ${ssh_port[i]} ${workdir}/config/k8s/daemon.json root@${host}:/etc/docker/daemon.json
+			scp -P ${ssh_port[i]} ${workdir}/config/docker/daemon.json root@${host}:/etc/docker/daemon.json
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "systemctl start docker && systemctl enable docker"
 		fi
 		((i++))
@@ -70,19 +70,19 @@ install_cfssl(){
 create_ca(){
 	for ip in ${etcd_ip[*]}
 	do
-		[[ -z `grep ${ip} ${workdir}/config/k8s/etcd-csr.json` ]] && sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/etcd-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/certs/etcd-csr.json` ]] && sed -i "/"127.0.0.1"/i\    \"${ip}\"," ${workdir}/config/k8s/certs/etcd-csr.json
 	done
 	
 	for ip in ${master_ip[*]}
 	do
-		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-		[[ -z `grep ${ip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-		[[ -z `grep ${ip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/certs/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/certs/kube-scheduler-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/certs/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${ip}\"," ${workdir}/config/k8s/certs/kube-controller-manager-csr.json
+		[[ -z `grep ${ip} ${workdir}/config/k8s/certs/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${ip}\"," ${workdir}/config/k8s/certs/kubernetes-csr.json
 		
 		if [[ -n ${vip} ]];then
-			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-scheduler-csr.json
-			[[ -z `grep ${vip} ${workdir}/config/k8s/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/kube-controller-manager-csr.json
-			[[ -z `grep ${vip} ${workdir}/config/k8s/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/kubernetes-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/certs/kube-scheduler-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/certs/kube-scheduler-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/certs/kube-controller-manager-csr.json` ]] && sed -i "/\"127.0.0.1\"/i\    \"${vip}\"," ${workdir}/config/k8s/certs/kube-controller-manager-csr.json
+			[[ -z `grep ${vip} ${workdir}/config/k8s/certs/kubernetes-csr.json` ]] && sed -i "/\"127.0.0.1\",/i\    \"${vip}\"," ${workdir}/config/k8s/certs/kubernetes-csr.json
 		fi
 
 	done
@@ -91,14 +91,14 @@ create_ca(){
 	
 	cd ${tmp_dir}/ssl
 	info_log "正在创建所需的证书......"
-	cfssl gencert -initca ${workdir}/config/k8s/ca-csr.json | cfssljson -bare ca -
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/etcd-csr.json | cfssljson -bare etcd
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/admin-csr.json | cfssljson -bare admin
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kubernetes-csr.json | cfssljson -bare kubernetes
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-scheduler-csr.json | cfssljson -bare kube-scheduler
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/kube-proxy-csr.json | cfssljson -bare kube-proxy
-	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/ca-config.json -profile=kubernetes ${workdir}/config/k8s/proxy-client-csr.json | cfssljson -bare proxy-client
+	cfssl gencert -initca ${workdir}/config/k8s/certs/ca-csr.json | cfssljson -bare ca -
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/etcd-csr.json | cfssljson -bare etcd
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/admin-csr.json | cfssljson -bare admin
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/kubernetes-csr.json | cfssljson -bare kubernetes
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/kube-proxy-csr.json | cfssljson -bare kube-proxy
+	cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=${workdir}/config/k8s/certs/ca-config.json -profile=kubernetes ${workdir}/config/k8s/certs/proxy-client-csr.json | cfssljson -bare proxy-client
 	cd ..
 }
 
@@ -197,39 +197,39 @@ get_etcd_cluster_ip(){
 }
 
 add_system(){
-	init_dir=${tmp_dir}
+
 	##etcd
 	Type="notify"
 	ExecStart="${etcd_dir}/bin/etcd --config-file=${etcd_dir}/cfg/etcd.yml"
-	add_daemon_file ${tmp_dir}/etcd_init
+	add_daemon_file ${tmp_dir}/etcd.service
 
 	##apiserver
 	ExecStartPost=
 	Type="notify"
 	EnvironmentFile="${k8s_dir}/cfg/kube-apiserver"
 	ExecStart="${k8s_dir}/bin/kube-apiserver \$KUBE_APISERVER_OPTS"
-	add_daemon_file ${tmp_dir}/apiserver_init
+	add_daemon_file ${tmp_dir}/kube-apiserver.service
 	##scheduler
 	Type="simple"
 	EnvironmentFile="${k8s_dir}/cfg/kube-scheduler"
 	ExecStart="${k8s_dir}/bin/kube-scheduler \$KUBE_SCHEDULER_OPTS"
-	add_daemon_file ${tmp_dir}/scheduler_init
+	add_daemon_file ${tmp_dir}/kube-scheduler.service
 	##controller
 	Requires='kube-apiserver.service'
 	Type="simple"
 	EnvironmentFile="${k8s_dir}/cfg/kube-controller-manager"
 	ExecStart="${k8s_dir}/bin/kube-controller-manager \$KUBE_CONTROLLER_MANAGER_OPTS"
-	add_daemon_file ${tmp_dir}/controller_init
+	add_daemon_file ${tmp_dir}/kube-controller-manager.service
 	##proxy
 	Type="simple"
 	EnvironmentFile="${k8s_dir}/cfg/kube-proxy"
 	ExecStart="${k8s_dir}/bin/kube-proxy \$KUBE_PROXY_OPTS"
-	add_daemon_file ${tmp_dir}/proxy_init
+	add_daemon_file ${tmp_dir}/kube-proxy.service
 	##proxy
 	Type="simple"
 	EnvironmentFile="${k8s_dir}/cfg/kubelet"
 	ExecStart="${k8s_dir}/bin/kubelet \$KUBELET_OPTS"
-	add_daemon_file ${tmp_dir}/kubelet_init
+	add_daemon_file ${tmp_dir}/kubelet.service
 
 }
 
@@ -266,7 +266,7 @@ install_before_conf(){
 	else
 		api_service_ip="https://${master_ip}:6443"
 	fi
-	sed -i -e "s?192.168.0.0/16?10.244.0.0/16?g" ${workdir}/config/k8s/calico.yaml
+	sed -i -e "s?192.168.0.0/16?10.244.0.0/16?g" ${workdir}/config/k8s/yml/calico.yaml
 	token_pub=$(openssl rand -hex 3)
 	token_secret=$(openssl rand -hex 8)
 	bootstrap_token="${token_pub}.${token_secret}"
@@ -416,12 +416,8 @@ master_node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem,proxy-client.pem,proxy-client-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/{auto-approve-node.yml,calico.yaml,corends.yaml}  root@${host}:${k8s_dir}/yml
-			scp  -P ${ssh_port[i]} ${tmp_dir}/apiserver_init root@${host}:/etc/systemd/system/kube-apiserver.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/scheduler_init root@${host}:/etc/systemd/system/kube-scheduler.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/controller_init root@${host}:/etc/systemd/system/kube-controller-manager.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver.service,kube-scheduler.service,kube-controller-manager.service,kube-proxy.service,kubelet.service} root@${host}:/etc/systemd/system
+			scp  -P ${ssh_port[i]} ${workdir}/config/k8s/yml/{auto-approve-node.yml,calico.yaml,corends.yaml}  root@${host}:${k8s_dir}/yml
 			info_log "正在生成主节点${host_ip[i]}kubeconfig配置文件..."
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
@@ -558,8 +554,7 @@ work_node_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/proxy_init root@${host}:/etc/systemd/system/kube-proxy.service
-			scp  -P ${ssh_port[i]} ${tmp_dir}/kubelet_init root@${host}:/etc/systemd/system/kubelet.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/{kube-proxy.service,kubelet.service} root@${host}:/etc/systemd/system
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			#创建kube-proxy.kubeconfig

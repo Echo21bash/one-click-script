@@ -13,5 +13,5 @@ docker_install_ctl(){
 		chmod +x /usr/local/bin/docker-compose
 	fi
 	mkdir /etc/docker
-	\cp ${workdir}/config/k8s/daemon.json /etc/docker
+	\cp ${workdir}/config/docker/daemon.json /etc/docker
 }
