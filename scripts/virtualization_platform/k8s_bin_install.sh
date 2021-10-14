@@ -166,7 +166,7 @@ etcd_check(){
 	for host in ${host_ip[@]};
 	do
 		if [[ ${host} = "${etcd_ip[0]}" ]];then
-			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "/opt/etcd/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
+			healthy=`ssh ${host_ip[$i]} -p ${ssh_port[$i]} "${etcd_dir}/bin/etcdctl --ca-file=${etcd_dir}/ssl/ca.pem --cert-file=${etcd_dir}/ssl/etcd.pem --key-file=${etcd_dir}/ssl/etcd-key.pem --endpoints="https://${etcd_ip}:2379" cluster-health" | grep 'cluster is healthy' | wc -l`
 			if [[ ${healthy} = '1' ]];then
 				info_log "etcd集群状态正常"
 			else
