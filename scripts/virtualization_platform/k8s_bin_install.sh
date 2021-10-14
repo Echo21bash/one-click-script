@@ -413,7 +413,7 @@ master_node_install_ctl(){
 			kubelet_conf
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
-			hostnamectl set-hostname k8s-worker${j}
+			hostnamectl set-hostname k8s-master${j}
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			info_log "正在向主节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
@@ -684,10 +684,10 @@ culster_other_conf(){
 			"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			#给节点打标签
-			${k8s_dir}/bin/kubectl label node ${master_ip[@]} node-role.kubernetes.io/master=""
-			${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/master=""
+			${k8s_dir}/bin/kubectl get node | grep work | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node ${node_ip[@]} node-role.kubernetes.io/node=""
 			#配置master节点禁止部署
-			${k8s_dir}/bin/kubectl taint nodes ${master_ip[@]} node-role.kubernetes.io/master=:NoExecute
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl taint nodes ${master_ip[@]} node-role.kubernetes.io/master=:NoExecute
 			"
 		fi
 		((i++))
