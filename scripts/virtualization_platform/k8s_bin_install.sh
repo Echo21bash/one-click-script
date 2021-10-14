@@ -11,6 +11,7 @@ env_load(){
 	local i=0
 	for host in ${host_ip[@]};
 	do
+	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/tmp
 	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
@@ -36,6 +37,7 @@ env_load(){
 	net.bridge.bridge-nf-call-arptables = 1
 	EOF
 	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
+	. /tmp/public.sh
 	. /tmp/system_optimize.sh
 	system_optimize_set
 	yum install bash-completion ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
@@ -418,7 +420,6 @@ master_node_install_ctl(){
 			controller_manager_conf
 			kubelet_conf
 			proxy_conf
-			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
 			[[ `service_control kube-apiserver is-exist` = 'exist' ]] && service_control kube-apiserver stop
@@ -577,7 +578,6 @@ work_node_install_ctl(){
 			hostname="k8s-worker${j}"
 			kubelet_conf
 			proxy_conf
-			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
 			[[ `service_control kube-proxy is-exist` = 'exist' ]] && service_control kube-proxy stop
