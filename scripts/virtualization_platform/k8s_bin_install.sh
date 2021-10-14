@@ -246,7 +246,7 @@ etcd_install_ctl(){
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
 			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
 			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd_init root@${host}:/etc/systemd/system/etcd.service
+			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.service root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			systemctl daemon-reload
 			systemctl enable etcd"
