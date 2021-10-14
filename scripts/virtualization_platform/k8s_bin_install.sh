@@ -716,10 +716,10 @@ culster_other_conf(){
 			"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			#给节点打标签
-			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/master=""
-			${k8s_dir}/bin/kubectl get node | grep work | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/node=""
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/master=""
+			${k8s_dir}/bin/kubectl get node | grep work | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/node=""
 			#配置master节点禁止部署
-			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl taint nodes {} node-role.kubernetes.io/master=:NoExecute
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl taint nodes {} node-role.kubernetes.io/master=:NoExecute
 			"
 		fi
 		((i++))

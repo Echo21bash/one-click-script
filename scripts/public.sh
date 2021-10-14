@@ -213,7 +213,6 @@ sys_info(){
 	else
 		network_status="${red}disconnected${plain}"
 	fi
-	diy_echo "Your machine is:${sys_name}"-"${release_all}"-"${os_bit}-bit.\n${info} The kernel version is:${kel}.\n${info} Network status:${network_status}" "" "${info}"
 	[[ ${sys_name} = "red-hat" ]] && sys_name="Centos"
 
 }
@@ -728,9 +727,9 @@ service_control(){
 			systemctl daemon-reload
 			systemctl ${arg} ${service_name}
 			if [[ $? = '0' ]];then
-				success_log "service ${service_name} ${arg} 操作完成"
+				success_log "systemctl ${service_name} ${arg} 操作完成"
 			else
-				error_log "service ${service_name} ${arg} 操作失败"
+				error_log "systemctl ${service_name} ${arg} 操作失败"
 			fi
 		fi
 	fi
@@ -753,3 +752,4 @@ add_sys_env(){
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
 colour_keyword
+sys_info
