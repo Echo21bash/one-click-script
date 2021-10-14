@@ -740,7 +740,6 @@ clean_tmpfile(){
 	for host in ${host_ip[@]};
 	do
 		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "rm -rf /tmp/public.sh /tmp/system_optimize.sh"
-		fi
 		((i++))
 	done
 }
