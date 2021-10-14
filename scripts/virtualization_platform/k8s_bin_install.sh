@@ -11,6 +11,7 @@ env_load(){
 	local i=0
 	for host in ${host_ip[@]};
 	do
+	scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 	scp -P ${ssh_port[i]} ${workdir}/scripts/other/system_optimize.sh root@${host}:/tmp
 	ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 	cat >/etc/modules-load.d/10-k8s-modules.conf<<-EOF
@@ -36,10 +37,11 @@ env_load(){
 	net.bridge.bridge-nf-call-arptables = 1
 	EOF
 	sysctl -p /etc/sysctl.d/95-k8s-sysctl.conf >/dev/null
+	. /tmp/public.sh
 	. /tmp/system_optimize.sh
 	system_optimize_set
 	yum install bash-completion ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
-	rm -rf /tmp/system_optimize.sh"
+	"
 	((i++))
 	done
 	
@@ -152,8 +154,7 @@ etcd_start(){
 		if [[ "${etcd_ip[@]}" =~ ${host} ]];then
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
-			service_control etcd restart
-			rm -rf /tmp/public.sh" &
+			service_control etcd restart" &
 		fi
 		((i++))
 	done
@@ -243,17 +244,17 @@ etcd_install_ctl(){
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			. /tmp/public.sh
+			[[ `service_control etcd is-exist` = 'exist' ]] && service_control etcd stop
+			rm -rf ${etcd_data_dir}/*
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
 			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
-			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
-			scp  -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
-			scp  -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
-			scp  -P ${ssh_port[i]} ${tmp_dir}/etcd.service root@${host}:/etc/systemd/system/etcd.service
+			scp -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin
+			scp -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
+			scp -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
+			scp -P ${ssh_port[i]} ${tmp_dir}/etcd.service root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
-			service_exist=`service_control etcd is-exist`
-			[[ \${service_exist} = 'exist' ]] && service_control etcd stop
-			rm -rf ${etcd_data_dir}/*
 			service_control etcd enable
 			"
 			((j++))
@@ -422,14 +423,13 @@ master_node_install_ctl(){
 			. /tmp/public.sh
 			[[ `service_control kube-apiserver is-exist` = 'exist' ]] && service_control kube-apiserver stop
 			[[ `service_control kube-scheduler is-exist` = 'exist' ]] && service_control kube-scheduler stop
-			[[ `service_control kube-controller-manager is-exist` = 'exist' ]] && service_control kube-scheduler stop
+			[[ `service_control kube-controller-manager is-exist` = 'exist' ]] && service_control kube-controller-manager stop
 			[[ `service_control kube-proxy is-exist` = 'exist' ]] && service_control kube-proxy stop
 			[[ `service_control kubelet is-exist` = 'exist' ]] && service_control kubelet stop
-			rm -rf ${k8s_dir}/*
+			rm -rf ${k8s_dir}/ssl/*
 			hostnamectl set-hostname k8s-master${j}
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			info_log "正在向主节点${host_ip[i]}分发k8s程序及配置文件..."
-			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 			scp -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
 			scp -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem,proxy-client.pem,proxy-client-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -551,15 +551,14 @@ master_node_install_ctl(){
 
 			service_control kube-apiserver enable
 			service_control kube-scheduler enable
-			service_control kube-scheduler enable
+			service_control kube-controller-manager enable
 			service_control kube-proxy enable
 			service_control kubelet enable
 			service_control kube-apiserver restart
 			service_control kube-scheduler restart
-			service_control kube-scheduler restart
+			service_control kube-controller-manager restart
 			service_control kube-proxy restart
 			service_control kubelet restart
-			rm -rf /tmp/public.sh
 			"
 			((j++))
 		fi
@@ -581,11 +580,10 @@ work_node_install_ctl(){
 			. /tmp/public.sh
 			[[ `service_control kube-proxy is-exist` = 'exist' ]] && service_control kube-proxy stop
 			[[ `service_control kubelet is-exist` = 'exist' ]] && service_control kubelet stop
-			rm -rf ${k8s_dir}/*
+			rm -rf ${k8s_dir}/ssl/*
 			hostnamectl set-hostname k8s-worker${j}
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			info_log "正在向工作节点${host_ip[i]}分发k8s程序及配置文件..."
-			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
 			scp -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
 			scp -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kube-proxy.pem,kube-proxy-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
@@ -640,7 +638,6 @@ work_node_install_ctl(){
 			service_control kubelet enable
 			service_control kube-proxy restart
 			service_control kubelet restart
-			rm -rf /tmp/public.sh
 			"
 			((j++))
 		fi
@@ -716,10 +713,10 @@ culster_other_conf(){
 			"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			#给节点打标签
-			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/master=""
-			${k8s_dir}/bin/kubectl get node | grep work | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/node=""
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/master=""
+			${k8s_dir}/bin/kubectl get node | grep work | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl label node {} node-role.kubernetes.io/node=""
 			#配置master节点禁止部署
-			${k8s_dir}/bin/kubectl get node | grep master | awk '{print$1}' | xargs -I {} ${k8s_dir}/bin/kubectl taint nodes {} node-role.kubernetes.io/master=:NoExecute
+			${k8s_dir}/bin/kubectl get node | grep master | awk '{print\$1}' | xargs -I {} ${k8s_dir}/bin/kubectl taint nodes {} node-role.kubernetes.io/master=:NoExecute
 			"
 		fi
 		((i++))
@@ -738,6 +735,15 @@ culster_other_conf(){
 	done
 }
 
+clean_tmpfile(){
+	local i=0
+	for host in ${host_ip[@]};
+	do
+		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "rm -rf /tmp/public.sh /tmp/system_optimize.sh"
+		((i++))
+	done
+}
+
 k8s_bin_install(){
 	env_load
 	install_cfssl
@@ -751,4 +757,5 @@ k8s_bin_install(){
 	culster_bootstrap_conf
 	work_node_install_ctl
 	culster_other_conf
+	clean_tmpfile
 }
