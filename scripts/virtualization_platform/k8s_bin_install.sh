@@ -41,7 +41,7 @@ env_load(){
 	. /tmp/system_optimize.sh
 	system_optimize_set
 	yum install bash-completion ipvsadm ipset jq conntrack libseccomp conntrack-tools socat -y
-	rm -rf /tmp/system_optimize.sh"
+	"
 	((i++))
 	done
 	
@@ -154,8 +154,7 @@ etcd_start(){
 		if [[ "${etcd_ip[@]}" =~ ${host} ]];then
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
-			service_control etcd restart
-			rm -rf /tmp/public.sh" &
+			service_control etcd restart" &
 		fi
 		((i++))
 	done
@@ -560,7 +559,6 @@ master_node_install_ctl(){
 			service_control kube-controller-manager restart
 			service_control kube-proxy restart
 			service_control kubelet restart
-			rm -rf /tmp/public.sh
 			"
 			((j++))
 		fi
@@ -640,7 +638,6 @@ work_node_install_ctl(){
 			service_control kubelet enable
 			service_control kube-proxy restart
 			service_control kubelet restart
-			rm -rf /tmp/public.sh
 			"
 			((j++))
 		fi
@@ -738,6 +735,16 @@ culster_other_conf(){
 	done
 }
 
+clean_tmpfile(){
+	local i=0
+	for host in ${host_ip[@]};
+	do
+		ssh ${host_ip[$i]} -p ${ssh_port[$i]} "rm -rf /tmp/public.sh /tmp/system_optimize.sh"
+		fi
+		((i++))
+	done
+}
+
 k8s_bin_install(){
 	env_load
 	install_cfssl
@@ -751,4 +758,5 @@ k8s_bin_install(){
 	culster_bootstrap_conf
 	work_node_install_ctl
 	culster_other_conf
+	clean_tmpfile
 }
