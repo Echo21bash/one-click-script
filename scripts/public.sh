@@ -207,7 +207,7 @@ sys_info(){
 	total_core=`cat /proc/cpuinfo | grep "processor"| wc -l`	
 	#内核版本
 	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
-	http_code=`curl --connect-timeout 3 -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
+	http_code=`timeout 3 curl --connect-timeout 3 -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
 	if [ ${http_code} = '200' ];then
 		network_status="${green}connected${plain}"
 	else
