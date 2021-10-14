@@ -362,7 +362,7 @@ kubelet_conf(){
 	cat > ${tmp_dir}/conf/kubelet <<-EOF
 	KUBELET_OPTS="--logtostderr=true \\
 	--v=2 \\
-	--hostname-override=${host_ip[$i]} \\
+	--hostname-override=${hostname} \\
 	--config=${k8s_dir}/cfg/kubelet.yml \\
 	--kubeconfig=${k8s_dir}/cfg/kubelet.kubeconfig \\
 	--bootstrap-kubeconfig=${k8s_dir}/cfg/bootstrap.kubeconfig \\
@@ -383,7 +383,7 @@ proxy_conf(){
 		cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 		KUBE_PROXY_OPTS="--logtostderr=true \\
 		--v=2 \\
-		--hostname-override=${host_ip[$i]} \\
+		--hostname-override=${hostname} \\
 		--proxy-mode=ipvs \\
 		--cluster-cidr=10.244.0.0/16 \\
 		--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
@@ -392,7 +392,7 @@ proxy_conf(){
 		cat > ${tmp_dir}/conf/kube-proxy  <<-EOF
 		KUBE_PROXY_OPTS="--logtostderr=true \\
 		--v=2 \\
-		--hostname-override=${host_ip[$i]} \\
+		--hostname-override=${hostname} \\
 		--cluster-cidr=10.244.0.0/16 \\
 		--kubeconfig=${k8s_dir}/cfg/kube-proxy.kubeconfig"
 		EOF
@@ -402,15 +402,18 @@ proxy_conf(){
 master_node_install_ctl(){
 	
 	local i=0
+	local j=1
 	for host in ${host_ip[@]};
 	do
 		if [[ "${master_ip[@]}" =~ ${host} ]];then
+			hostname="k8s-master${j}"
 			apiserver_conf
 			scheduler_conf
 			controller_manager_conf
 			kubelet_conf
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			hostnamectl set-hostname k8s-worker${j}
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl,yml}"
 			info_log "正在向主节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-apiserver,kube-scheduler,kube-controller-manager,kubectl,kubelet,kube-proxy} root@${host}:${k8s_dir}/bin
@@ -535,6 +538,7 @@ master_node_install_ctl(){
 			systemctl restart kube-apiserver kube-scheduler kube-controller-manager && systemctl enable kube-apiserver kube-scheduler kube-controller-manager
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			"
+			((j++))
 		fi
 		((i++))
 	done
@@ -543,12 +547,15 @@ master_node_install_ctl(){
 
 work_node_install_ctl(){
 	local i=0
+	local j=1
 	for host in ${host_ip[@]};
 	do
 		if [[ "${node_ip[@]}" =~ ${host} ]];then
+			hostname="k8s-worker${j}"
 			kubelet_conf
 			proxy_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			hostnamectl set-hostname k8s-worker${j}
 			mkdir -p ${k8s_dir}/{bin,cfg,ssl}"
 			info_log "正在向工作节点${host_ip[i]}分发k8s程序及配置文件..."
 			scp  -P ${ssh_port[i]} ${tmp_dir}/soft/kubernetes/server/bin/{kube-proxy,kubelet,kubectl} root@${host}:${k8s_dir}/bin
@@ -603,6 +610,7 @@ work_node_install_ctl(){
 			
 			systemctl restart kube-proxy kubelet && systemctl enable kube-proxy kubelet
 			"
+			((j++))
 		fi
 		((i++))
 	done
