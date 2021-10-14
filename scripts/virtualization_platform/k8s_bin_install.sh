@@ -244,17 +244,17 @@ etcd_install_ctl(){
 		if [[ ${etcd_ip[@]} =~ ${host} ]];then
 			etcd_conf
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
+			. /tmp/public.sh
+			[[ `service_control etcd is-exist` = 'exist' ]] && service_control etcd stop
+			rm -rf ${etcd_data_dir}/*
 			mkdir -p ${etcd_dir}/{bin,cfg,ssl}"
 			scp -P ${ssh_port[i]} ${workdir}/scripts/public.sh root@${host}:/tmp
-			scp -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin/
+			scp -P ${ssh_port[i]} ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64/{etcd,etcdctl} root@${host}:${etcd_dir}/bin
 			scp -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,etcd.pem,etcd-key.pem}  root@${host}:${etcd_dir}/ssl
 			scp -P ${ssh_port[i]} ${tmp_dir}/conf/etcd.yml  root@${host}:${etcd_dir}/cfg
 			scp -P ${ssh_port[i]} ${tmp_dir}/etcd.service root@${host}:/etc/systemd/system/etcd.service
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
-			service_exist=`service_control etcd is-exist`
-			[[ \${service_exist} = 'exist' ]] && service_control etcd stop
-			rm -rf ${etcd_data_dir}/*
 			service_control etcd enable
 			"
 			((j++))
