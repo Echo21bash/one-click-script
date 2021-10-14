@@ -690,6 +690,7 @@ add_system_service(){
 service_control(){
 	#$1守护进程名称
 	#$2操作指令
+	
 	service_name=$1
 	arg=$2
 	if [[ "x${service_name}" = "x" || "x${arg}" = "x" ]];then
@@ -700,6 +701,12 @@ service_control(){
 		if [[ ${arg} = 'enable' ]];then
 			chkconfig --add ${service_name}
 			chkconfig ${service_name} on
+		elif [[ ${arg} = 'is-exist' ]];then
+			if [[ -f /etc/init.d/${service_name} ]];then
+				echo exist
+			else
+				echo noexist
+			fi
 		else
 			service ${service_name} ${arg}
 			if [[ $? = '0' ]];then
@@ -711,12 +718,20 @@ service_control(){
 	fi
 
 	if [[  ${os_release} > '6' ]];then
-		systemctl daemon-reload
-		systemctl ${arg} ${service_name}
-		if [[ $? = '0' ]];then
-			success_log "service ${service_name} ${arg} 操作完成"
+		if [[ ${arg} = 'is-exist' ]];then
+			if [[ -f /etc/systemd/system/${service_name}.service || -f /usr/lib/systemd/system/${service_name}.service ]];then
+				echo exist
+			else
+				echo noexist
+			fi
 		else
-			error_log "service ${service_name} ${arg} 操作失败"
+			systemctl daemon-reload
+			systemctl ${arg} ${service_name}
+			if [[ $? = '0' ]];then
+				success_log "service ${service_name} ${arg} 操作完成"
+			else
+				error_log "service ${service_name} ${arg} 操作失败"
+			fi
 		fi
 	fi
 
@@ -738,4 +753,3 @@ add_sys_env(){
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
 colour_keyword
-sys_info
