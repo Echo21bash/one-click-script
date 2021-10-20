@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 openldap_env_load(){
 	tmp_dir=/usr/local/src/openldap_tmp

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 php_env_load(){
 	

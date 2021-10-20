@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ftp_install_set(){
 	input_option '是否快速配置vsftp服务' 'y' 'vsftp'

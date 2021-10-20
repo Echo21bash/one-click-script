@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 node_env_load(){
 	tmp_dir=/usr/local/src/node_tmp

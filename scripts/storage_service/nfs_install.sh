@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 nfs_install_ctl(){
 	input_option "请输入要共享的目录:" "/data/nfs" "nfs_dir"

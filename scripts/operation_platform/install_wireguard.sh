@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 wireguard_env_check(){
 	if [[ ${os_release} < '7' ]];then

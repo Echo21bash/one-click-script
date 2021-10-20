@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 docker_install_ctl(){
 

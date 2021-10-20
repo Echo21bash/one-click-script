@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 redis_env_load(){
 	tmp_dir=/usr/local/src/redis_tmp

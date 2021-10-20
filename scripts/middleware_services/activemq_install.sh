@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 activemq_env_load(){
 	
 	tmp_dir=/usr/local/src/activemq_tmp

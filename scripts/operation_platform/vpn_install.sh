@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 vpn_install_ctl(){
 	

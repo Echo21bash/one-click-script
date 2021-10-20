@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 minio_env_load(){
 

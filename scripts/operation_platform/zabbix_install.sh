@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 zabbix_env_load(){
 	tmp_dir=/usr/local/src/zabbix_tmp

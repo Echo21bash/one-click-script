@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 zookeeper_env_load(){
 	

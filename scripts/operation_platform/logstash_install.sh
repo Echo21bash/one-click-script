@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 logstash_env_load(){
 	tmp_dir=/usr/local/src/logstash_tmp

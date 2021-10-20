@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 openssh_env_load(){
 	tmp_dir=/usr/local/src/openssh_tmp
 	mkdir -p ${tmp_dir}

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 elk_install_ctl(){
 	diy_echo "为了兼容性所有组件最好选择一样的版本" "${yellow}" "${info}"

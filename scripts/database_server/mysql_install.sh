@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 mysql_env_load(){
 	tmp_dir=/usr/local/src/mysql_tmp

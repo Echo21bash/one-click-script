@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 ###########################################################
 #System Required: Centos 6+
 #Description: Install the java tomcat mysql and tools
@@ -512,6 +513,7 @@ add_daemon_sysvinit_file(){
 	system_service_config_file=$1
 	cat >${system_service_config_file}<<-EOF
 	#!/bin/bash
+set -e
 	# chkconfig: 345 70 60
 	# description: ${soft_name} daemon
 	# processname: ${soft_name}

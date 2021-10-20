@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 system_optimize_set(){
 

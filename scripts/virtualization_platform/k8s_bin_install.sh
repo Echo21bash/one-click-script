@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 env_load(){
 	vi ${workdir}/config/k8s/k8s.conf

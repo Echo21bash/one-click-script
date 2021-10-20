@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ruby_env_load(){
 	tmp_dir=/usr/local/src/ruby_tmp

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 filebeat_env_load(){
 	tmp_dir=/usr/local/src/filebeat_tmp

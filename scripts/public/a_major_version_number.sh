@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 select_version(){
 	if [[ -z ${program_version} ]];then
 		diy_echo "函数select_version缺少program_version变量" "${error}"

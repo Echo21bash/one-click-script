@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 
 all_version_general1(){

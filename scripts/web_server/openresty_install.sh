@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 openresty_env_load(){
 	tmp_dir=/usr/local/src/openresty_tmp

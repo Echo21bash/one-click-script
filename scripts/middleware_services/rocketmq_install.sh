@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 rocketmq_env_load(){
 	
 	tmp_dir=/usr/local/src/rocketmq_tmp

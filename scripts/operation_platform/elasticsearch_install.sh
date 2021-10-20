@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 elasticsearch_env_load(){
 	tmp_dir=/usr/local/src/elasticsearch_tmp

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 tomcat_env_load(){
 	tmp_dir=/usr/local/src/tomcat_tmp
