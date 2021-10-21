@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 k8s_set(){
 	output_option "选择节点类型" "master node" node_type

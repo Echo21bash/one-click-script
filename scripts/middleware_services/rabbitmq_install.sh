@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 rabbitmq_env_load(){
 	

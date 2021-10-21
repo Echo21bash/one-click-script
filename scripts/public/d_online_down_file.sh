@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 online_down_file(){
 
 	if [[ -n $1 ]];then

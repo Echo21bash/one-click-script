@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 rocketmq_env_load(){
 	

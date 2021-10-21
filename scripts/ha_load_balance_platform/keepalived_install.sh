@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 keepalived_env(){
 	warning_log "高可用vip通过vrrp协议实现，部分云服务器禁止vrrp协议"

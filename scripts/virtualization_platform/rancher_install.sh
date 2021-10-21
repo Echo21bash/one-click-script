@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 rancher_install_ctl(){
 	input_option "请输入访问端口" "8888" "port"

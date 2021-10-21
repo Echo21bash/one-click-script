@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 rhcs_install_set(){
 	input_option "输入集群名称" "ha_cluster" "cluster_name"

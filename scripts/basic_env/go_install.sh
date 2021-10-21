@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 go_env_load(){
 	tmp_dir=/usr/local/src/go_tmp

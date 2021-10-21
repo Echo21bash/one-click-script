@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 kibana_env_load(){
 	tmp_dir=/usr/local/src/kibana_tmp
 	soft_name=kibana

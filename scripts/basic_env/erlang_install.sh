@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 erlang_env_load(){
 	tmp_dir=/usr/local/src/erlang_tmp

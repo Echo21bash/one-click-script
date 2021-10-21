@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 java_env_load(){
 	tmp_dir=/usr/local/src/java_tmp

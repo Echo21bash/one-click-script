@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 sftp_install_ctl(){
 	add_sysuser

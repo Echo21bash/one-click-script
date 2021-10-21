@@ -1,18 +1,16 @@
 #!/bin/bash
-set -e
-
 
 all_version_general1(){
-	curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+	timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 }
 
 all_version_general2(){
-	curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
+	timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
 }
 	
 all_version_general3(){
-	curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+	timeout 3 curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
 
 }
 
@@ -23,16 +21,16 @@ all_version_other(){
 
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
+				timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
 
 			else
-				curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+				timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 			fi
 
 		;;
 		mongodb)
-			curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			timeout 3 curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 
 		;;
 
@@ -43,7 +41,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			curl --connect-timeout 3 -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 3 curl --connect-timeout 3 -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	

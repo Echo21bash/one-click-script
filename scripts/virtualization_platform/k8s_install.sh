@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 k8s_install_set(){
 

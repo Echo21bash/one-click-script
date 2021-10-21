@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 fastdfs_env_load(){
 

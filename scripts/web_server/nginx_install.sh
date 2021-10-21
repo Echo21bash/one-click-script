@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 nginx_env_load(){
 	tmp_dir=/usr/local/src/nginx_tmp

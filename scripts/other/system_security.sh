@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 system_security_set(){
 	###密码更改周期配置
@@ -38,7 +37,7 @@ system_security_set(){
 	###系统用户操作记录配置/var/log/bash_history.log
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
 	#!/bin/bash
-set -e
+
 	
 	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
 	export PROMPT_COMMAND='\

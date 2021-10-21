@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 greenplum_env_load(){
 	

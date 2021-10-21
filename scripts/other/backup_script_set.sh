@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 multi_function_backup_script_set(){
 	output_option "请选择需要备份的类型" "mysql dir svn" "back_type"

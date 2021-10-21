@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 anylink_env_load(){
 

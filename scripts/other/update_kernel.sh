@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 update_kernel(){
 	warning_log "请谨慎更新内核,需要重新系统"
 	output_option '选择升级kernel类型' '长期维护版 最新版' 'kernel_type'

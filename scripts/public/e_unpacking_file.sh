@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+
 unpacking_file(){
 	##$1 待解压文件路径 $2解压至目录
 	if [[ -n $1 ]];then
