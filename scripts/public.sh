@@ -214,7 +214,9 @@ sys_info(){
 	else
 		network_status="${red}disconnected${plain}"
 	fi
-	[[ ${sys_name} = "red-hat" ]] && sys_name="Centos"
+	if [[ ${sys_name} = "red-hat" ]];then
+		sys_name="Centos"
+	fi
 
 }
 
