@@ -105,14 +105,14 @@ output_option(){
 	last_option=${all_option[@]: -1}
 	#最后一个下标号
 	last_option_subscript=$((($len-1)))
-
+	#将选项转换为all_option数组
 	local i
 	local j
 	i=0
 	j=0
 	for item in ${all_option[@]}
 	do
-		if [[ $i -gt 0 && $i -lt $last_option_subscript ]];then
+		if [[ $i -gt 0 && $i -lt ${last_option_subscript} ]];then
 			#选项数组
 			item_option[$j]=${all_option[$i]}
 			((j++))
@@ -127,7 +127,7 @@ output_option(){
 	if [[ -z ${output} ]];then
 		output=1
 	fi
-
+	#将所选择的序号转换为数组output
 	output=(${output})
 	#选项总数
 	item_option_len=${#item_option[@]}
@@ -137,6 +137,8 @@ output_option(){
 		error_log "输入值存在非数字"
 		exit 1
 	fi
+
+	#将所选择的序号对应的值转换为数组output_value
 	#清空output_value
 	output_value=()
 	local k
