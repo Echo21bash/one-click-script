@@ -1,7 +1,7 @@
 #!/bin/bash
 
 all_version_general1(){
-	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/ >/dev/null 2>&1
 
 }
 
