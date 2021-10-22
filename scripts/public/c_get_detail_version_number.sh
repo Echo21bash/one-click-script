@@ -53,27 +53,27 @@ ver_rule_general(){
 	case "$soft_name" in
 		java)
 			if [[ ${version_number} -lt '9' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}u[0-9]{1,3}-b[0-9]{2}" | sort -uV >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -uV >${tmp_dir}/all_version
 			fi
 		;;
 		
 		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix|anylink|wireguard-ui)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}-[0-9.]{5,}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}-[0-9.]{5,}" | sort -uV >${tmp_dir}/all_version
 			fi
 		;;		
 		greenplum)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 		*|node|openresty|elasticsearch|logstash|kibana|filebeat)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 	esac
 
