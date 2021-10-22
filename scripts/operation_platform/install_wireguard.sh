@@ -61,7 +61,7 @@ wireguard_install(){
 }
 
 wireguard_config(){
-
+	get_ip
 	ip_forward=$(cat /etc/sysctl.conf | grep 'net.ipv4.ip_forward = 1')
 	if [[ -z ${ip_forward} ]];then
 		echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
@@ -69,18 +69,32 @@ wireguard_config(){
 	fi
 	\cp ${workdir}/config/wireguard/wg-reload.service /etc/systemd/system
 	\cp ${workdir}/config/wireguard/wg-reload.path /etc/systemd/system
-	service_control enable wg-reload.service wg-reload.path wg-quick@wg0
+	service_control wg-reload.service enable
+	service_control wg-reload.path enable
+	service_control wg-quick@wg0 enable
+	service_control wg-reload.service restart
+	service_control wg-reload.path restart
+	service_control wg-quick@wg0 restart
 }
 
 add_wireguard_ui_service(){
 	WorkingDirectory="${home_dir}"
 	ExecStart="${home_dir}/wireguard-ui"
-	add_daemon_file	${home_dir}/wgui.service
-	add_system_service wgui ${home_dir}/wgui.service
-	service_control wgui start
+	add_daemon_file	${home_dir}/wg-ui.service
+	add_system_service wg-ui ${home_dir}/wg-ui.service
+	service_control wg-ui enable
+	service_control wg-ui start
 
 }
 
+wireguard_readme(){
+	info_log "=====wireguard相关组件已经安装完成====="
+	info_log "wireguard-ui页面地址http://${local_ip}:5000 用户名密码均为admin"
+	info_log "wireguard-ui用户名密码均为admin"
+	info_log "服务启停命令如下"
+	service_control wg-ui usage
+	service_control wg-quick@wg0 usage
+}
 
 wireguard_install_ctl(){
 	wireguard_env_check

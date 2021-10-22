@@ -711,6 +711,8 @@ service_control(){
 			else
 				echo noexist
 			fi
+		elif [[ ${arg} = 'usage' ]];then
+			diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
 		else
 			service ${service_name} ${arg}
 			if [[ $? = '0' ]];then
@@ -728,6 +730,8 @@ service_control(){
 			else
 				echo noexist
 			fi
+		elif [[ ${arg} = 'usage' ]];then
+			diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
 		else
 			systemctl daemon-reload
 			systemctl ${arg} ${service_name}
