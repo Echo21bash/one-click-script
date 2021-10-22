@@ -115,7 +115,7 @@ fastdfs_config(){
 		sed -i "s#^port.*#port=${storage_port}#" ${home_dir}/etc/storage.conf
 		sed -i "s#^base_path.*#base_path=${data_dir}#" ${home_dir}/etc/storage.conf
 		sed -i "s#^store_path0.*#store_path0=${data_dir}#" ${home_dir}/etc/storage.conf
-		sed -i "s#^tracker_server.*#\#tracker_server=${local_ip}:22000#" ${home_dir}/etc/storage.conf
+		sed -i "s#^tracker_server.*#\tracker_server=${local_ip}:22000#" ${home_dir}/etc/storage.conf
 		if [[ ${fastdht_enable} = 'yes' ]];then
 			sed -i "s#^check_file_duplicate.*#check_file_duplicate=1#" ${home_dir}/etc/storage.conf
 			sed -i "/##include /home/yuqing/fastdht/a#include ${home_dir}/etc/fdht_servers.conf" ${home_dir}/etc/storage.conf
