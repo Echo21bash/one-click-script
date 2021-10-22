@@ -41,7 +41,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			timeout 5 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 10 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
