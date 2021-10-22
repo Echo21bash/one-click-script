@@ -95,8 +95,8 @@ fastdfs_config(){
 	cp ${home_dir}/etc/tracker.conf.sample ${home_dir}/etc/tracker.conf
 	cp ${home_dir}/etc/storage.conf.sample ${home_dir}/etc/storage.conf
 	cp ${home_dir}/etc/client.conf.sample ${home_dir}/etc/client.conf
-	cp ${tar_dir}/conf/http.conf ${home_dir}/etc
-	cp ${tar_dir}/conf/mime.types ${home_dir}/etc
+	cp ${tmp_dir}/fastdfs-${detail_version_number}/conf/http.conf ${home_dir}/etc
+	cp ${tmp_dir}/fastdfs-${detail_version_number}/conf/mime.types ${home_dir}/etc
 	cp ${workdir}/config/fastdfs/fastdfs_start.sh ${home_dir}/bin/start.sh && chmod +x ${home_dir}/bin/start.sh
 	get_ip
 
@@ -144,18 +144,18 @@ add_fastdfs_service(){
 	
 	Type="forking"
 	ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
-	PIDFile="${data_dir}/fdfs_trackerd.pid"
+	PIDFile="${data_dir}/data/fdfs_trackerd.pid"
 	add_daemon_file ${home_dir}/init
-	add_system_service fdfs_trackerd ${home_dir}/init
+	add_system_service fdfs-trackerd ${home_dir}/init
 
 	ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
-	PIDFile="${data_dir}/fdfs_storaged.pid"
+	PIDFile="${data_dir}/data/fdfs_storaged.pid"
 	add_daemon_file ${home_dir}/init
-	add_system_service fdfs_storaged ${home_dir}/init
+	add_system_service fdfs-storaged ${home_dir}/init
 
 	if [[ ${install_fastdht} = 'y' ]];then
 		ExecStart="${home_dir}/bin/fdhtd ${home_dir}/etc/fdhtd.conf start"
-		PIDFile="${data_dir}/fdhtd.pid.pid"
+		PIDFile="${data_dir}/data/fdhtd.pid.pid"
 		add_daemon_file ${home_dir}/init
 		add_system_service fdhtd ${home_dir}/init
 	fi
