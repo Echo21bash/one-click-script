@@ -4,7 +4,7 @@ kibana_env_load(){
 	tmp_dir=/usr/local/src/kibana_tmp
 	soft_name=kibana
 	program_version=('5' '6' '7')
-	url='https://mirrors.huaweicloud.com/kibana'
+	url='https://repo.huaweicloud.com/kibana'
 	select_version
 	install_dir_set
 	online_version

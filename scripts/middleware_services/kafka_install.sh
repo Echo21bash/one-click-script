@@ -6,7 +6,7 @@ kafka_env_load(){
 	mkdir -p ${tmp_dir}
 	soft_name=kafka
 	program_version=('2.1' '2.2' '2.3')
-	url='https://mirrors.huaweicloud.com/apache/kafka'
+	url='https://repo.huaweicloud.com/apache/kafka'
 	select_version
 	install_dir_set
 	online_version

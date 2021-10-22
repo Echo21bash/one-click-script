@@ -4,7 +4,7 @@ openresty_env_load(){
 	tmp_dir=/usr/local/src/openresty_tmp
 	soft_name=openresty
 	program_version=(1.13 1.14 1.15)
-	url="https://mirrors.huaweicloud.com/openresty"
+	url="https://repo.huaweicloud.com/openresty"
 	select_version
 	install_dir_set
 	online_version

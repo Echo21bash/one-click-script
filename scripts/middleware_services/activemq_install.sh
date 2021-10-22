@@ -6,7 +6,7 @@ activemq_env_load(){
 	mkdir -p ${tmp_dir}
 	soft_name=activemq
 	program_version=('5')
-	url='https://mirrors.huaweicloud.com/apache/activemq'
+	url='https://repo.huaweicloud.com/apache/activemq'
 	select_version
 	install_dir_set
 	online_version

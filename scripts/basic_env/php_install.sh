@@ -31,7 +31,7 @@ php_install_depend(){
 	yum  -y install gcc gcc-c++ autoconf openldap-devel libxml2 libxml2-devel bzip2 bzip2-devel libmcrypt libmcrypt-devel openssl openssl-devel libcurl-devel libjpeg-devel libpng-devel freetype-devel readline readline-devel libxslt-devel perl perl-devel psmisc.x86_64 recode recode-devel libtidy libtidy-devel sqlite-devel
 
 	#必要函数库
-	down_file https://mirrors.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ${tmp_dir}/libiconv-1.15.tar.gz
+	down_file https://repo.huaweicloud.com/gnu/libiconv/libiconv-1.15.tar.gz ${tmp_dir}/libiconv-1.15.tar.gz
 	cd ${tmp_dir} && tar zxf libiconv-1.15.tar.gz && cd libiconv-1.15 && ./configure --prefix=/usr && make && make install
 	cd ${tar_dir}	
 	

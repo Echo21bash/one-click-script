@@ -8,7 +8,7 @@ mysql_env_load(){
 	install_dir_set
 	output_option '请选择mysql版本' 'mysql普通版 galera版' 'branch'
 	if [[ ${branch} = '1' ]];then
-		url='https://mirrors.huaweicloud.com/mysql/Downloads'
+		url='https://repo.huaweicloud.com/mysql/Downloads'
 	else
 		if [[ ${os_bit} = '32' ]];then
 			diy_echo "不支持32位系统建议换成64系统" "${red}" "${error}"
