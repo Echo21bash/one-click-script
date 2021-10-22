@@ -41,7 +41,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			timeout 3 curl --connect-timeout 3 -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 3 curl --connect-timeout 3 -sL https://ghproxy.com/${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
