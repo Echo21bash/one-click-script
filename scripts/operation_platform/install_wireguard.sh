@@ -103,4 +103,5 @@ wireguard_install_ctl(){
 	wireguard_install
 	wireguard_config
 	add_wireguard_ui_service
+	wireguard_readme
 }
