@@ -118,20 +118,15 @@ fastdfs_config(){
 		sed -i "s#^tracker_server.*#tracker_server=${local_ip}:22000#" ${home_dir}/etc/storage.conf
 		if [[ ${fastdht_enable} = 'yes' ]];then
 			sed -i "s#^check_file_duplicate.*#check_file_duplicate=1#" ${home_dir}/etc/storage.conf
-			sed -i "s?##include /home/yuqing/.*?include ${home_dir}/etc/fdht_servers.conf?" ${home_dir}/etc/storage.conf
-			#配置多个fdht_servers
-			len=${#fastdht_ip[@]}
-			echo "group_count = ${len}">${home_dir}/etc/fdht_servers.conf
-			for ((i=0;i<$len;i++))
-			do
-				echo "group0 = ${fastdht_ip[$i]}">>${home_dir}/etc/fdht_servers.conf
-			done
+			sed -i "s?##include /home/yuqing/.*?#include ${home_dir}/etc/fdht_servers.conf?" ${home_dir}/etc/storage.conf
 		fi
 
 		if [[ ${fastdht_enable} = 'yes' ]];then
 			cp ${tmp_dir}/fastdht-patch-1/conf/fdhtd.conf ${home_dir}/etc/fdhtd.conf
-			sed -i "s#^port.*#port=${fastdht_port}#" ${home_dir}/etc/fdhtd.conf
+			sed -i "s#^port.*#port=24000#" ${home_dir}/etc/fdhtd.conf
 			sed -i "s#^base_path.*#base_path=${data_dir}#" ${home_dir}/etc/fdhtd.conf
+			sed -i "s#^group_count =.*#group_count = 1#" ${home_dir}/etc/fdht_servers.conf
+			echo "group0 = ${local_ip}:24000" >>${home_dir}/etc/fdht_servers.conf
 		fi
 		add_log_cut fastdfs ${data_dir}/logs/*.log
 		add_sys_env "PATH=${home_dir}/bin:\$PATH"
