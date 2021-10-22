@@ -153,9 +153,9 @@ add_fastdfs_service(){
 	add_daemon_file ${home_dir}/init
 	add_system_service fdfs-storaged ${home_dir}/init
 
-	if [[ ${install_fastdht} = 'y' ]];then
+	if [[ ${fastdht_enable} = 'yes' ]];then
 		ExecStart="${home_dir}/bin/fdhtd ${home_dir}/etc/fdhtd.conf start"
-		PIDFile="${data_dir}/data/fdhtd.pid.pid"
+		PIDFile="${data_dir}/data/fdhtd.pid"
 		add_daemon_file ${home_dir}/init
 		add_system_service fdhtd ${home_dir}/init
 	fi
