@@ -60,17 +60,9 @@ wireguard_config(){
 		echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 		sysctl -p > /dev/null
 	fi
-	systemctl start wg-quick@wg0
-	if [[ -n $(ip a | grep -Eo 'wg0') ]];then
-		success_log "wireguard启动成功，请下载/etc/wireguard/client.conf客户端配置文件"
-	else
-		error_log "wireguard启动失败"
-		exit 1
-	fi
-	cp ${workdir}/config/wireguard/wg-reload.service /etc/systemd/system
-	cp ${workdir}/config/wireguard/wg-reload.path /etc/systemd/system
-	systemctl daemon-reload
-	systemctl enable wg-reload.service wg-reload.path wg-quick@wg0
+	\cp ${workdir}/config/wireguard/wg-reload.service /etc/systemd/system
+	\cp ${workdir}/config/wireguard/wg-reload.path /etc/systemd/system
+	service_control enable wg-reload.service wg-reload.path wg-quick@wg0
 }
 
 add_wireguard_ui_service(){
