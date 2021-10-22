@@ -22,11 +22,11 @@ fastdfs_down(){
 fastdfs_install_set(){
 	output_option "选择安装模式" "单机 集群" "deploy_mode"
 	if [[ ${deploy_mode} = '1' ]];then
-		vi ${workdir}/config/fsatdfs/fastdfs-single.conf
-		. ${workdir}/config/fsatdfs/fastdfs-single.conf
+		vi ${workdir}/config/fastdfs/fastdfs-single.conf 
+		. ${workdir}/config/fastdfs/fastdfs-single.conf
 	else
-		vi ${workdir}/config/fsatdfs/fastdfs-cluster.conf
-		. ${workdir}/config/fsatdfs/fastdfs-cluster.conf
+		vi ${workdir}/config/fastdfs/fastdfs-cluster.conf
+		. ${workdir}/config/fastdfs/fastdfs-cluster.conf
 	fi
 }
 
