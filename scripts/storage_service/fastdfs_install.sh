@@ -15,8 +15,8 @@ fastdfs_down(){
 
 	online_down_file "${url}/archive/refs/tags/V${detail_version_number}.tar.gz"
 	online_down_file "https://github.com/happyfish100/libfastcommon/archive/refs/tags/V1.0.53.tar.gz"
-	unpacking_file ${tmp_dir}/V${detail_version_number}.tar.gz
-	unpacking_file ${tmp_dir}/V1.0.53.tar.gz
+	unpacking_file ${tmp_dir}/V${detail_version_number}.tar.gz ${tmp_dir}
+	unpacking_file ${tmp_dir}/V1.0.53.tar.gz ${tmp_dir}
 
 }
 fastdfs_install_set(){
@@ -163,7 +163,6 @@ add_fastdfs_service(){
 
 fastdfs_install_ctl(){
 	fastdfs_env_load
-	install_dir_set
 	fastdfs_install_set
 	fastdfs_down
 	fastdfs_install
