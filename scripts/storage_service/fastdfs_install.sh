@@ -118,7 +118,7 @@ fastdfs_config(){
 		sed -i "s#^tracker_server.*#tracker_server=${local_ip}:22000#" ${home_dir}/etc/storage.conf
 		if [[ ${fastdht_enable} = 'yes' ]];then
 			sed -i "s#^check_file_duplicate.*#check_file_duplicate=1#" ${home_dir}/etc/storage.conf
-			sed -i "/##include /home/yuqing/fastdht/a#include ${home_dir}/etc/fdht_servers.conf" ${home_dir}/etc/storage.conf
+			sed -i "s?##include /home/yuqing/.*?include ${home_dir}/etc/fdht_servers.conf?" ${home_dir}/etc/storage.conf
 			#配置多个fdht_servers
 			len=${#fastdht_ip[@]}
 			echo "group_count = ${len}">${home_dir}/etc/fdht_servers.conf
