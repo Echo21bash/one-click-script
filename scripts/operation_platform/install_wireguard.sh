@@ -33,9 +33,15 @@ wireguard_ui_down(){
 		down_url="${url}/releases/download/v${detail_version_number}/wireguard-ui-v${detail_version_number}-linux-386.tar.gz"
 	fi
 	online_down_file
+	unpacking_file ${tmp_dir}/${down_file_name} ${tmp_dir}
 }
 
 wireguard_install(){
+	
+	home_dir=${install_dir}/wireguard-ui
+	mkdir -p ${home_dir}
+	#安装wireguard界面
+	\cp ${tmp_dir}/wireguard-ui ${home_dir}
 
 	if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 		cp ${workdir}/config/public/epel-7.repo /etc/yum.repos.d/epel.repo
@@ -44,6 +50,7 @@ wireguard_install(){
 	if [[ ! -f /etc/yum.repos.d/wireguard.repo ]];then
 		cp ${workdir}/config/wireguard/wireguard.repo /etc/yum.repos.d/wireguard.repo
 	fi
+	#安装wireguard组件
 	yum install -y dkms wireguard-dkms wireguard-tools
 	if [[ $? = '0' ]];then
 		success_log "wireguard安装成功"
@@ -83,5 +90,3 @@ wireguard_install_ctl(){
 	wireguard_config
 	add_wireguard_ui_service
 }
-
-
