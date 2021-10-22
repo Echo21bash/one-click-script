@@ -1,16 +1,16 @@
 #!/bin/bash
 
 all_version_general1(){
-	timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 }
 
 all_version_general2(){
-	timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
+	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
 }
 	
 all_version_general3(){
-	timeout 3 curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+	timeout 5 curl -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
 
 }
 
@@ -21,16 +21,16 @@ all_version_other(){
 
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
+				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
 
 			else
-				timeout 3 curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 			fi
 
 		;;
 		mongodb)
-			timeout 3 curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			timeout 5 curl -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 
 		;;
 
@@ -41,7 +41,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			timeout 3 curl --connect-timeout 3 -sL https://ghproxy.com/${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 5 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
