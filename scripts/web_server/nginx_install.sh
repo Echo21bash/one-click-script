@@ -60,7 +60,7 @@ nginx_compile(){
 		
 		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master/src"
 		sed -i 's#ngx_module_incs=.*#ngx_module_incs="/usr/include/fastdfs /usr/include/fastcommon/"#' ${tar_dir}/${add_module_value}-master/src/config
-		sed -i 's#CORE_INCS=.*#CORE_INCS="$CORE_INCS "/usr/include/fastdfs /usr/include/fastcommon/""#' ${tar_dir}/${add_module_value}-master/src/config
+		sed -i 's#CORE_INCS=.*#CORE_INCS="$CORE_INCS /usr/include/fastdfs /usr/include/fastcommon/#' ${tar_dir}/${add_module_value}-master/src/config
 	fi
 	if [[ ${add_module[*]} =~ '2' ]];then
 		down_file https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
