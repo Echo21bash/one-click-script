@@ -63,6 +63,7 @@ elasticsearch_run_env_check(){
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/elasticsearch
 		if [[ ${version_number} > '6' ]];then
 			JAVA_HOME=${home_dir}/jdk
 		else
@@ -70,7 +71,6 @@ elasticsearch_install(){
 		fi
 		elasticsearch_down
 		useradd -M elasticsearch
-		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
 		\cp -rp ${tar_dir}/* ${home_dir}
 		chown -R elasticsearch.elasticsearch ${home_dir}
@@ -218,6 +218,7 @@ elasticsearch_conf(){
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\n#bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.system_call_filter.*/bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#network.host.*/network.host: ${local_ip}/" ${conf_dir}/elasticsearch.yml
+		sed -i "/network.host:.*/adiscovery.type: single-node" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: 9200\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: 9300/" ${conf_dir}/elasticsearch.yml
 	else
 		conf_dir=${tar_dir}/config
