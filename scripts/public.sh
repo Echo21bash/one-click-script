@@ -105,7 +105,9 @@ output_option(){
 	last_option=${all_option[@]: -1}
 	#最后一个下标号
 	last_option_subscript=$((($len-1)))
-	#将选项转换为all_option数组
+	#将选项转换为item_option数组
+	#清空上个选项数组值
+	item_option=()
 	local i
 	local j
 	i=0
@@ -113,7 +115,7 @@ output_option(){
 	for item in ${all_option[@]}
 	do
 		if [[ $i -gt 0 && $i -lt ${last_option_subscript} ]];then
-			#选项数组
+			#从所有参数里面抽取选项并转换为item_option数组
 			item_option[$j]=${all_option[$i]}
 			((j++))
  			diy_echo "[${green}${j}${plain}] ${item}"
@@ -711,6 +713,13 @@ service_control(){
 			else
 				echo noexist
 			fi
+		elif [[ ${arg} = 'is-active' ]];then
+			service ${service_name} status >/dev/null 2>&1
+			if [[ $? = '0' ]];then
+				echo active
+			else
+				echo noactive
+			fi
 		elif [[ ${arg} = 'usage' ]];then
 			diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
 		else
@@ -732,13 +741,15 @@ service_control(){
 			fi
 		elif [[ ${arg} = 'usage' ]];then
 			diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
+		elif [[ ${arg} = 'is-active' ]];then
+			systemctl ${arg} ${service_name} 
 		else
 			systemctl daemon-reload
 			systemctl ${arg} ${service_name}
 			if [[ $? = '0' ]];then
-				success_log "systemctl ${service_name} ${arg} 操作完成"
+				success_log "systemctl ${arg} ${service_name}操作完成"
 			else
-				error_log "systemctl ${service_name} ${arg} 操作失败"
+				error_log "systemctl ${arg} ${service_name}操作失败"
 			fi
 		fi
 	fi
