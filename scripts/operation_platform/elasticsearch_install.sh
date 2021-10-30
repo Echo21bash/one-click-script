@@ -4,7 +4,7 @@ elasticsearch_env_load(){
 	tmp_dir=/usr/local/src/elasticsearch_tmp
 	soft_name=elasticsearch
 	program_version=('5' '6' '7')
-	url='https://mirrors.huaweicloud.com/elasticsearch'
+	url='https://repo.huaweicloud.com/elasticsearch'
 	select_version
 	install_dir_set
 	online_version	
@@ -63,6 +63,7 @@ elasticsearch_run_env_check(){
 elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		home_dir=${install_dir}/elasticsearch
 		if [[ ${version_number} > '6' ]];then
 			JAVA_HOME=${home_dir}/jdk
 		else
@@ -70,14 +71,12 @@ elasticsearch_install(){
 		fi
 		elasticsearch_down
 		useradd -M elasticsearch
-		home_dir=${install_dir}/elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
 		\cp -rp ${tar_dir}/* ${home_dir}
 		chown -R elasticsearch.elasticsearch ${home_dir}
 		elasticsearch_conf
 		add_elasticsearch_service
 		service_control elasticsearch start
-		sleep 20
 		elasticsearch_cluster_check
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
@@ -217,7 +216,8 @@ elasticsearch_conf(){
 		sed -i "s/#node.name.*/node.name: node1\nnode.max_local_storage_nodes: 3/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\n#bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.system_call_filter.*/bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#network.host.*/network.host: ${local_ip}/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#network.host.*/network.host: 0.0.0.0/" ${conf_dir}/elasticsearch.yml
+		sed -i "/network.host:.*/adiscovery.type: single-node" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: 9200\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: 9300/" ${conf_dir}/elasticsearch.yml
 	else
 		conf_dir=${tar_dir}/config
@@ -242,7 +242,7 @@ elasticsearch_conf(){
 		
 		sed -i "s/#bootstrap.memory_lock.*/#bootstrap.memory_lock: false\n#bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#bootstrap.system_call_filter.*/bootstrap.system_call_filter: false/" ${conf_dir}/elasticsearch.yml
-		sed -i "s/#network.host.*/network.host: ${now_host}/" ${conf_dir}/elasticsearch.yml
+		sed -i "s/#network.host.*/network.host: 0.0.0.0/" ${conf_dir}/elasticsearch.yml
 		sed -i "s/#http.port.*/http.port: ${elsearch_port}\nhttp.cors.enabled: true\nhttp.cors.allow-origin: \"*\"\ntransport.tcp.port: ${elsearch_tcp_port}/" ${conf_dir}/elasticsearch.yml
 		###JVM内存配置
 		sed -i "s/## -Xms.*/-Xms${jvm_heap}/" ${conf_dir}/jvm.options
@@ -282,10 +282,28 @@ add_elasticsearch_service(){
 
 elasticsearch_cluster_check(){
 
+	info_log "正在检测集群健康状态"
 	if [[ ${deploy_mode} = '1' ]];then
-		info_log "节点列表"
-		curl http://${local_ip}:9200/_cat/nodes?pretty
+		for (( i = 0; i < 60; i++ ))
+		do
+			sleep 2
+			elasticsearch_status=`service_control elasticsearch is-active`
+			if [[ ${elasticsearch_status} = 'active' ]];then
+				curl http://127.0.0.1:9200 >/dev/null 2>&1
+				if [[ $? = 0 ]];then
+					elasticsearch_read=yes
+					success_log "elasticsearch已就绪"
+					break
+				fi
+			fi
+		done
+		if [[ ${elasticsearch_read} = 'yes' ]];then
+			success_log "elasticsearch集群正常"
+		else
+			error_log "elasticsearch集群异常"
+		fi
 	fi
+
 	if [[ ${deploy_mode} = '2' ]];then
 		local i=1
 		local k=0

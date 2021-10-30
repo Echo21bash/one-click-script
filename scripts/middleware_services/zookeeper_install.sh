@@ -6,7 +6,7 @@ zookeeper_env_load(){
 	mkdir -p ${tmp_dir}
 	soft_name=zookeeper
 	program_version=('3.4' '3.5')
-	url='https://mirrors.huaweicloud.com/apache/zookeeper'
+	url='https://repo.huaweicloud.com/apache/zookeeper'
 	select_version
 	install_dir_set
 	online_version

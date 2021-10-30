@@ -1,4 +1,5 @@
 #!/bin/bash
+
 install_dir_set(){
 
 	input_option "请输入安装路径" "/usr/local" "install_dir"

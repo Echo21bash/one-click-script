@@ -4,7 +4,7 @@ logstash_env_load(){
 	tmp_dir=/usr/local/src/logstash_tmp
 	soft_name=logstash
 	program_version=('5' '6' '7')
-	url='https://mirrors.huaweicloud.com/logstash'
+	url='https://repo.huaweicloud.com/logstash'
 	select_version
 	install_dir_set
 	online_version

@@ -1,11 +1,12 @@
 #!/bin/bash
+
 rocketmq_env_load(){
 	
 	tmp_dir=/usr/local/src/rocketmq_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=rocketmq
 	program_version=('4')
-	url='https://mirrors.huaweicloud.com/apache/rocketmq'
+	url='https://repo.huaweicloud.com/apache/rocketmq'
 	select_version
 	install_dir_set
 	online_version

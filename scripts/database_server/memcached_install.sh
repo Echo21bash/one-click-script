@@ -4,7 +4,7 @@ memcached_env_load(){
 	tmp_dir=/usr/local/src/memcached_tmp
 	soft_name=memcached
 	program_version=('1.4' '1.5')
-	url="https://mirrors.huaweicloud.com/memcached"
+	url="https://repo.huaweicloud.com/memcached"
 	select_version
 	install_dir_set
 	online_version

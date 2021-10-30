@@ -1,9 +1,10 @@
 #!/bin/bash
+
 kibana_env_load(){
 	tmp_dir=/usr/local/src/kibana_tmp
 	soft_name=kibana
 	program_version=('5' '6' '7')
-	url='https://mirrors.huaweicloud.com/kibana'
+	url='https://repo.huaweicloud.com/kibana'
 	select_version
 	install_dir_set
 	online_version
@@ -39,11 +40,18 @@ kibana_install(){
 kibana_conf(){
 	get_ip
 	conf_dir=${home_dir}/config
-	sed -i "s/#server.host.*/server.host: ${local_ip}/" ${conf_dir}/kibana.yml
+	sed -i "s/#server.host.*/server.host: 0.0.0.0/" ${conf_dir}/kibana.yml
 	sed -i "s%#elasticsearch.url.*%elasticsearch.url: ${elasticsearch_ip}%" ${conf_dir}/kibana.yml
 	sed -i "s%#elasticsearch.hosts.*%elasticsearch.hosts: [${elasticsearch_ip}]%" ${conf_dir}/kibana.yml
 	sed -i "s%#elasticsearch.requestTimeout:.*%elasticsearch.requestTimeout: 60000%" ${conf_dir}/kibana.yml
 	sed -i "s%#i18n.locale:.*%i18n.locale: \"zh-CN\"%" ${conf_dir}/kibana.yml
+
+    if [[ -n ${elasticsearch_user} && -n ${elasticsearch_passwd} ]];then
+		sed -i "s/#elasticsearch.username:.*/elasticsearch.username: ${elasticsearch_user}/" ${conf_dir}/kibana.yml
+		sed -i "s/#elasticsearch.password:.*/elasticsearch.password: ${elasticsearch_passwd}/" ${conf_dir}/kibana.yml
+		sed -i "s/elasticsearch.username:.*/elasticsearch.username: \"${elasticsearch_user}\"/" ${conf_dir}/kibana.yml
+		sed -i "s/elasticsearch.password:.*/elasticsearch.password: \"${elasticsearch_passwd}\"/" ${conf_dir}/kibana.yml
+	fi
 }
 
 add_kibana_service(){

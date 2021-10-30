@@ -1,17 +1,16 @@
 #!/bin/bash
 
-
 all_version_general1(){
-	curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/ >/dev/null 2>&1
 
 }
 
 all_version_general2(){
-	curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
+	timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/${version_number}/ >/dev/null 2>&1
 }
 	
 all_version_general3(){
-	curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
+	timeout 5 curl -sL -o ${tmp_dir}/tmp_version ${url}/${soft_name}-${version_number} >/dev/null 2>&1
 
 }
 
@@ -22,16 +21,16 @@ all_version_other(){
 
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
+				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
 
 			else
-				curl --connect-timeout 3 -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
+				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
 
 			fi
 
 		;;
 		mongodb)
-			curl --connect-timeout 3 -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
+			timeout 5 curl -sL -o ${tmp_dir}/tmp_version ${url}/x86_64-${version_number} >/dev/null 2>&1
 
 		;;
 
@@ -42,7 +41,7 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			curl --connect-timeout 3 -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 10 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version || timeout 10 curl -sL https://hub.fastgit.org/${url#*github.com/}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
@@ -54,30 +53,27 @@ ver_rule_general(){
 	case "$soft_name" in
 		java)
 			if [[ ${version_number} -lt '9' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}u[0-9]{1,3}-b[0-9]{2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}u[0-9]{1,3}-b[0-9]{2}" | sort -uV >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,3}\.[0-9]{1,3}\+[0-9]{1,3}" | sort -uV >${tmp_dir}/all_version
 			fi
 		;;
 		
-		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix|anylink|wireguard-ui|fastdfs)
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 			else
-				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}-[0-9.]{5,}" | sort -u >${tmp_dir}/all_version
+				cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}-[0-9.]{5,}" | sort -uV >${tmp_dir}/all_version
 			fi
 		;;		
 		greenplum)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
-		;;
-		wireguard-ui|anylink)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1}\.[0-9]{1}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 		*|node|openresty|elasticsearch|logstash|kibana|filebeat)
-			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -u >${tmp_dir}/all_version
+			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 	esac
 

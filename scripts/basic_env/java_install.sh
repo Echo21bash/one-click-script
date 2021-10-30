@@ -1,4 +1,5 @@
 #!/bin/bash
+
 java_env_load(){
 	tmp_dir=/usr/local/src/java_tmp
 	soft_name=java

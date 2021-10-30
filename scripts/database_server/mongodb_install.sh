@@ -1,4 +1,5 @@
 #!/bin/bash
+
 mongodb_env_load(){
 	tmp_dir=/usr/local/src/mongodb_tmp
 	soft_name=mongodb

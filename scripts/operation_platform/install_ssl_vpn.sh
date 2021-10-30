@@ -4,7 +4,7 @@ anylink_env_load(){
 
 	tmp_dir=/usr/local/src/anylink_tmp
 	mkdir -p ${tmp_dir}
-	program_version=(0)
+	program_version=(0.6)
 	soft_name=anylink
 	url='https://github.com/bjdgyc/anylink'
 	select_version

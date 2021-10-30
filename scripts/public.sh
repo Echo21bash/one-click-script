@@ -105,15 +105,17 @@ output_option(){
 	last_option=${all_option[@]: -1}
 	#最后一个下标号
 	last_option_subscript=$((($len-1)))
-
+	#将选项转换为item_option数组
+	#清空上个选项数组值
+	item_option=()
 	local i
 	local j
 	i=0
 	j=0
 	for item in ${all_option[@]}
 	do
-		if [[ $i -gt 0 && $i -lt $last_option_subscript ]];then
-			#选项数组
+		if [[ $i -gt 0 && $i -lt ${last_option_subscript} ]];then
+			#从所有参数里面抽取选项并转换为item_option数组
 			item_option[$j]=${all_option[$i]}
 			((j++))
  			diy_echo "[${green}${j}${plain}] ${item}"
@@ -127,7 +129,7 @@ output_option(){
 	if [[ -z ${output} ]];then
 		output=1
 	fi
-
+	#将所选择的序号转换为数组output
 	output=(${output})
 	#选项总数
 	item_option_len=${#item_option[@]}
@@ -137,6 +139,8 @@ output_option(){
 		error_log "输入值存在非数字"
 		exit 1
 	fi
+
+	#将所选择的序号对应的值转换为数组output_value
 	#清空output_value
 	output_value=()
 	local k
@@ -213,7 +217,9 @@ sys_info(){
 	else
 		network_status="${red}disconnected${plain}"
 	fi
-	[[ ${sys_name} = "red-hat" ]] && sys_name="Centos"
+	if [[ ${sys_name} = "red-hat" ]];then
+		sys_name="Centos"
+	fi
 
 }
 
@@ -512,6 +518,7 @@ add_daemon_sysvinit_file(){
 	system_service_config_file=$1
 	cat >${system_service_config_file}<<-EOF
 	#!/bin/bash
+
 	# chkconfig: 345 70 60
 	# description: ${soft_name} daemon
 	# processname: ${soft_name}
@@ -706,6 +713,15 @@ service_control(){
 			else
 				echo noexist
 			fi
+		elif [[ ${arg} = 'is-active' ]];then
+			service ${service_name} status >/dev/null 2>&1
+			if [[ $? = '0' ]];then
+				echo active
+			else
+				echo noactive
+			fi
+		elif [[ ${arg} = 'usage' ]];then
+			diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
 		else
 			service ${service_name} ${arg}
 			if [[ $? = '0' ]];then
@@ -723,13 +739,17 @@ service_control(){
 			else
 				echo noexist
 			fi
+		elif [[ ${arg} = 'usage' ]];then
+			diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
+		elif [[ ${arg} = 'is-active' ]];then
+			systemctl ${arg} ${service_name} 
 		else
 			systemctl daemon-reload
 			systemctl ${arg} ${service_name}
 			if [[ $? = '0' ]];then
-				success_log "systemctl ${service_name} ${arg} 操作完成"
+				success_log "systemctl ${arg} ${service_name}操作完成"
 			else
-				error_log "systemctl ${service_name} ${arg} 操作失败"
+				error_log "systemctl ${arg} ${service_name}操作失败"
 			fi
 		fi
 	fi

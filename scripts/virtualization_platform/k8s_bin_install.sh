@@ -104,7 +104,7 @@ create_ca(){
 
 down_k8s_file(){
 	mkdir -p ${tmp_dir}/soft/cni
-	down_file https://mirrors.huaweicloud.com/etcd/v${etcd_ver}/etcd-v${etcd_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64.tar.gz
+	down_file https://repo.huaweicloud.com/etcd/v${etcd_ver}/etcd-v${etcd_ver}-linux-amd64.tar.gz ${tmp_dir}/soft/etcd-v${etcd_ver}-linux-amd64.tar.gz
 	down_file https://storage.googleapis.com/kubernetes-release/release/v${k8s_ver}/kubernetes-server-linux-amd64.tar.gz ${tmp_dir}/soft/kubernetes-server-linux-amd64.tar.gz
 	down_file https://github.com/containernetworking/plugins/releases/download/v${cni_ver}/cni-plugins-linux-amd64-v${cni_ver}.tgz ${tmp_dir}/soft/cni-plugins-linux-amd64-v${cni_ver}.tgz
 	diy_echo "正在解压文件中..." "${info}"
@@ -279,6 +279,27 @@ install_before_conf(){
 	bootstrap_token="${token_pub}.${token_secret}"
 }
 
+create_hosts_file(){
+	###创建hosts文件
+	rm -rf ${tmp_dir}/hosts
+	echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" >> ${tmp_dir}/hosts
+	echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> ${tmp_dir}/hosts
+	local j=1
+	local k=1
+	for host in ${host_ip[@]};
+	do
+		if [[ "${master_ip[@]}" =~ ${host} ]];then
+			echo "${host}  k8s-master${j}" >> ${tmp_dir}/hosts
+			((j++))
+		fi
+		if [[ "${node_ip[@]}" =~ ${host} ]];then
+			echo "${host}  k8s-worker${k}" >> ${tmp_dir}/hosts
+			((k++))
+		fi
+	done
+
+}
+
 apiserver_conf(){
 	cat >${tmp_dir}/conf/kube-apiserver <<-EOF 
 	
@@ -294,6 +315,11 @@ apiserver_conf(){
 	--authorization-mode=RBAC,Node \\
 	--enable-bootstrap-token-auth \\
 	--enable-aggregator-routing=true \\
+	--requestheader-client-ca-file=${k8s_dir}/ssl/ca.pem \\
+	--requestheader-allowed-names=aggregator,metrics-server \\
+	--requestheader-extra-headers-prefix=X-Remote-Extra- \\
+	--requestheader-group-headers=X-Remote-Group \\
+	--requestheader-username-headers=X-Remote-User \\
 	--service-node-port-range=30000-50000 \\
 	--tls-cert-file=${k8s_dir}/ssl/kubernetes.pem  \\
 	--tls-private-key-file=${k8s_dir}/ssl/kubernetes-key.pem \\
@@ -434,7 +460,8 @@ master_node_install_ctl(){
 			scp -P ${ssh_port[i]} ${tmp_dir}/ssl/{ca.pem,ca-key.pem,kubernetes.pem,kubernetes-key.pem,kube-controller-manager.pem,kube-controller-manager-key.pem,kube-scheduler.pem,kube-scheduler-key.pem,admin.pem,admin-key.pem,kube-proxy.pem,kube-proxy-key.pem,proxy-client.pem,proxy-client-key.pem}  root@${host}:${k8s_dir}/ssl
 			scp -P ${ssh_port[i]} ${tmp_dir}/conf/{kube-apiserver,kube-scheduler,kube-controller-manager,kube-proxy,kubelet,kubelet.yml}  root@${host}:${k8s_dir}/cfg
 			scp -P ${ssh_port[i]} ${tmp_dir}/{kube-apiserver.service,kube-scheduler.service,kube-controller-manager.service,kube-proxy.service,kubelet.service} root@${host}:/etc/systemd/system
-			scp -P ${ssh_port[i]} ${workdir}/config/k8s/yml/{auto-approve-node.yml,calico.yaml,corends.yaml}  root@${host}:${k8s_dir}/yml
+			scp -P ${ssh_port[i]} ${tmp_dir}/hosts root@${host}:/etc/hosts
+			scp -P ${ssh_port[i]} ${workdir}/config/k8s/yml/{auto-approve-node.yml,calico.yaml,corends.yaml,metrics-server.yaml}  root@${host}:${k8s_dir}/yml
 			info_log "正在生成主节点${host_ip[i]}kubeconfig配置文件..."
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
 			. /tmp/public.sh
@@ -709,6 +736,7 @@ culster_other_conf(){
 			${k8s_dir}/bin/kubectl create clusterrolebinding kube-apiserver:kubelet-apis --clusterrole=system:kubelet-api-admin --user kubernetes
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/calico.yaml
 			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/corends.yaml
+			${k8s_dir}/bin/kubectl apply -f ${k8s_dir}/yml/metrics-server.yaml
 			sleep 30
 			"
 			ssh ${host_ip[$i]} -p ${ssh_port[$i]} "
@@ -752,6 +780,7 @@ k8s_bin_install(){
 	add_system
 	etcd_install_ctl
 	install_before_conf
+	create_hosts_file
 	master_node_install_ctl
 	master_node_check
 	culster_bootstrap_conf

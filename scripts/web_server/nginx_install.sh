@@ -4,7 +4,7 @@ nginx_env_load(){
 	tmp_dir=/usr/local/src/nginx_tmp
 	soft_name=nginx
 	program_version=('1.14' '1.15' '1.16')
-	url="https://mirrors.huaweicloud.com/nginx"
+	url="https://repo.huaweicloud.com/nginx"
 	select_version
 	install_dir_set
 	online_version
@@ -46,20 +46,12 @@ nginx_compile(){
 	configure_arg="--prefix=${home_dir} --group=nginx --user=nginx  --with-pcre --with-stream --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module --with-http_geoip_module --with-stream_ssl_module"
 	if [[ ${add_module[*]} =~ '1' ]];then
 		diy_echo "请确保正确配置/etc/fdfs/mod_fastdfs.conf并启动fsatdfs,否则会无法访问文件！" "${yellow}" "${warning}"
-		down_file https://github.com/happyfish100/libfastcommon/archive/master.tar.gz libfastcommon-master.tar.gz && tar -zxf libfastcommon-master.tar.gz
-		cd libfastcommon-master
-		./make.sh  && ./make.sh install
-		if [[ $? = '0' ]];then
-			diy_echo "libfastcommon安装完成." "" "${info}"
-			cd ..
-		else
-			diy_echo "libfastcommon安装失败." "${yellow}" "${error}"
-			exit
-		fi
-		down_file https://github.com/happyfish100/fastdfs-nginx-module/archive/master.tar.gz fastdfs-nginx-module-master.tar.gz && tar zxf fastdfs-nginx-module-master.tar.gz
+
+		down_file https://github.com/happyfish100/fastdfs-nginx-module/archive/refs/tags/V1.22.tar.gz fastdfs-nginx-module-1.22.tar.gz && tar zxf fastdfs-nginx-module-1.22.tar.gz
 		
-		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master/src"
-		#sed -i 's///'
+		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-1.22/src"
+		sed -i 's#ngx_module_incs=.*#ngx_module_incs="/usr/include/fastdfs /usr/include/fastcommon/"#' ${tar_dir}/${add_module_value}-1.22/src/config
+		sed -i 's#CORE_INCS=.*#CORE_INCS="$CORE_INCS /usr/include/fastdfs /usr/include/fastcommon/"#' ${tar_dir}/${add_module_value}-1.22/src/config
 	fi
 	if [[ ${add_module[*]} =~ '2' ]];then
 		down_file https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz

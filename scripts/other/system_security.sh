@@ -37,6 +37,7 @@ system_security_set(){
 	###系统用户操作记录配置/var/log/bash_history.log
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
 	#!/bin/bash
+
 	
 	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
 	export PROMPT_COMMAND='\

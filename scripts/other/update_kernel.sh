@@ -1,8 +1,9 @@
 #!/bin/bash
+
 update_kernel(){
 	warning_log "请谨慎更新内核,需要重新系统"
 	output_option '选择升级kernel类型' '长期维护版 最新版' 'kernel_type'
-	if [ ! -f /etc/yum.repos.d/elrepo.repo ]; then
+	if [[ ! -f /etc/yum.repos.d/elrepo.repo ]]; then
 		rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 		if (( ${os_release} < '7' ));then
 			rpm -Uvh http://www.elrepo.org/elrepo-release-6-8.el6.elrepo.noarch.rpm
@@ -11,7 +12,9 @@ update_kernel(){
 		fi
 	fi
 
-	if [ ! -f /etc/yum.repos.d/elrepo.repo ]; then
+	if [[ -f /etc/yum.repos.d/elrepo.repo ]]; then
+		sed -e 's!^metalink=!#metalink=!g' -e 's!^mirrorlist=!#mirrorlist=!g' -e 's!^#baseurl=!baseurl=!g' -e '/^\t/d' -e '/^baseurl=/s!https\?://[^/]*/\(\(linux/\)\|\(elrepo/\)\)\?!https://mirrors.aliyun.com/elrepo/!g;' -i /etc/yum.repos.d/elrepo.repo
+	else
 		error_log "添加elrepo源失败"
 		exit 1
 	fi
