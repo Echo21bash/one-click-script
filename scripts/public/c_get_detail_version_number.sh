@@ -21,7 +21,7 @@ all_version_other(){
 
 		mysql)
 			if [[ ${branch} = '1' ]];then
-				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number} >/dev/null 2>&1
+				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url}/MySQL-${version_number}/ >/dev/null 2>&1
 
 			else
 				timeout 5 curl -Ls -o ${tmp_dir}/tmp_version ${url} >/dev/null 2>&1
