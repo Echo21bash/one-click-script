@@ -7,8 +7,10 @@
 #                            by---wang2017.7
 ###########################################################
 
-###pubic函数
+##############基础函数##############
+
 colour_keyword(){
+	###颜色关键字设定
 	red='\033[0;31m'
 	green='\033[0;32m'
 	yellow='\033[0;33m'
@@ -358,7 +360,7 @@ auto_ssh_keygen(){
 		host_ip=(${input_value[@]})
 	fi
 	expect_dir=`which expect 2>/dev/null`
-	[ -z ${expect_dir} ] && yum install expect -y
+	[[ -z ${expect_dir} ]] && yum install expect -y
 	
 	su ${user} -c "if [[ ! -f ~/.ssh/id_rsa ]];then ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q;fi"
 
@@ -676,6 +678,7 @@ add_daemon_systemd_file(){
 	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
 	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
 }
+
 #添加守护进程
 add_system_service(){
 	#$1服务名 $2服务文件路径
@@ -771,5 +774,22 @@ add_sys_env(){
 	fi
 	diy_echo "请再运行一次source /etc/profile" "${yellow}" "${info}"
 }
+
+auto_input_keyword(){
+	###用于自动输入
+	cmd=$1
+	input_keyword=$2
+	expect_dir=`which expect 2>/dev/null`
+	[[ -z ${expect_dir} ]] && yum install expect -y
+	expect <<-EOF
+		set timeout -1
+		spawn $cmd
+		expect {
+			"*yes/no" { send "yes\n";exp_continue}
+			"*password:" { send "${input_keyword}\n;exp_continue"}
+		}
+	EOF
+}
+
 colour_keyword
 sys_info
