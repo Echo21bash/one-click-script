@@ -777,16 +777,16 @@ add_sys_env(){
 
 auto_input_keyword(){
 	###用于自动输入
-	cmd=$1
-	input_keyword=$2
+	cmd="$1"
+	input_keyword="$2"
 	expect_dir=`which expect 2>/dev/null`
 	[[ -z ${expect_dir} ]] && yum install expect -y
 	expect <<-EOF
 		set timeout -1
-		spawn $cmd
+		spawn -noecho $cmd
 		expect {
 			"*yes/no" { send "yes\n";exp_continue}
-			"*password:" { send "${input_keyword}\n;exp_continue"}
+			"*password:" { send "${input_keyword}\n";exp_continue}
 		}
 	EOF
 }
