@@ -51,7 +51,7 @@ zookeeper_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			java_status=`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1
 			EOF" "${passwd[$k]}"`
 			if [[ ${java_status} = 0 ]];then
