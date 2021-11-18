@@ -209,10 +209,10 @@ zookeeper_cluster_check(){
 
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				zookeeper_status="`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				zookeeper_status=`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				service_control zookeeper-node${i} is-active
-				EOF" "${passwd[$k]"`"
+				EOF" "${passwd[$k]}"`
 				if [[ ${zookeeper_status} =~ 'active' ]];then
 					success_log "zookeeper-node${i}启动完成"
 				else
