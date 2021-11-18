@@ -54,7 +54,7 @@ zookeeper_run_env_check(){
 			java_status="`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && javaok
 			EOF" "${passwd[$k]}"`"
-			if [[ ${java_status} ~= "javaok" ]];then
+			if [[ ${java_status} =~ "javaok" ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
 				error_log "主机${host_ip[$k]}java运行环境未就绪"
