@@ -51,7 +51,9 @@ zookeeper_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
+			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1
+			EOF" "${passwd[$k]}"`
 			if [[ ${java_status} = 0 ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
@@ -77,7 +79,7 @@ zookeeper_install(){
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
-		auto_ssh_keygen
+		#auto_ssh_keygen
 		zookeeper_run_env_check
 		zookeeper_down
 		add_zookeeper_server_list
@@ -94,16 +96,13 @@ zookeeper_install(){
 				zookeeper_config
 				home_dir=${install_dir}/zookeeper-node${service_id}				
 				add_zookeeper_service
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/zookeeper-node${service_id}
-				mkdir -p ${zookeeper_data_dir}/node${service_id}
-				"
+				
 				info_log "正在向节点${now_host}分发zookeeper-node${service_id}安装程序和配置文件..."
+				auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} \"mkdir -p ${install_dir}/zookeeper-node${service_id};mkdir -p ${zookeeper_data_dir}/node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{myid_node${service_id},log_cut_zookeeper-node${i}} ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-				
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				Type="forking"
 				ExecStart="${home_dir}/bin/zkServer.sh start"
@@ -113,8 +112,8 @@ zookeeper_install(){
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
 				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/logrotate.d/zookeeper-node${i}
 				service_control zookeeper-node${i} restart
-				rm -rf /tmp/public.sh
-				EOF
+				#rm -rf /tmp/public.sh
+				EOF" "${passwd[$k]}"
 				((i++))
 			done
 			((k++))
@@ -183,8 +182,6 @@ zookeeper_config(){
 add_zookeeper_service(){
 	if [[ ${deploy_mode} = '1' ]];then
 		JAVA_HOME=${JAVA_HOME}
-	else
-		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
 	fi
 	
 	Type="forking"
@@ -208,7 +205,10 @@ zookeeper_cluster_check(){
 
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				zookeeper_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "systemctl is-active zookeeper-node${i}"`
+				zookeeper_status=`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				. /tmp/public.sh
+				service_control zookeeper-node${i} is-active
+				EOF" "${passwd[$k]"`
 				if [[ ${zookeeper_status} = 'active' ]];then
 					success_log "zookeeper-node${i}启动完成"
 				else
