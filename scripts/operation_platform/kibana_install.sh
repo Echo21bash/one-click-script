@@ -23,8 +23,8 @@ kibana_down(){
 }
 
 kibana_install_set(){
-	input_option "输入elasticsearch服务http地址" "http://127.0.0.1:9200,http://127.0.0.1:9200,http://127.0.0.1:9200" "elasticsearch_ip"
-	elasticsearch_ip=${input_value}
+	vi ${workdir}/config/elk/kibana.conf
+	. ${workdir}/config/elk/kibana.conf
 }
 
 kibana_install(){
