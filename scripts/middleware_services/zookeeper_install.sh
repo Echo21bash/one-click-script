@@ -98,7 +98,8 @@ zookeeper_install(){
 				add_zookeeper_service
 				
 				info_log "正在向节点${now_host}分发zookeeper-node${service_id}安装程序和配置文件..."
-				auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				auto_input_keyword "
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				mkdir -p ${install_dir}/zookeeper-node${service_id}
 				mkdir -p ${zookeeper_data_dir}/node${service_id}
 				EOF
