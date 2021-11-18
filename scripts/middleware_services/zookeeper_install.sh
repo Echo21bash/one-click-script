@@ -99,10 +99,13 @@ zookeeper_install(){
 				
 				info_log "正在向节点${now_host}分发zookeeper-node${service_id}安装程序和配置文件..."
 				auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} \"mkdir -p ${install_dir}/zookeeper-node${service_id};mkdir -p ${zookeeper_data_dir}/node${service_id}
+				mkdir -p ${install_dir}/zookeeper-node${service_id}
+				mkdir -p ${zookeeper_data_dir}/node${service_id}
+				EOF
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{myid_node${service_id},log_cut_zookeeper-node${i}} ${host_ip[$k]}:${install_dir}/zookeeper-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				Type="forking"
 				ExecStart="${home_dir}/bin/zkServer.sh start"
