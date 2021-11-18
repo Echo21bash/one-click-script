@@ -112,7 +112,7 @@ zookeeper_install(){
 				ExecStart='${home_dir}/bin/zkServer.sh start'
 				Environment='JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs'
 				add_daemon_file ${home_dir}/zookeeper-node${i}.service
-				add_system_service zookeeper ${home_dir}/zookeeper-node${i}.service
+				add_system_service zookeeper-node${i} ${home_dir}/zookeeper-node${i}.service
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
 				\cp ${install_dir}/zookeeper-node${service_id}/log_cut_zookeeper-node${i} /etc/logrotate.d/zookeeper-node${i}
 				service_control zookeeper-node${i} restart
