@@ -108,8 +108,8 @@ zookeeper_install(){
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				Type=forking
-				ExecStart=${home_dir}/bin/zkServer.sh start
-				Environment=JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs
+				ExecStart='${home_dir}/bin/zkServer.sh start'
+				Environment='JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs'
 				add_daemon_file ${home_dir}/zookeeper-node${i}.service
 				add_system_service zookeeper ${home_dir}/zookeeper-node${i}.service
 				\cp ${install_dir}/zookeeper-node${service_id}/myid_node${service_id} ${zookeeper_data_dir}/node${service_id}/myid
@@ -212,7 +212,7 @@ zookeeper_cluster_check(){
 				. /tmp/public.sh
 				service_control zookeeper-node${i} is-active
 				EOF" "${passwd[$k]"`
-				if [[ ${zookeeper_status} = 'active' ]];then
+				if [[ ${zookeeper_status} =~ 'active' ]];then
 					success_log "zookeeper-node${i}启动完成"
 				else
 					error_log "zookeeper-node${i}启动失败"
