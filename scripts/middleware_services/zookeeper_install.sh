@@ -19,6 +19,7 @@ zookeeper_down(){
 	elif [[ ${version_number} = "3.5" ]];then
 		down_url="${url}/zookeeper-${detail_version_number}/apache-zookeeper-${detail_version_number}-bin.tar.gz"
 	fi
+	down_file_rename=zookeeper-${detail_version_number}.tar.gz
 	online_down_file
 	unpacking_file ${tmp_dir}/zookeeper-${detail_version_number}.tar.gz ${tmp_dir}
 
