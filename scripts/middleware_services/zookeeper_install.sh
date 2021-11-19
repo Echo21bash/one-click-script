@@ -26,12 +26,11 @@ zookeeper_install_set(){
 	output_option '请选择安装模式' '单机模式 集群模式' 'deploy_mode'
 
 	if [[ ${deploy_mode} = '1' ]];then
-		input_option '请设置zookeeper的客户端口号' '2181' 'zk_port'
-		input_option '请设置zookeeper的数据存储目录' '/data/zookeeper_data' 'zookeeper_data_dir'
-		zookeeper_data_dir=${input_value}
+		vi ${workdir}/config/zookeeper/zookeeper-single.conf
+		. ${workdir}/config/zookeeper/zookeeper-single.conf
 	elif [[ ${deploy_mode} = '2' ]];then
-		vi ${workdir}/config/zookeeper/zookeeper.conf
-		. ${workdir}/config/zookeeper/zookeeper.conf
+		vi ${workdir}/config/zookeeper/zookeeper-cluster.conf
+		. ${workdir}/config/zookeeper/zookeeper-cluster.conf
 	fi
 }
 
@@ -185,14 +184,9 @@ zookeeper_config(){
 
 add_zookeeper_service(){
 	if [[ ${deploy_mode} = '1' ]];then
-		JAVA_HOME=${JAVA_HOME}
-	fi
-	
-	Type="forking"
-	ExecStart="${home_dir}/bin/zkServer.sh start"
-	Environment="JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs"
-	
-	if [[ ${deploy_mode} = '1' ]];then
+		Type="forking"
+		ExecStart="${home_dir}/bin/zkServer.sh start"
+		Environment="JAVA_HOME=${JAVA_HOME} ZOO_LOG_DIR=${home_dir}/logs"
 		add_daemon_file ${tmp_dir}/zookeeper.service
 		add_system_service zookeeper ${tmp_dir}/zookeeper.service
 	fi
