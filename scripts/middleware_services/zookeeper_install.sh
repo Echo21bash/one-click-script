@@ -14,8 +14,11 @@ zookeeper_env_load(){
 }
 
 zookeeper_down(){
-
-	down_url="${url}/zookeeper-${detail_version_number}/zookeeper-${detail_version_number}.tar.gz"
+	if [[ ${version_number} = "3.4" ]];then
+		down_url="${url}/zookeeper-${detail_version_number}/zookeeper-${detail_version_number}.tar.gz"
+	elif [[ ${version_number} = "3.5" ]];then
+		down_url="${url}/zookeeper-${detail_version_number}/apache-zookeeper-${detail_version_number}-bin.tar.gz"
+	fi
 	online_down_file
 	unpacking_file ${tmp_dir}/zookeeper-${detail_version_number}.tar.gz ${tmp_dir}
 
@@ -78,7 +81,6 @@ zookeeper_install(){
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
-		#auto_ssh_keygen
 		zookeeper_run_env_check
 		zookeeper_down
 		add_zookeeper_server_list
@@ -166,7 +168,7 @@ zookeeper_config(){
 		sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}#" ${conf_dir}/zoo.cfg
 		sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${install_dir}'/zookeeper/logs' ${tar_dir}/bin/zkServer.sh
 		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/zookeeper.out
-		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/
+		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/zookeeper
 	else
 		sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
 		if [[ -z `grep ^ZOO_LOG_DIR ${tar_dir}/bin/zkServer.sh` ]];then
