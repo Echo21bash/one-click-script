@@ -13,7 +13,7 @@ activemq_env_load(){
 
 }
 
-rocketmq_down(){
+activemq_down(){
 
 	down_url="${url}/${detail_version_number}/apache-activemq-${detail_version_number}-bin.tar.gz"
 	online_down_file
@@ -114,7 +114,7 @@ activemq_config(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		#插入身份认证配置
-		sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
+		sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
 		#注释无用的消息协议只开启tcp
 		sed -i 's#<transportConnector name#<!-- <transportConnector name#' ${home_dir}/conf/activemq.xml
 		sed -i 's#maxFrameSize=104857600"/>#maxFrameSize=104857600"/> -->#' ${home_dir}/conf/activemq.xml
@@ -125,7 +125,7 @@ activemq_config(){
 	elif [[ ${deploy_mode} = '2' ]];then
 		
 			#插入身份认证配置
-			sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
+			sed -i "/<\/persistenceAdapter>/r ${workdir}/config/activemq/activemq_authentication.txt" ${home_dir}/conf/activemq.xml
 			#注释无用的消息协议只开启tcp
 			sed -i 's#<transportConnector name#<!-- <transportConnector name#' ${home_dir}/conf/activemq.xml
 			sed -i 's#maxFrameSize=104857600"/>#maxFrameSize=104857600"/> -->#' ${home_dir}/conf/activemq.xml
@@ -139,13 +139,13 @@ activemq_config(){
 
 		elif [[ ${cluster_mode} = '2' ]];then
 			sed -i 's#brokerName="localhost"#brokerName="broker'${i}'"#' ${home_dir}/conf/activemq.xml
-			sed -i "/<\/plugins>/r ${workdir}/config/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
+			sed -i "/<\/plugins>/r ${workdir}/config/activemq/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
 			sed -i 's#<transportConnector name="openwire" uri="tcp://0.0.0.0:61616#<transportConnector name="openwire" uri="tcp://0.0.0.0:'${activemq_conn_port}'#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<property name="port" value="8161"/>#<property name="port" value="'${activemq_mana_port}'"/>#' ${home_dir}/conf/jetty.xml
 		elif [[ ${cluster_mode} = '3' ]];then
 			sed -i 's#brokerName="localhost"#brokerName="broker'${weight_factor}'"#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<kahaDB directory="${activemq.data}/kahadb"/>#<kahaDB directory="'${shared_dir}'/broker'${weight_factor}'"/>#' ${home_dir}/conf/activemq.xml
-			sed -i "/<\/plugins>/r ${workdir}/config/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
+			sed -i "/<\/plugins>/r ${workdir}/config/activemq/activemq_networkconnectors.txt" ${home_dir}/conf/activemq.xml
 			sed -i 's#<networkConnector uri="static:(tcp://0.0.0.0:61616)#<networkConnector uri="static:(tcp://0.0.0.0:'${activemq_networkconn_port}')#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<transportConnector name="openwire" uri="tcp://0.0.0.0:61616#<transportConnector name="openwire" uri="tcp://0.0.0.0:'${activemq_conn_port}'#' ${home_dir}/conf/activemq.xml
 			sed -i 's#<property name="port" value="8161"/>#<property name="port" value="'${activemq_mana_port}'"/>#' ${home_dir}/conf/jetty.xml

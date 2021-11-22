@@ -120,9 +120,9 @@ rocketmq_namesrvaddr(){
 
 rocketmq_config(){
 
-	cat ${workdir}/config/rocketmq_namesrv.properties >${home_dir}/conf/namesrv.properties
+	cat ${workdir}/config/rocketmq/rocketmq_namesrv.properties >${home_dir}/conf/namesrv.properties
 
-	cat ${workdir}/config/rocketmq_broker.properties >${home_dir}/conf/broker.properties
+	cat ${workdir}/config/rocketmq/rocketmq_broker.properties >${home_dir}/conf/broker.properties
 
 
 	sed -i "s#rocketmqHome=#rocketmqHome=${home_dir}#" ${home_dir}/conf/namesrv.properties
