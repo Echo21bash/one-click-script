@@ -177,7 +177,7 @@ zookeeper_config(){
 		fi
 		sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}#" ${conf_dir}/zoo.cfg
 		sed -i '/ZOOBIN="${BASH_SOURCE-$0}"/i ZOO_LOG_DIR='${install_dir}'/zookeeper/logs' ${tar_dir}/bin/zkServer.sh
-		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/zookeeper.out
+		add_log_cut ${home_dir}/log_cut_zookeeper ${home_dir}/logs/*.out
 		\cp ${home_dir}/log_cut_zookeeper /etc/rsyslog.d/zookeeper
 	else
 		sed -i "s#dataDir=.*#dataDir=${zookeeper_data_dir}/node${service_id}#" ${conf_dir}/zoo.cfg
@@ -189,7 +189,7 @@ zookeeper_config(){
 		fi
 		cat ${tmp_dir}/zk_list >>${conf_dir}/zoo.cfg
 		echo "${service_id}" > ${tmp_dir}/myid_node${service_id}
-		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${install_dir}/zookeeper-node${service_id}/logs/zookeeper.out
+		add_log_cut ${tmp_dir}/log_cut_zookeeper-node${i} ${install_dir}/zookeeper-node${service_id}/logs/*.out
 	fi
 
 }
