@@ -86,7 +86,7 @@ kafka_install(){
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
-		auto_ssh_keygen
+		#auto_ssh_keygen
 		kafka_run_env_check
 		kafka_down
 		local i=0
