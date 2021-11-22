@@ -457,7 +457,7 @@ add_log_cut(){
 			mkdir -p ${pdir}
 		fi
 		cat >${log_cut_config_file}<<-EOF
-		    ${logs_dir}{
+		${logs_dir}{
 		    weekly
 		    rotate 26
 		    compress
