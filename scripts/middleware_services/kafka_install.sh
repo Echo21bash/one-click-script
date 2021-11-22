@@ -23,15 +23,11 @@ kafka_down(){
 kafka_install_set(){
 	output_option '请选择安装模式' '单机模式 集群模式' 'deploy_mode'
 	if [[ ${deploy_mode} = '1' ]];then
-		input_option '请设置kafka的端口号' '9092' 'kafka_port'
-		input_option '请设置kafka数据目录' '/data/kafka' 'kafka_data_dir'
-		kafka_data_dir=${input_value}
-		diy_echo "此处建议使用单独zookeeper服务" "${yellow}" "${info}"
-		input_option '请设置kafka连接的zookeeper地址池' '192.168.1.2:2181 192.168.1.3:2181 192.168.1.4:2181' 'zookeeper_ip'
-		zookeeper_ip=(${input_value[@]})
+		vi ${workdir}/config/kafka/kafka-single.conf
+		. ${workdir}/config/kafka/kafka-single.conf
 	elif [[ ${deploy_mode} = '2' ]];then
-		vi ${workdir}/config/kafka/kafka.conf
-		. ${workdir}/config/kafka/kafka.conf
+		vi ${workdir}/config/kafka/kafka-cluster.conf
+		. ${workdir}/config/kafka/kafka-cluster.conf
 	fi
 	
 
@@ -53,8 +49,10 @@ kafka_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-			if [[ ${java_status} = 0 ]];then
+			java_status="`auto_input_keyword "ssh -Tq ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && javaok
+			EOF" "${passwd[$k]}"`"
+			if [[ ${java_status} =~ "javaok" ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
 				error_log "主机${host_ip[$k]}java运行环境未就绪"
@@ -70,7 +68,7 @@ kafka_run_env_check(){
 	if [[ ${zookeeper_status} = 'imok' ]];then
 		success_log "zookeeper运行环境已就绪"
 	else
-		success_log "zookeeper运行环境未就绪"
+		error_log "zookeeper运行环境未就绪"
 		exit 1
 	fi
 }
@@ -103,24 +101,25 @@ kafka_install(){
 				kafka_config
 				home_dir=${install_dir}/kafka-broker${broker_id}
 				add_kafka_service
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
-				mkdir -p ${install_dir}/kafka-broker${broker_id}
-				"
 				info_log "正在向节点${now_host}分发kafka-broker${broker_id}安装程序和配置文件..."
+				auto_input_keyword "
+				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				mkdir -p ${install_dir}/kafka-broker${broker_id}
+				EOF
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/kafka-broker${broker_id}
 				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				Type=simple
-				ExecStart="${home_dir}/bin/kafka-server-start.sh"
-				StartArgs="${home_dir}/config/server.properties"
-				ExecStop="${home_dir}/bin/kafka-server-stop.sh"
-				Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
+				ExecStart='${home_dir}/bin/kafka-server-start.sh'
+				StartArgs='${home_dir}/config/server.properties'
+				ExecStop='${home_dir}/bin/kafka-server-stop.sh'
+				Environment='JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}'
 				add_daemon_file ${home_dir}/kafka-broker${broker_id}.service
 				add_system_service kafka-broker${broker_id} ${home_dir}/kafka-broker${broker_id}.service
 				service_control kafka-broker${broker_id} restart
 				rm -rf /tmp/public.sh
-				EOF
+				EOF" "${passwd[$k]}"
 				((i++))
 			done
 			((k++))
@@ -157,17 +156,11 @@ kafka_config(){
 
 add_kafka_service(){
 	if [[ ${deploy_mode} = '1' ]];then
-		JAVA_HOME=${JAVA_HOME}
-	else
-		JAVA_HOME=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} 'echo $JAVA_HOME'`
-	fi
-
-	Type=simple
-	ExecStart="${home_dir}/bin/kafka-server-start.sh"
-	StartArgs="${home_dir}/config/server.properties"
-	ExecStop="${home_dir}/bin/kafka-server-stop.sh"
-	Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
-	if [[ ${deploy_mode} = '1' ]];then
+		Type=simple
+		ExecStart="${home_dir}/bin/kafka-server-start.sh"
+		StartArgs="${home_dir}/config/server.properties"
+		ExecStop="${home_dir}/bin/kafka-server-stop.sh"
+		Environment="JAVA_HOME=${JAVA_HOME} KAFKA_HOME=${home_dir}"
 		add_daemon_file ${home_dir}/kafka.service
 		add_system_service kafka ${home_dir}/kafka.service
 		service_control kafka restart
