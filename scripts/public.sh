@@ -457,14 +457,14 @@ add_log_cut(){
 			mkdir -p ${pdir}
 		fi
 		cat >${log_cut_config_file}<<-EOF
-		${logs_dir}{
-		weekly
-		rotate 26
-		compress
-		missingok
-		notifempty
-		copytruncate
-		dateext
+		    ${logs_dir}{
+		    weekly
+		    rotate 26
+		    compress
+		    missingok
+		    notifempty
+		    copytruncate
+		    dateext
 		}
 		EOF
 		success_log "成功创建${log_cut_config_file}日志切割配置文件,请复制到/etc/logrotate.d/下"
