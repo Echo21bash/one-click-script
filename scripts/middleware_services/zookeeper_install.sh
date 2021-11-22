@@ -158,10 +158,19 @@ zookeeper_config(){
 	conf_dir=${tar_dir}/conf
 	\cp ${conf_dir}/zoo_sample.cfg ${conf_dir}/zoo.cfg
 	\cp ${workdir}/config/zookeeper/java.env ${conf_dir}
+	###四字命令
+	if [[ ${version_number} = "3.5" ]];then
+		echo '4lw.commands.whitelist=*' >> ${conf_dir}/zoo.cfg
+	fi
+	###java堆内存
 	if [[ -n ${jvm_heap} ]];then
 		sed -i "s#512m#${jvm_heap}#g" ${conf_dir}/java.env
 	fi
-	sed -i "s#clientPort=.*#clientPort=${zk_port}#" ${conf_dir}/zoo.cfg
+	###修改端口
+	if [[ -n ${zk_port} ]];then
+		sed -i "s#clientPort=.*#clientPort=${zk_port}#" ${conf_dir}/zoo.cfg
+	fi
+
 	if [[ ${deploy_mode} = '1' ]];then
 		if [[ ! -d ${zookeeper_data_dir} ]];then
 			mkdir -p ${zookeeper_data_dir}
