@@ -51,7 +51,7 @@ tomcat_install(){
 tomcat_config(){
 	#修改配置参数
 	sed -i '/<Connector port="8080" protocol="HTTP\/1.1"/,/redirectPort="8443" \/>/s/redirectPort="8443" \/>/redirectPort="8443"/' ${home_dir}/conf/server.xml
-	sed -i '/^               redirectPort="8443"$/r '${workdir}'/config/tomcat_service.txt' ${home_dir}/conf/server.xml
+	sed -i '/^               redirectPort="8443"$/r '${workdir}'/config/tomcat/tomcat_service.txt' ${home_dir}/conf/server.xml
 	sed -i '/<\/Host>/i \      <!--<Context path="" docBase="" reloadable="true">\n      <\/Context>-->' ${home_dir}/conf/server.xml
 
 	#禁用shutdown端口
@@ -87,9 +87,9 @@ memory_overflow_config(){
 	sed -i "$N i# JAVA_OPTS (Optional) Java runtime options used when any command is executed.\n" ${home_dir}/bin/catalina.sh
 	
 	if [[ ${java_version} < '1.8' ]];then
-		sed -i "/^# JAVA_OPTS.*/r ${workdir}/config/tomcat_jvm7.txt" ${home_dir}/bin/catalina.sh
+		sed -i "/^# JAVA_OPTS.*/r ${workdir}/config/tomcat/tomcat_jvm7.txt" ${home_dir}/bin/catalina.sh
 	else
-		sed -i "/^# JAVA_OPTS.*/r ${workdir}/config/tomcat_jvm8.txt" ${home_dir}/bin/catalina.sh
+		sed -i "/^# JAVA_OPTS.*/r ${workdir}/config/tomcat/tomcat_jvm8.txt" ${home_dir}/bin/catalina.sh
 	fi
 }
 
