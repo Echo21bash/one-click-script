@@ -129,6 +129,7 @@ elasticsearch_install(){
 				User=elasticsearch
 				ExecStart="${home_dir}/bin/elasticsearch"
 				Environment="JAVA_HOME=${JAVA_HOME}"
+				SuccessExitStatus="143"
 				add_daemon_file ${home_dir}/elasticsearch-node${service_id}.service
 				add_system_service elasticsearch-node${service_id} ${home_dir}/elasticsearch-node${service_id}.service
 				service_control elasticsearch-node${service_id} enable
@@ -282,6 +283,7 @@ add_elasticsearch_service(){
 		User=elasticsearch
 		ExecStart="${home_dir}/bin/elasticsearch"
 		Environment="JAVA_HOME=${JAVA_HOME}"
+		SuccessExitStatus="143"
 		add_daemon_file ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 		service_control elasticsearch enable

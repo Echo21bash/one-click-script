@@ -100,6 +100,7 @@ logstash_install(){
 			User=logstash
 			ExecStart="${home_dir}/bin/logstash"
 			Environment="JAVA_HOME=${JAVA_HOME}"
+			SuccessExitStatus="143"
 			add_daemon_file ${home_dir}/logstash.service
 			add_system_service logstash ${home_dir}/logstash.service
 			service_control logstash restart
@@ -167,6 +168,7 @@ add_logstash_service(){
 		User=logstash
 		ExecStart="${home_dir}/bin/logstash"
 		Environment="JAVA_HOME=${JAVA_HOME}"
+		SuccessExitStatus="143"
 		add_daemon_file ${home_dir}/logstash.service
 		add_system_service logstash ${home_dir}/logstash.service
 	fi
