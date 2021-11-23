@@ -82,7 +82,6 @@ elasticsearch_install(){
 		elasticsearch_cluster_check
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		auto_ssh_keygen
 		if [[ ${version_number} < '7' ]];then
 			elasticsearch_run_env_check
 		fi
