@@ -57,7 +57,6 @@ filebeat_install(){
 			mkdir -p ${install_dir}/filebeat/input.d
 			EOF
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/filebeat
-			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/filebeat.service ${host_ip[$k]}:${install_dir}/filebeat
 			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			. /tmp/public.sh
