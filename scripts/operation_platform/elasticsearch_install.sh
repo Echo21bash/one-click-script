@@ -38,8 +38,8 @@ elasticsearch_run_env_check(){
 		###修改内核参数
 		[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
 		###检测JDK环境
-		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
-		if [[ ${java_status} = 0 ]];then
+		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1 && echo javaok`
+		if [[ ${java_status} = "javaok" ]];then
 			success_log "java运行环境已就绪"
 		else
 			error_log "java运行环境未就绪"
@@ -340,7 +340,7 @@ elasticsearch_cluster_check(){
 			elasticsearch_status=`auto_input_keyword "ssh ${host_ip[0]} -p ${ssh_port[0]} <<-EOF
 			systemctl is-active elasticsearch-node1
 			EOF" "${passwd[0]}"`
-			if [[ ${elasticsearch_status} =~ 'active' ]];then
+			if [[ ${elasticsearch_status} =~ "active" ]];then
 				curl http://${host_ip[0]}:9200 >/dev/null 2>&1
 				if [[ $? = 0 ]];then
 					elasticsearch_read=yes
@@ -361,5 +361,5 @@ elasticsearch_install_ctl(){
 	elasticsearch_env_load
 	elasticsearch_install_set
 	elasticsearch_install
-	
+
 }
