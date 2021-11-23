@@ -48,8 +48,10 @@ elasticsearch_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-			if [[ ${java_status} = 0 ]];then
+			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
+			EOF "${passwd[$k]}"`
+			if [[ ${java_status} =~ "javaok" ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
 				error_log "主机${host_ip[$k]}java运行环境未就绪"
@@ -103,15 +105,15 @@ elasticsearch_install(){
 				if [[ ${version_number} > '6' ]];then
 					JAVA_HOME=${home_dir}/jdk
 				fi
-				ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+
+				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
+				auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				useradd -M elasticsearch
 				mkdir -p ${install_dir}/elasticsearch-node${service_id}
 				mkdir -p ${elsearch_data_dir}/node${service_id}
-				"
-				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
+				EOF
 				scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/elasticsearch-node${service_id}
 				scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-
 				ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 				. /tmp/public.sh
 				chown -R elasticsearch.elasticsearch ${install_dir}/elasticsearch-node${service_id}
@@ -124,7 +126,7 @@ elasticsearch_install(){
 				service_control elasticsearch-node${service_id} enable
 				service_control elasticsearch-node${service_id} restart
 				rm -rf /tmp/public.sh
-				EOF
+				EOF" "${passwd[$k]}"
 				((i++))
 			done
 			((k++))
@@ -267,11 +269,11 @@ elasticsearch_conf(){
 
 add_elasticsearch_service(){
 
-	Type=simple
-	User=elasticsearch
-	ExecStart="${home_dir}/bin/elasticsearch"
-	Environment="JAVA_HOME=${JAVA_HOME}"
 	if [[ ${deploy_mode} = '1' ]];then
+		Type=simple
+		User=elasticsearch
+		ExecStart="${home_dir}/bin/elasticsearch"
+		Environment="JAVA_HOME=${JAVA_HOME}"
 		add_daemon_file ${home_dir}/elasticsearch.service
 		add_system_service elasticsearch ${home_dir}/elasticsearch.service
 		service_control elasticsearch enable
@@ -309,11 +311,12 @@ elasticsearch_cluster_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-
 			for ((j=0;j<${node_num[$k]};j++))
 			do
-				elasticsearch_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "systemctl is-active elasticsearch-node${i}"`
-				if [[ ${elasticsearch_status} = 'active' ]];then
+				elasticsearch_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				systemctl is-active elasticsearch-node${i}
+				EOF" "${passwd[$k]}"`
+				if [[ ${elasticsearch_status} =~ "active" ]];then
 					success_log "elasticsearch-node${i}启动完成"
 				else
 					error_log "elasticsearch-node${i}启动失败"
@@ -322,8 +325,27 @@ elasticsearch_cluster_check(){
 			done
 			((k++))
 		done
-		info_log "节点列表"
-		curl http://${host_ip[0]}:9200/_cat/nodes?pretty
+
+		for (( i = 0; i < 60; i++ ))
+		do
+			sleep 2
+			elasticsearch_status=`auto_input_keyword "ssh ${host_ip[0]} -p ${ssh_port[0]} <<-EOF
+			systemctl is-active elasticsearch-node${i}
+			EOF" "${passwd[0]}"`
+			if [[ ${elasticsearch_status} =~ 'active' ]];then
+				curl http://${host_ip[0]}:9200 >/dev/null 2>&1
+				if [[ $? = 0 ]];then
+					elasticsearch_read=yes
+					success_log "elasticsearch已就绪"
+					break
+				fi
+			fi
+		done
+		if [[ ${elasticsearch_read} = 'yes' ]];then
+			success_log "elasticsearch集群正常"
+		else
+			error_log "elasticsearch集群异常"
+		fi
 	fi
 }
 
