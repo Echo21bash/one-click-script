@@ -59,7 +59,7 @@ elasticsearch_run_env_check(){
 			###检测JDK环境
 			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
-			EOF "${passwd[$k]}"`
+			EOF" "${passwd[$k]}"`
 			if [[ ${java_status} =~ "javaok" ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
