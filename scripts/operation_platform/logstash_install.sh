@@ -92,7 +92,7 @@ logstash_install(){
 			mkdir -p ${install_dir}/logstash
 			EOF
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/logstash
-			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tm
+			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			. /tmp/public.sh
 			chown -R logstash.logstash ${install_dir}/logstash
