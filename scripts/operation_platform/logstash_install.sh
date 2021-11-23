@@ -37,8 +37,8 @@ logstash_install_set(){
 logstash_run_env_check(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
-		if [[ ${java_status} = 0 ]];then
+		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok`
+		if [[ ${java_status} = "javaok" ]];then
 			success_log "java运行环境已就绪"
 		else
 			error_log "java运行环境未就绪"
@@ -50,14 +50,16 @@ logstash_run_env_check(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			java_status=`ssh ${host_ip[$k]} -p ${ssh_port[$k]} "${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1"`
-			if [[ ${java_status} = 0 ]];then
+			###检测JDK环境
+			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
+			EOF" "${passwd[$k]}"`
+			if [[ ${java_status} =~ "javaok" ]];then
 				success_log "主机${host_ip[$k]}java运行环境已就绪"
 			else
 				error_log "主机${host_ip[$k]}java运行环境未就绪"
 				exit 1
 			fi
-			((k++))
 		done
 	fi
 }
@@ -75,24 +77,22 @@ logstash_install(){
 		add_logstash_service
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		auto_ssh_keygen
 		logstash_run_env_check
 		logstash_down
 		home_dir=${install_dir}/logstash
 		logstash_conf
-		add_logstash_service
 		local i=1
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			info_log "正在向节点${now_host}分发logstash安装程序和配置文件..."
+			auto_input_keyword "
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			useradd -M logstash
 			mkdir -p ${install_dir}/logstash
-			"
-			info_log "正在向节点${now_host}分发logstash安装程序和配置文件..."
+			EOF
 			scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${install_dir}/logstash
-			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-				
+			scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tm
 			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			. /tmp/public.sh
 			chown -R logstash.logstash ${install_dir}/logstash
@@ -104,7 +104,7 @@ logstash_install(){
 			add_system_service logstash ${home_dir}/logstash.service
 			service_control logstash restart
 			rm -rf /tmp/public.sh
-			EOF
+			EOF" "${passwd[$k]}"
 			((k++))
 		done
 	fi
@@ -161,11 +161,12 @@ logstash_conf(){
 }
 
 add_logstash_service(){
-	Type=simple
-	User=logstash
-	ExecStart="${home_dir}/bin/logstash"
-	Environment="JAVA_HOME=${JAVA_HOME}"
+
 	if [[ ${deploy_mode} = '1' ]];then
+		Type=simple
+		User=logstash
+		ExecStart="${home_dir}/bin/logstash"
+		Environment="JAVA_HOME=${JAVA_HOME}"
 		add_daemon_file ${home_dir}/logstash.service
 		add_system_service logstash ${home_dir}/logstash.service
 	fi
