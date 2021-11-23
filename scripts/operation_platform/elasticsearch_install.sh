@@ -55,7 +55,7 @@ elasticsearch_run_env_check(){
 			###修改内核参数
 			auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
-			EOF" "${passwd[$k]}"`
+			EOF" "${passwd[$k]}"
 			###检测JDK环境
 			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
