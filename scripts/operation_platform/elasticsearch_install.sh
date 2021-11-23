@@ -35,6 +35,9 @@ elasticsearch_install_set(){
 elasticsearch_run_env_check(){
 
 	if [[ ${deploy_mode} = '1' ]];then
+		###修改内核参数
+		[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
+		###检测JDK环境
 		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo 0 || echo 1`
 		if [[ ${java_status} = 0 ]];then
 			success_log "java运行环境已就绪"
@@ -42,12 +45,18 @@ elasticsearch_run_env_check(){
 			error_log "java运行环境未就绪"
 			exit 1
 		fi
+		
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
+			###修改内核参数
+			auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+			[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
+			EOF" "${passwd[$k]}"`
+			###检测JDK环境
 			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
 			EOF "${passwd[$k]}"`
@@ -329,7 +338,7 @@ elasticsearch_cluster_check(){
 		do
 			sleep 2
 			elasticsearch_status=`auto_input_keyword "ssh ${host_ip[0]} -p ${ssh_port[0]} <<-EOF
-			systemctl is-active elasticsearch-node${i}
+			systemctl is-active elasticsearch-node1
 			EOF" "${passwd[0]}"`
 			if [[ ${elasticsearch_status} =~ 'active' ]];then
 				curl http://${host_ip[0]}:9200 >/dev/null 2>&1
