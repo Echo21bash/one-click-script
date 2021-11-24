@@ -14,7 +14,7 @@ online_down_file(){
 		down_file_name=${down_url##*/}
 	else
 		down_file_name=${down_file_rename}
-
+		down_file_rename=""
 	fi
 	
 	if [[ -z ${tmp_dir} ]];then

@@ -72,9 +72,29 @@ java_install(){
 
 }
 
+java_check(){
+
+	local k=0
+	for now_host in ${host_ip[@]}
+	do
+		info_log "正在向节点${now_host}分发java${service_id}安装程序和配置文件..."
+		java_status=`auto_input_keyword "
+		ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+		${install_dir}/java/bin/java -version > /dev/null 2>&1  && echo javaok
+		EOF" "${passwd[$k]}"`
+		if [[ ${java_status} =~ "javaok" ]];then
+			success_log "主机${host_ip[$k]}java运行环境已就绪"
+		else
+			warning_log "主机${host_ip[$k]}java运行环境未就绪"
+		fi
+		((k++))
+	done
+
+}
+
 java_readme(){
 
-	success_log "java运行环境已就绪"
+	info_log "java环境为全局配置"
 }
 
 java_install_ctl(){
@@ -82,6 +102,7 @@ java_install_ctl(){
 	java_install_set
 	java_down
 	java_install
+	java_check
 	java_readme
 	
 }

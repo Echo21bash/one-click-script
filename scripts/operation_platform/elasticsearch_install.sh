@@ -37,15 +37,19 @@ elasticsearch_run_env_check(){
 	if [[ ${deploy_mode} = '1' ]];then
 		###修改内核参数
 		[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
-		###检测JDK环境
-		java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1 && echo javaok`
-		if [[ ${java_status} = "javaok" ]];then
-			success_log "java运行环境已就绪"
+		if [[ ${version_number} < '7' ]];then
+			###检测JDK环境
+			java_status=`${JAVA_HOME}/bin/java -version > /dev/null 2>&1 && echo javaok`
+			if [[ ${java_status} = "javaok" ]];then
+				success_log "java运行环境已就绪"
+			else
+				error_log "java运行环境未就绪"
+				exit 1
+			fi
+			
 		else
-			error_log "java运行环境未就绪"
-			exit 1
+			JAVA_HOME=${home_dir}/jdk
 		fi
-		
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
@@ -56,16 +60,21 @@ elasticsearch_run_env_check(){
 			auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			[[ `sysctl -n vm.max_map_count` -lt "262144" ]] && echo 'vm.max_map_count = 262144'>>/etc/sysctl.conf && sysctl -w vm.max_map_count=262144
 			EOF" "${passwd[$k]}"
-			###检测JDK环境
-			java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
-			${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
-			EOF" "${passwd[$k]}"`
-			if [[ ${java_status} =~ "javaok" ]];then
-				success_log "主机${host_ip[$k]}java运行环境已就绪"
+			if [[ ${version_number} < '7' ]];then
+				###检测JDK环境
+				java_status=`auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+				${JAVA_HOME}/bin/java -version > /dev/null 2>&1  && echo javaok
+				EOF" "${passwd[$k]}"`
+				if [[ ${java_status} =~ "javaok" ]];then
+					success_log "主机${host_ip[$k]}java运行环境已就绪"
+				else
+					error_log "主机${host_ip[$k]}java运行环境未就绪"
+					exit 1
+				fi		
 			else
-				error_log "主机${host_ip[$k]}java运行环境未就绪"
-				exit 1
+				JAVA_HOME=${home_dir}/jdk
 			fi
+
 			((k++))
 		done
 	fi
@@ -75,11 +84,7 @@ elasticsearch_install(){
 
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/elasticsearch
-		if [[ ${version_number} > '6' ]];then
-			JAVA_HOME=${home_dir}/jdk
-		else
-			elasticsearch_run_env_check
-		fi
+		elasticsearch_run_env_check
 		elasticsearch_down
 		useradd -M elasticsearch
 		mkdir -p ${install_dir}/elasticsearch
@@ -91,9 +96,7 @@ elasticsearch_install(){
 		elasticsearch_cluster_check
 	fi
 	if [[ ${deploy_mode} = '2' ]];then
-		if [[ ${version_number} < '7' ]];then
-			elasticsearch_run_env_check
-		fi
+		elasticsearch_run_env_check
 		elasticsearch_down
 		elasticsearch_master_node_list
 		elasticsearch_master_server_list
@@ -110,9 +113,6 @@ elasticsearch_install(){
 				let elsearch_tcp_port=9300+$j
 				elasticsearch_conf
 				home_dir=${install_dir}/elasticsearch-node${service_id}
-				if [[ ${version_number} > '6' ]];then
-					JAVA_HOME=${home_dir}/jdk
-				fi
 
 				info_log "正在向节点${now_host}分发elsearch-node${service_id}安装程序和配置文件..."
 				auto_input_keyword "ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
