@@ -33,31 +33,8 @@ java_install_set(){
 	
 }
 
-check_java(){
-	#检查旧版本
-	info_log "正在检查预装openjava..."
-	j=`rpm -qa | grep  java | awk 'END{print NR}'`
-	#卸载旧版
-	if [ $j -gt 0 ];then
-		info_log "java卸载清单:"
-		for ((i=1;i<=j;i++));
-		do		
-			a1=`rpm -qa | grep java | awk '{if(NR == 1 ) print $0}'`
-			echo $a1
-			rpm -e --nodeps $a1
-		done
-		if [ $? = 0 ];then
-			info_log "卸载openjava完成."
-		else
-			error_log "卸载openjava失败，请尝试手动卸载."
-			exit 1
-		fi
-	else
-		info_log "该系统没有预装openjava."
-	fi
-}
 
-install_java(){
+java_install(){
 
 	home_dir=${install_dir}/java
 	if [[ ${deploy_mode} = '1' ]];then
@@ -76,30 +53,36 @@ install_java(){
 		local k=0
 		for now_host in ${host_ip[@]}
 		do
-			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			info_log "正在向节点${now_host}分发java${service_id}安装程序和配置文件..."
+			auto_input_keyword "
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			mkdir -p ${install_dir}/java
 			mkdir -p ${tmp_dir}
-			"
-			info_log "正在向节点${now_host}分发java${service_id}安装程序和配置文件..."
+			EOF
 			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/${down_file_name} ${host_ip[$k]}:${tmp_dir}
 			scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/java_profile.sh ${host_ip[$k]}:${tmp_dir}
-			info_log "解压${down_file_name}..."
-			ssh ${host_ip[$k]} -p ${ssh_port[$k]} "
+			ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 			cd ${tmp_dir}
 			tar zxf ${tmp_dir}/${down_file_name} -C ${install_dir}/java --strip-components 1 
 			\cp ${tmp_dir}/java_profile.sh /etc/profile.d/
 			chmod +x /etc/profile.d/java_profile.sh
-			"
+			EOF" "${passwd[$k]}"
 			((k++))
 		done
 	fi
 
 }
 
+java_readme(){
+
+	success_log "java运行环境已就绪"
+}
+
 java_install_ctl(){
 	java_env_load
 	java_install_set
 	java_down
-	install_java
+	java_install
+	java_readme
 	
 }
