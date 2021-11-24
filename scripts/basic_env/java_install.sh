@@ -47,7 +47,6 @@ java_install(){
 	fi
 	
 	if [[ ${deploy_mode} = '2' ]];then
-		auto_ssh_keygen
 		\cp ${workdir}/config/java/java_profile.sh ${tmp_dir}
 		sed -i "s%JAVA_HOME=.*%JAVA_HOME=${home_dir}%" ${tmp_dir}/java_profile.sh
 		local k=0
