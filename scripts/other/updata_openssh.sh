@@ -4,7 +4,7 @@ openssh_env_load(){
 	tmp_dir=/usr/local/src/openssh_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=openssh
-	program_version=('8.4' '8.5' '8.6')
+	program_version=('8.4' '8.5' '8.6' '8.8')
 	url='https://raw.githubusercontent.com/hebaodanroot/rpm_package'
 	select_version
 	ssh_ver=`rpm -qa openssh | grep -oE "[0-9]{1}\.[0-9]{1}"`
