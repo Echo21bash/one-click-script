@@ -7,9 +7,10 @@ openssh_env_load(){
 	program_version=('8.4' '8.5' '8.6' '8.8')
 	url='https://raw.githubusercontent.com/hebaodanroot/rpm_package'
 	select_version
+	info_log "获取当前ssh版本"
 	ssh_ver=`rpm -qa openssh | grep -oE "[0-9]{1}\.[0-9]{1}"`
-	if [[ ${ssh_ver} > ${version_number} ]];then
-		info_log "现有版本大于选择版本无需升级"
+	if [[ ${ssh_ver} > ${version_number} || ${ssh_ver} = ${version_number} ]];then
+		info_log "现有版本大于等于选择版本无需升级"
 		exit 0
 	fi
 }
