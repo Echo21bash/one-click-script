@@ -9,14 +9,14 @@ system_optimize_set(){
 		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
 		fi
-		if [[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]];then
+		if [[ -z `grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo` ]];then
 			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
 		fi
 	else
 		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
 		fi
-		if [[ -z 'grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo' ]];then
+		if [[ -z `grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo` ]];then
 			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
 		fi
 	fi
