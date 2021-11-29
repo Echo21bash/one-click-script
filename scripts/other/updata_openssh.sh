@@ -112,11 +112,13 @@ openssh_upgrade_batch(){
 	fi
 	
 	###启动telnet
-	nohup /tmp_dir/telshell >/dev/null 2>&1 && \
-	info_log "telnet已经就绪，端口为1000。" || \
-	error_log "telnet未就绪，请检查！"
-	[[ \$? != "0" ]] && exit 1
-
+	nohup /tmp_dir/telshell >/dev/null 2>&1 
+	if [[ \$? = "0" ]];then
+		info_log "telnet已经就绪，端口为1000。"
+	else
+		error_log "telnet未就绪，请检查！"
+		exit 1
+	fi
 	###备份sshd
 	info_log "备份${now_host}openssh配置文件"
 	[[ ! -f /etc/pam.d/sshd_back_upgrade ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd_back_upgrade
