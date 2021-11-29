@@ -112,7 +112,7 @@ openssh_upgrade_batch(){
 	fi
 	
 	###启动telnet
-	nohup /tmp_dir/telshell >/dev/null 2>&1 
+	nohup ${tmp_dir}/telshell >/dev/null 2>&1 
 	if [[ \$? = "0" ]];then
 		info_log "telnet已经就绪，端口为1000。"
 	else
