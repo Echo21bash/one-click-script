@@ -54,7 +54,7 @@ openssh_local_run_telshell(){
 		exit 0
 	fi
 	cp ${workdir}/bin/telshell /tmp_dir
-	nohup /tmp_dir/telshell >/dev/null/ 2>&1 &
+	nohup /tmp_dir/telshell >/dev/null 2>&1 &
 	if [[ -n `pidof telshell` ]];then
 		info_log "telnet已经就绪，端口为1000。"
 	else
@@ -112,10 +112,10 @@ openssh_upgrade_batch(){
 	fi
 	
 	###启动telnet
-	nohup /tmp_dir/telshell >/dev/null/ 2>&1 && \
+	nohup /tmp_dir/telshell >/dev/null 2>&1 && \
 	info_log "telnet已经就绪，端口为1000。" || \
 	error_log "telnet未就绪，请检查！"
-	[[ \$? ! = "0" ]] && exit 1
+	[[ \$? != "0" ]] && exit 1
 
 	###备份sshd
 	info_log "备份${now_host}openssh配置文件"
