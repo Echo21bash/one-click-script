@@ -113,7 +113,7 @@ openssh_upgrade_batch(){
 	
 	###启动telnet
 	nohup ${tmp_dir}/telshell >/dev/null 2>&1 
-	if [[ \$? = "0" ]];then
+	if [[ -n \`pidof telshell\` ]];then
 		info_log "telnet已经就绪，端口为1000。"
 	else
 		error_log "telnet未就绪，请检查！"
