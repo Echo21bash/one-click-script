@@ -163,9 +163,15 @@ openssh_upgrade(){
 
 }
 
+openssh_readme(){
+
+	info_log "ssh升级完成，请尽快验证。如有问题可使用telnet连接修复。完成后请手动结束telshell进程"
+}
+
 updata_openssh_ctl(){
 	openssh_env_load
 	openssh_updata_set
 	openssh_down
 	openssh_upgrade
+	openssh_readme
 }
