@@ -60,7 +60,7 @@ openssh_local_run_telshell(){
 	else
 		error_log "telnet未就绪，请检查！"
 		exit 1
-	if
+	fi
 }
 
 
