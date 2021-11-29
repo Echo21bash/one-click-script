@@ -112,6 +112,7 @@ openssh_upgrade_batch(){
 	fi
 	
 	###启动telnet
+	info_log "启动telshell"
 	nohup ${tmp_dir}/telshell >/dev/null 2>&1
 	sleep 2
 	if [[ -n \`pidof telshell\` ]];then
