@@ -101,7 +101,7 @@ openssh_upgrade_batch(){
 	mkdir -p ${tmp_dir}
 	EOF
 	scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/openssh* ${workdir}/bin/telshell ${workdir}/scripts/public.sh ${host_ip[$k]}:${tmp_dir}
-	ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-'EOF'
+	ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-"EOF"
 	. ${tmp_dir}/public.sh
 	###获取当前ssh版本
 	info_log "获取${now_host}当前ssh版本"
