@@ -780,6 +780,8 @@ auto_input_keyword(){
 	cmd="$1"
 	echo "${cmd}" >/tmp/tmp.sh
 	input_keyword="$2"
+	###特殊字符都添加反斜杠
+	input_keyword=$(perl -e 'print quotemeta shift(@ARGV)' "${input_keyword}")
 	expect_dir=`which expect 2>/dev/null`
 	[[ -z ${expect_dir} ]] && yum install expect -y
 	expect <<-EOF
