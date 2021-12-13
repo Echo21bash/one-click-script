@@ -20,7 +20,7 @@ system_security_set(){
 	###ssh远程登录限制
 	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
 		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
-		success_log "更新本地登录失败策略"
+		success_log "更新远程登录失败策略"
 		info_log "登录失败策略为登录失败3次锁定10分钟"
 	else
 		info_log "已经存在策略，已跳过。"
@@ -28,7 +28,7 @@ system_security_set(){
 	###本地登陆限制
 	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/system-auth` ]];then
 		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
-		success_log "更新远程登录失败策略"
+		success_log "更新本地登录失败策略"
 		info_log "登录失败策略为登录失败3次锁定10分钟"
 	else
 		info_log "已经存在策略，已跳过。"
@@ -37,8 +37,6 @@ system_security_set(){
 	###系统用户操作记录配置/var/log/bash_history.log
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
 	#!/bin/bash
-
-	
 	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
 	export PROMPT_COMMAND='\
 	if [ -z "$OLD_PWD" ];then
@@ -46,6 +44,7 @@ system_security_set(){
 	fi;
 	if [ ! -z "$LAST_CMD" ] && [ "$(history 1)" != "$LAST_CMD" ]; then
 		echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
+		logger-t`whoami`_shell_cmd"[$OLD_PWD]$(history1)";
 	fi;
 	export LAST_CMD="$(history 1)";
 	export OLD_PWD=$(pwd);'
@@ -57,7 +56,36 @@ system_security_set(){
 	source /etc/profile
 	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log"
 	
+	if [[ -z `grep '^Banner' /etc/ssh/sshd_config` ]];then
+		sed -i '/#Banner none/aBanner /etc/ssh/alert' /etc/ssh/sshd_config
+		cat >/etc/ssh/alert<<-EOF
+		*******************************************************
+		警告!!!你已经登陆生产环境,一切操作将被记录请谨慎操作!!!
+		Warning!!!Any Access Without Permission Is Forbidden!!!
+		*******************************************************
+		EOF
+		success_log "添加ssh登陆Banner"
+	else
+		info_log "ssh登陆Banner，已跳过。"
+	fi
+	
+	if [[ -z `grep '^umask 027' /etc/profile` ]];then
+		echo "umask 027" >>/etc/profile
+		success_log "文件掩码umask修改为027"
+	fi
+	
+	if [[ -z `grep '^umask 027' /etc/bashrc` ]];then
+		echo "umask 027" >>/etc/bashrc
+		success_log "文件掩码umask修改为027"
+	fi
 
+	if [[ -f /etc/init/control-alt-delete.conf ]];then
+		sed -i 's?exec /sbin/shutdown?#exec /sbin/shutdown?' /etc/init/control-alt-delete.conf
+	fi
+	if [[ -f /etc/init/control-alt-delete.conf ]];then
+		\cp /usr/lib/systemd/system/ctrl-alt-del.target /usr/lib/systemd/system/ctrl-alt-del.target.default
+		rm -rf /usr/lib/systemd/system/ctrl-alt-del.target
+	fi
 	
 	#锁定关键文件系统
 	#chattr +i /etc/passwd
