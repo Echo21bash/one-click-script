@@ -178,7 +178,7 @@ add_nacos_service(){
 nacos_status_check(){
 
 	if [[ ${deploy_mode} = '1' ]];then
-		nacos_status=`service_control nacos-node${i} is-active`
+		nacos_status=`service_control nacos is-active`
 		if [[ ${nacos_status} =~ 'active' ]];then
 			success_log "nacos启动完成"
 		else
