@@ -630,14 +630,7 @@ add_daemon_sysvinit_file(){
 	esac
 	EOF
 	success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/init.d下"
-	#删除空值
-	[[ -z ${Requires} ]] && sed -i /Requires=/d ${system_service_config_file}
-	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
-	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
-	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
-	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
-	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
-	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
+
 }
 
 add_daemon_systemd_file(){
@@ -675,6 +668,8 @@ add_daemon_systemd_file(){
 	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
 	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
 	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
+	[[ -z ${ExecReload} ]] && sed -i /ExecReload=/d ${system_service_config_file}
+	[[ -z ${ExecStop} ]] && sed -i /ExecStop=/d ${system_service_config_file}
 	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
 	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
 }
