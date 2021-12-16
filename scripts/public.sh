@@ -458,6 +458,7 @@ add_log_cut(){
 		fi
 		cat >${log_cut_config_file}<<-EOF
 		${logs_dir}{
+			su root root
 		    weekly
 		    rotate 26
 		    compress
