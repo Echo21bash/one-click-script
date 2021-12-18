@@ -114,11 +114,11 @@ logstash_install(){
 logstash_conf(){
 	if [[ ${deploy_mode} = '1' ]];then
 		get_ip
+		conf_dir=${home_dir}/config
 		\cp ${workdir}/config/elk/logstash-http.conf ${home_dir}/config.d/
 		if [[ ! -f ${conf_dir}/logstash.yml.bak ]];then
 			cp ${conf_dir}/logstash.yml ${conf_dir}/logstash.yml.bak
 		fi
-		conf_dir=${home_dir}/config
 		sed -i "s/# pipeline.workers.*/pipeline.workers: 4/" ${conf_dir}/logstash.yml
 		sed -i "s/# pipeline.output.workers.*/pipeline.output.workers: 2/" ${conf_dir}/logstash.yml
 		sed -i "s%# path.config.*%path.config: ${home_dir}/config.d%" ${conf_dir}/logstash.yml
@@ -171,6 +171,7 @@ add_logstash_service(){
 		SuccessExitStatus="143"
 		add_daemon_file ${home_dir}/logstash.service
 		add_system_service logstash ${home_dir}/logstash.service
+		service_control logstash restart
 	fi
 }
 

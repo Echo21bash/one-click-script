@@ -311,13 +311,14 @@ down_file(){
 		if [[ ! -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -n 16 -a ${mirror_down_url} -o ${path_file}
+				axel -c -n 8 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -n 16 -a ${down_url} -o ${path_file}
+
+				axel -c -n 8 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
@@ -326,13 +327,15 @@ down_file(){
 		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
 			diy_echo "正在断点续传下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -n 16 -a ${mirror_down_url} -o ${path_file}
+
+				axel -c -n 8 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -n 16 -a ${down_url} -o ${path_file}
+
+				axel -c -n 8 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
@@ -458,6 +461,7 @@ add_log_cut(){
 		fi
 		cat >${log_cut_config_file}<<-EOF
 		${logs_dir}{
+			su root root
 		    weekly
 		    rotate 26
 		    compress
@@ -630,14 +634,8 @@ add_daemon_sysvinit_file(){
 	esac
 	EOF
 	success_log "成功创建${system_service_config_file}系统服务配置文件,请复制到/etc/init.d下"
-	#删除空值
-	[[ -z ${Requires} ]] && sed -i /Requires=/d ${system_service_config_file}
-	[[ -z ${WorkingDirectory} ]] && sed -i /WorkingDirectory=/d ${system_service_config_file}
-	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
-	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
-	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
-	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
-	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
+
+
 }
 
 add_daemon_systemd_file(){
@@ -675,6 +673,8 @@ add_daemon_systemd_file(){
 	[[ -z ${Environment} ]] && sed -i /Environment=/d ${system_service_config_file}
 	[[ -z ${EnvironmentFile} ]] && sed -i /EnvironmentFile=/d ${system_service_config_file}
 	[[ -z ${PIDFile} ]] && sed -i /PIDFile=/d ${system_service_config_file}
+	[[ -z ${ExecReload} ]] && sed -i /ExecReload=/d ${system_service_config_file}
+	[[ -z ${ExecStop} ]] && sed -i /ExecStop=/d ${system_service_config_file}
 	[[ -z ${ExecStartPost} ]] && sed -i /ExecStartPost=/d ${system_service_config_file}
 	[[ -z ${SuccessExitStatus} ]] && sed -i /SuccessExitStatus=/d ${system_service_config_file}
 }

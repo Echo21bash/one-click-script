@@ -91,7 +91,7 @@ done
 
 middleware_services(){
 
-output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka RabbitMQ' 'middleware'
+output_option '请选择要安装的软件' 'ActiveMQ RocketMQ Zookeeper Kafka RabbitMQ Nacos' 'middleware'
 
 for number in ${middleware[@]}; do
 	case "$number" in
@@ -104,6 +104,8 @@ for number in ${middleware[@]}; do
 		4)kafka_install_ctl
 		;;
 		5)rabbitmq_install_ctl
+		;;
+		6)nacos_install_ctl
 		;;
 	esac
 done

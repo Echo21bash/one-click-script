@@ -60,7 +60,7 @@ system_security_set(){
 		sed -i '/#Banner none/aBanner /etc/ssh/alert' /etc/ssh/sshd_config
 		cat >/etc/ssh/alert<<-EOF
 		*******************************************************
-		警告!!!你已经登陆生产环境,一切操作将被记录请谨慎操作!!!
+		警告!!!你已经登录生产环境,一切操作将被记录请谨慎操作!!!
 		Warning!!!Any Access Without Permission Is Forbidden!!!
 		*******************************************************
 		EOF

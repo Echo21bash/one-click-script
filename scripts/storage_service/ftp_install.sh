@@ -83,5 +83,5 @@ ftp_install_ctl(){
 	ftp_install_set
 	ftp_install
 	ftp_config
-	service_control vsftpd.service
+	service_control vsftpd.service start
 }
