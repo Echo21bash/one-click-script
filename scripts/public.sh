@@ -530,7 +530,7 @@ add_daemon_sysvinit_file(){
 	Environment="${Environment:-}"
 	WorkingDirectory="${WorkingDirectory:-}"
 	Name="${Name:-${soft_name}}"
-	PidFile="${PidFile:-}"
+	PIDFile="${PIDFile:-}"
 	User="${User:-root}"
 	ExecStart="${ExecStart:-}"
 	StartArgs="${StartArgs:-}"
@@ -543,8 +543,8 @@ add_daemon_sysvinit_file(){
 	[[ -f ${Environment} ]] && export ${Environment}
 	[[ -d ${WorkingDirectory} ]] && cd ${WorkingDirectory}
 	_pid(){
-	    if [[ -s $PidFile ]];then
-	        pid=$(cat $PidFile) && kill -0 $pid 2>/dev/null || pid=''
+	    if [[ -s $PIDFile ]];then
+	        pid=$(cat $PIDFile) && kill -0 $pid 2>/dev/null || pid=''
 	    else
 	        pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
 	        if [[ -z $pid ]];then
