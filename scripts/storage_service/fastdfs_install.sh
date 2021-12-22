@@ -37,7 +37,7 @@ fastdfs_install(){
 	cd ${tmp_dir}/libfastcommon-1.0.53
 	home_dir=${install_dir}/fastdfs
 	mkdir -p ${home_dir}
-	#libfastcommon安装目录配置
+	###libfastcommon安装目录配置
 	sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}/" ./make.sh
 	sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh
 	./make.sh  && ./make.sh install
@@ -47,15 +47,19 @@ fastdfs_install(){
 		error_log "libfastcommon编译失败"
 		exit 1
 	fi
+	###链接到系统路径
 	ln -sfn ${home_dir}/include/fastcommon /usr/include
 	ln -sfn ${home_dir}/lib64/libfastcommon.so /usr/lib/libfastcommon.so
 	ln -sfn ${home_dir}/lib64/libfastcommon.so /usr/lib64/libfastcommon.so
-	#fastdfs安装目录配置
+	###fastdfs安装目录配置
 	cd ${tmp_dir}/fastdfs-${detail_version_number}
+	###fastdfs增加自定义安装路径
 	sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
 	sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh
 	sed -i 's#TARGET_CONF_PATH=.*#TARGET_CONF_PATH=$DESTDIR/etc#' ./make.sh
 	sed -i 's#TARGET_INIT_PATH=.*#TARGET_INIT_PATH=$DESTDIR/etc/init.d#' ./make.sh
+	###修复centos6的错误 lib64/libfastcommon.so: undefined reference to `clock_gettime'
+	sed -i 's#LIBS="$LIBS -lpthread"#LIBS="$LIBS -lpthread -lrt"#' ./make.sh
 
 	info_log "正在编译fastdfs服务..."
 	./make.sh && ./make.sh install
@@ -70,16 +74,18 @@ fastdfs_install(){
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib64/libfdfsclient.so
 	
 	if [[ ${fastdht_enable} = "yes" ]];then
-		yum install libdb-devel -y
+		yum install libdb-devel -y || yum install db4 -y
 		down_file https://github.com/hebaodanroot/fastdht/archive/patch-1.tar.gz ${tmp_dir}/fastdht-patch-1.tar.gz
 		cd ${tmp_dir}
 		tar -zxf fastdht-patch-1.tar.gz
 		cd ${tmp_dir}/fastdht-patch-1
-		#fastdht安装目录配置
+		###fastdht安装目录配置
 		sed -i "/^TARGET_PREFIX=$DESTDIR/i\DESTDIR=${home_dir}" ./make.sh
 		sed -i 's#TARGET_PREFIX=.*#TARGET_PREFIX=$DESTDIR#' ./make.sh
 		sed -i 's#TARGET_CONF_PATH=.*#TARGET_CONF_PATH=$DESTDIR/etc#' ./make.sh
 		sed -i 's#TARGET_INIT_PATH=.*#TARGET_INIT_PATH=$DESTDIR/etc/init.d#' ./make.sh
+		###修复centos6的错误 lib64/libfastcommon.so: undefined reference to `clock_gettime'
+		sed -i 's#LIBS="$LIBS -lpthread"#LIBS="$LIBS -lpthread -lrt"#' ./make.sh
 		./make.sh && ./make.sh install
 		if [[ $? = '0' ]];then
 			success_log "fastdht编译完成."
