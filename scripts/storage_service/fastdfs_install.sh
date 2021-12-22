@@ -74,7 +74,7 @@ fastdfs_install(){
 	ln -sfn ${home_dir}/lib64/libfdfsclient.so /usr/lib64/libfdfsclient.so
 	
 	if [[ ${fastdht_enable} = "yes" ]];then
-		yum install libdb-devel -y || yum install db4 -y
+		yum install libdb-devel -y || yum install db4-devel -y
 		down_file https://github.com/hebaodanroot/fastdht/archive/patch-1.tar.gz ${tmp_dir}/fastdht-patch-1.tar.gz
 		cd ${tmp_dir}
 		tar -zxf fastdht-patch-1.tar.gz
