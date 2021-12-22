@@ -4,15 +4,11 @@ system_optimize_set(){
 
 	###yum替换为阿里源
 	[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
-
 	if [[ ${os_release} < "7" ]];then
-		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
-			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo >/dev/null 2>&1
-		fi
-		if [[ -z `grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo` ]];then
-			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo >/dev/null 2>&1
-		fi
-	else
+		\cp ${workdir}/config/yum/CentOS6-epel.repo /etc/yum.repos.d/epel.repo
+		\cp ${workdir}/config/yum/CentOS6-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+	fi
+	if [[ ${os_release} > "6" ]];then
 		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
 		fi
@@ -140,13 +136,5 @@ system_optimize_set(){
 	else
 		error_log "禁用selinux、关闭防火墙失败"
 	fi
-
-
-	if [[ ${os_release} < "7" ]];then
-		for A in sysstat rsyslog network sshd crond chronyd;do chkconfig $A on;done
-	else
-		for A in sysstat rsyslog network sshd crond chronyd;do systemctl enable $A;done
-	fi
-	success_log "系统必要服务设置开机自启"
 
 }

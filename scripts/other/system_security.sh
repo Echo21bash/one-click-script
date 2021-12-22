@@ -40,11 +40,11 @@ system_security_set(){
 	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
 	export PROMPT_COMMAND='\
 	if [ -z "$OLD_PWD" ];then
-		export OLD_PWD=$(pwd);
+	    export OLD_PWD=$(pwd);
 	fi;
 	if [ ! -z "$LAST_CMD" ] && [ "$(history 1)" != "$LAST_CMD" ]; then
-		echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
-		logger-t`whoami`_shell_cmd"[$OLD_PWD]$(history1)";
+	    echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
+	    logger -t `whoami`_shell_cmd "[$OLD_PWD]$(history 1)";
 	fi;
 	export LAST_CMD="$(history 1)";
 	export OLD_PWD=$(pwd);'
@@ -78,15 +78,28 @@ system_security_set(){
 		echo "umask 027" >>/etc/bashrc
 		success_log "文件掩码umask修改为027"
 	fi
-
+	
+	###control-alt-delete组合键禁用
 	if [[ -f /etc/init/control-alt-delete.conf ]];then
 		sed -i 's?exec /sbin/shutdown?#exec /sbin/shutdown?' /etc/init/control-alt-delete.conf
+		if [[ -f /usr/lib/systemd/system/ctrl-alt-del.target ]];then
+			\cp /usr/lib/systemd/system/ctrl-alt-del.target /usr/lib/systemd/system/ctrl-alt-del.target.default
+			rm -rf /usr/lib/systemd/system/ctrl-alt-del.target
+		fi
 	fi
-	if [[ -f /etc/init/control-alt-delete.conf ]];then
-		\cp /usr/lib/systemd/system/ctrl-alt-del.target /usr/lib/systemd/system/ctrl-alt-del.target.default
-		rm -rf /usr/lib/systemd/system/ctrl-alt-del.target
+	###系统日志轮转
+	if [[ -f /etc/logrotate.conf ]];then
+		sed -i 's/^rotate.*/rotate 26/' /etc/logrotate.conf
+		success_log "系统日志轮转周期修改为26周"
 	fi
 	
+	service_control auditd enable
+	service_control auditd start
+	service_control rsyslog enable
+	service_control rsyslog start
+	service_control chronyd enable
+	service_control chronyd start
+
 	#锁定关键文件系统
 	#chattr +i /etc/passwd
 	#chattr +i /etc/inittab
