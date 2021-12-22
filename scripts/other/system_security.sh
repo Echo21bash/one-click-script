@@ -87,6 +87,16 @@ system_security_set(){
 		rm -rf /usr/lib/systemd/system/ctrl-alt-del.target
 	fi
 	
+	if [[ -f /etc/logrotate.conf ]];then
+		sed -i 's/^rotate.*/rotate 26/' /etc/logrotate.conf
+		success_log "系统日志轮转周期修改为26周"
+	fi
+	
+	service_control auditd enable
+	service_control auditd start
+	service_control rsyslog enable
+	service_control rsyslog start
+
 	#锁定关键文件系统
 	#chattr +i /etc/passwd
 	#chattr +i /etc/inittab
