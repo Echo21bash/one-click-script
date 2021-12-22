@@ -137,12 +137,4 @@ system_optimize_set(){
 		error_log "禁用selinux、关闭防火墙失败"
 	fi
 
-
-	if [[ ${os_release} < "7" ]];then
-		for A in sysstat rsyslog network sshd crond chronyd;do chkconfig $A on;done
-	else
-		for A in sysstat rsyslog network sshd crond chronyd;do systemctl enable $A;done
-	fi
-	success_log "系统必要服务设置开机自启"
-
 }
