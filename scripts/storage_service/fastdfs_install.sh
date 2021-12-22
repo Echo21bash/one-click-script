@@ -153,18 +153,21 @@ fastdfs_config(){
 add_fastdfs_service(){
 	
 	Type="forking"
-	ExecStart="${home_dir}/bin/fdfs_trackerd ${home_dir}/etc/tracker.conf start"
+	ExecStart="${home_dir}/bin/fdfs_trackerd"
+	StartArgs="${home_dir}/etc/tracker.conf start"
 	PIDFile="${data_dir}/data/fdfs_trackerd.pid"
 	add_daemon_file ${home_dir}/init
 	add_system_service fdfs-trackerd ${home_dir}/init
 
-	ExecStart="${home_dir}/bin/fdfs_storaged ${home_dir}/etc/storage.conf start"
+	ExecStart="${home_dir}/bin/fdfs_storaged"
+	StartArgs="${home_dir}/etc/storage.conf start"
 	PIDFile="${data_dir}/data/fdfs_storaged.pid"
 	add_daemon_file ${home_dir}/init
 	add_system_service fdfs-storaged ${home_dir}/init
 
 	if [[ ${fastdht_enable} = 'yes' ]];then
-		ExecStart="${home_dir}/bin/fdhtd ${home_dir}/etc/fdhtd.conf start"
+		ExecStart="${home_dir}/bin/fdhtd"
+		StartArgs="${home_dir}/etc/fdhtd.conf start"
 		PIDFile="${data_dir}/data/fdhtd.pid"
 		add_daemon_file ${home_dir}/init
 		add_system_service fdhtd ${home_dir}/init
