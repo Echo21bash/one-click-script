@@ -132,6 +132,7 @@ fastdfs_config(){
 			sed -i "s#^port.*#port=24000#" ${home_dir}/etc/fdhtd.conf
 			sed -i "s#^base_path.*#base_path=${data_dir}#" ${home_dir}/etc/fdhtd.conf
 			sed -i "s#^group_count =.*#group_count = 1#" ${home_dir}/etc/fdht_servers.conf
+			sed  -i "/^group0 =.*/d" ${home_dir}/etc/fdht_servers.conf
 			echo "group0 = ${local_ip}:24000" >>${home_dir}/etc/fdht_servers.conf
 		fi
 		add_log_cut fastdfs ${data_dir}/logs/*.log
