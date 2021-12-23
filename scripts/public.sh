@@ -546,8 +546,8 @@ add_daemon_sysvinit_file(){
 	[[ -f ${Environment} ]] && export ${Environment}
 	[[ -d ${WorkingDirectory} ]] && cd ${WorkingDirectory}
 	_pid(){
-	    if [[ -s $PIDFile ]];then
-	        pid=$(cat $PIDFile) && kill -0 $pid 2>/dev/null || pid=''
+	    if [[ -n $PIDFile ]];then
+	        pid=$(cat $PIDFile 2>/dev/null) && kill -0 $pid 2>/dev/null || pid=''
 	    else
 	        pid=$(ps aux | grep ${ExecStart} | grep -v grep | awk '{print $2}')
 	        if [[ -z $pid ]];then
