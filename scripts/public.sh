@@ -311,13 +311,13 @@ down_file(){
 		if [[ ! -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -c -n 8 -a ${mirror_down_url} -o ${path_file}
+				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -c -n 8 -a ${down_url} -o ${path_file}
+				axel -ck -n 8 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
@@ -326,13 +326,13 @@ down_file(){
 		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
 			diy_echo "正在断点续传下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -c -n 8 -a ${mirror_down_url} -o ${path_file}
+				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -c -n 8 -a ${down_url} -o ${path_file}
+				axel -ck -n 8 -a ${down_url} -o ${path_file}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
