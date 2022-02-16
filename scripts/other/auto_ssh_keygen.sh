@@ -8,6 +8,6 @@ auto_ssh_keygen_tool(){
 		host_ip=${a[0]}
 		ssh_port=${a[1]}
 		passwd=${a[2]}
+		auto_ssh_keygen
 	done < ${workdir}/config/ssh/passwd.txt
-	auto_ssh_keygen
 }
