@@ -308,38 +308,21 @@ down_file(){
 			full_path_file=${path_file}
 		fi
 		#开始下载	
-		if [[ ! -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
+		if [[ ! -f ${full_path_file} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
+				wgot -c 8 -o ${path_file} ${mirror_down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -ck -n 8 -a ${down_url} -o ${path_file}
+				wgot -c 8 -o ${path_file} ${down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			fi
-		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
-			diy_echo "正在断点续传下载${down_url}" "${info}"
-			if [[ -n ${mirror_down_url} ]];then
-				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
-				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}" "${error}"
-					exit 1
-				fi
-			else
-				axel -ck -n 8 -a ${down_url} -o ${path_file}
-				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}" "${error}"
-					exit 1
-				fi
-			fi
-		elif [[ -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
-			diy_echo "已经存在文件${path_file}/${down_file_name}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
