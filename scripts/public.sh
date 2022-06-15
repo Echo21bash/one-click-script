@@ -308,38 +308,21 @@ down_file(){
 			full_path_file=${path_file}
 		fi
 		#开始下载	
-		if [[ ! -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
+		if [[ ! -f ${full_path_file} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
+				wgot -c 8 -o ${path_file} ${mirror_down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				axel -ck -n 8 -a ${down_url} -o ${path_file}
+				wgot -c 8 -o ${path_file} ${down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			fi
-		elif [[ -f ${full_path_file} && -f ${full_path_file}.st ]];then
-			diy_echo "正在断点续传下载${down_url}" "${info}"
-			if [[ -n ${mirror_down_url} ]];then
-				axel -ck -n 8 -a ${mirror_down_url} -o ${path_file}
-				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}" "${error}"
-					exit 1
-				fi
-			else
-				axel -ck -n 8 -a ${down_url} -o ${path_file}
-				if [[ $? -ne '0' ]];then
-					diy_echo "下载失败" "${red}" "${error}"
-					exit 1
-				fi
-			fi
-		elif [[ -f ${full_path_file} && ! -f ${full_path_file}.st ]];then
-			diy_echo "已经存在文件${path_file}/${down_file_name}" "${info}"
 		fi
 	else
 		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
@@ -363,7 +346,7 @@ auto_ssh_keygen(){
 	[[ -z ${expect_dir} ]] && yum install expect -y
 	
 	su ${user} -c "if [[ ! -f ~/.ssh/id_rsa ]];then ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa -q;fi"
-
+	get_ip
 	local i
 	i=0
 	for host in ${host_ip[@]}
@@ -376,26 +359,29 @@ auto_ssh_keygen(){
 			input_option "请输入${host}的${user}用户的密码" "passwd" "passwd"
 			passwd[$i]=${input_value}
 		fi
-		timeout 5 su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'" >/dev/null 2>&1
-		if [[ $? = 0 ]];then
-			diy_echo "主机${host}已经可以免密登录无需配置" "${green}" "${info}"
-		else
-			su ${user} -c "expect <<-EOF
-			set timeout -1
-			spawn ssh-copy-id -i ${key_dir}/.ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
-			expect {
-				\"*yes/no\" { send \"yes\\r\";exp_continue}
-				\"*password:\" { send \"${passwd[$i]}\\r\";exp_continue}
-			}
-			EOF"
-			su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'"
+		if [[ ${local_ip} != "${host_ip}" ]];then
+			timeout 5 su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'" >/dev/null 2>&1
 			if [[ $? = 0 ]];then
-				diy_echo "主机${host}免密登录配置完成" "${green}" "${info}"
+				diy_echo "主机${host}已经可以免密登录无需配置" "${green}" "${info}"
 			else
-				diy_echo "主机${host}免密登录配置失败" "${red}" "${info}" 
+				su ${user} -c "expect <<-EOF
+				set timeout -1
+				spawn ssh-copy-id -i ${key_dir}/.ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
+				expect {
+					\"*yes/no\" { send \"yes\\r\";exp_continue}
+					\"*password:\" { send \"${passwd[$i]}\\r\";exp_continue}
+				}
+				EOF"
+				su ${user} -c "ssh ${user}@${host} -p ${ssh_port[$i]} 'echo'"
+				if [[ $? = 0 ]];then
+					diy_echo "主机${host}免密登录配置完成" "${green}" "${info}"
+				else
+					diy_echo "主机${host}免密登录配置失败" "${red}" "${info}" 
+				fi
 			fi
+		else
+		  warning_log "无需配置本地免密"
 		fi
-
 		((i++))
 	done
 }

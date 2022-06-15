@@ -187,7 +187,7 @@ done
 }
 
 tools(){
-output_option '请选择进行的操作' '优化系统配置 系统安全加固 查看系统详情 升级内核版本 安装WireGuard-VPN 多功能备份脚本 主机ssh互信 升级openssh' 'tools'
+output_option '请选择进行的操作' '优化系统配置 系统安全加固 查看系统详情 升级内核版本 安装WireGuard-VPN 多功能备份脚本 批量主机ssh互信 升级openssh' 'tools'
 
 for number in ${tools[@]}; do
 	case "$number" in
