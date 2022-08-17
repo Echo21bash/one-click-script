@@ -243,17 +243,14 @@ done
 
 }
 
-
 clear
 [[ $EUID -ne 0 ]] && echo -e "${error} Need to use root account to run this script!" && exit 1
 echo -e "+ + + + + + + + + + + + + + + + + + + + + + + + + +"
-echo -e "+ System Required: Centos 6+                      +"
 echo -e "+ Description: Multi-function one-click script    +"
 echo -e	"+                                                 +"
 echo -e "+                                   Version: 2.1  +"
 echo -e "+                                 by---wang2017.7 +"
 echo -e "+ + + + + + + + + + + + + + + + + + + + + + + + + +"
-
 sys_info
 main
 

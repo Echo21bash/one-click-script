@@ -190,17 +190,17 @@ sys_info(){
 		fi
 	elif [ -f /etc/openEuler-release ]; then
 		sys_name="openEuler"
-    elif cat /etc/issue | grep -Eqi "debian"; then
-        sys_name="Debian"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
-        sys_name="Ubuntu"
-    elif cat /etc/issue | grep -Eqi "Centos"; then
-        sys_name="Centos"
-    elif cat /etc/issue | grep -Eqi "red hat|redhat"; then
-        sys_name="Red-hat"
+	elif cat /etc/issue | grep -Eqi "debian"; then
+		sys_name="Debian"
+	elif cat /etc/issue | grep -Eqi "ubuntu"; then
+		sys_name="Ubuntu"
+	elif cat /etc/issue | grep -Eqi "Centos"; then
+		sys_name="Centos"
+	elif cat /etc/issue | grep -Eqi "red hat|redhat"; then
+		sys_name="Red-hat"
 	fi
 	#版本号
-    if [[ -s /etc/redhat-release ]]; then
+	if [[ -s /etc/redhat-release ]]; then
 		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
 		os_release=${release_all%%.*}
 	elif [[ -s /etc/openEuler-release ]];then
@@ -209,7 +209,7 @@ sys_info(){
 	else
 		release_all=`grep -oE  "[0-9.]+" /etc/issue`
 		os_release=${release_all%%.*}
-    fi
+	fi
 
 	#系统位数
 	os_bit=`getconf LONG_BIT`
@@ -228,7 +228,7 @@ sys_info(){
 	if [[ ${sys_name} = "red-hat" ]];then
 		sys_name="Centos"
 	fi
-
+	echo -e "System name:${sys_name}-${release_all}"
 }
 
 get_ip(){
