@@ -188,6 +188,8 @@ sys_info(){
 		elif cat /etc/redhat-release | grep -Eqi "red hat" || cat /etc/redhat-release | grep -Eqi "redhat";then
 			sys_name="Red-hat"
 		fi
+	elif [ -f /etc/openEuler-release ]; then
+		sys_name="openEuler"
     elif cat /etc/issue | grep -Eqi "debian"; then
         sys_name="Debian"
     elif cat /etc/issue | grep -Eqi "ubuntu"; then
@@ -201,10 +203,14 @@ sys_info(){
     if [[ -s /etc/redhat-release ]]; then
 		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
 		os_release=${release_all%%.*}
-		else
+	elif [[ -s /etc/openEuler-release ]];then
+		release_all=`grep -oE  "[0-9.]+" /etc/issue`
+		os_release=`grep -oE  "[0-9.]+" /etc/issue`
+	else
 		release_all=`grep -oE  "[0-9.]+" /etc/issue`
 		os_release=${release_all%%.*}
     fi
+
 	#系统位数
 	os_bit=`getconf LONG_BIT`
 	#总内存MB
@@ -444,7 +450,7 @@ add_log_cut(){
 		fi
 		cat >${log_cut_config_file}<<-EOF
 		${logs_dir}{
-			su root root
+		    su root root
 		    weekly
 		    rotate 26
 		    compress
