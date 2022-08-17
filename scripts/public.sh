@@ -691,7 +691,10 @@ service_control(){
 		error_log "函数service_control缺少参数"
 	fi
 
-	if [[ ${os_release} < '7' ]];then
+	if [[ ${sys_name} = "Centos" && ${os_release} < '7' ]];then
+		if [[ ${service_name} = "firewalld" ]];then
+			service_name="iptables"
+		fi
 		if [[ ${arg} = 'enable' ]];then
 			chkconfig --add ${service_name}
 			chkconfig ${service_name} on
@@ -720,7 +723,7 @@ service_control(){
 		fi
 	fi
 
-	if [[  ${os_release} > '6' ]];then
+	if [[ ${sys_name} = "Centos" && ${os_release} > '6' ]] || [[ ${sys_name} = "openEuler" ]];then
 		if [[ ${arg} = 'is-exist' ]];then
 			if [[ -f /etc/systemd/system/${service_name}.service || -f /usr/lib/systemd/system/${service_name}.service ]];then
 				echo exist
