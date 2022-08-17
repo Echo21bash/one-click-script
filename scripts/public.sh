@@ -204,8 +204,8 @@ sys_info(){
 		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
 		os_release=${release_all%%.*}
 	elif [[ -s /etc/openEuler-release ]];then
-		release_all=`grep -oE  "[0-9.]+" /etc/issue`
-		os_release=`grep -oE  "[0-9.]+" /etc/issue`
+		release_all=`grep -oE  "[0-9.]+" /etc/openEuler-releas`
+		os_release=`grep -oE  "[0-9.]+" /etc/openEuler-releas`
 	else
 		release_all=`grep -oE  "[0-9.]+" /etc/issue`
 		os_release=${release_all%%.*}
@@ -268,9 +268,6 @@ sys_info_detail(){
 	#内存使用情况
 	echo -e "${info} 内存使用情况(MB):参考[可用内存=free的内存+cached的内存+buffers的内存]"
 	free -m
-	(( ${os_release} < "7" )) && free -m | grep -i Mem | awk '{print "总内存是:"$2"M,实际使用内存是:"$2-$4-$5-$6-$7"M,实际可用内存是:"$4+$6+$7"M,内存使用率是:"(1-($4+$6+$7)/$2)*100"%"}' 
-	(( ${os_release} >= "7" )) && free -m | grep -i Mem | awk '{print "总内存是:"$2"M,实际使用内存是:"$2-$4-$5-$6"M,实际可用内存是:"$4+$6"M,内存使用率是:"(1-($4+$6)/$2)*100"%"}'
-	free -m | grep -i Swap| awk '{print "总Swap大小:"$2"M,已使用的大小:"$3"M,可用大小:"$4"M,Swap使用率是:"$3/$2*100"%"}' 
 	#磁盘使用情况
 	echo -e "${info} 磁盘使用情况:"
 	df -h
