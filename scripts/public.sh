@@ -204,8 +204,8 @@ sys_info(){
 		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
 		os_release=${release_all%%.*}
 	elif [[ -s /etc/openEuler-release ]];then
-		release_all=`grep -oE  "[0-9.]+" /etc/openEuler-releas`
-		os_release=`grep -oE  "[0-9.]+" /etc/openEuler-releas`
+		release_all=`grep -oE  "[0-9.]+" /etc/openEuler-release`
+		os_release=`grep -oE  "[0-9.]+" /etc/openEuler-release`
 	else
 		release_all=`grep -oE  "[0-9.]+" /etc/issue`
 		os_release=${release_all%%.*}
