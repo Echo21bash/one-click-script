@@ -228,7 +228,7 @@ sys_info(){
 	if [[ ${sys_name} = "red-hat" ]];then
 		sys_name="Centos"
 	fi
-	echo -e "System name:${sys_name}-${release_all}"
+	echo -e "[${green}INFO${plain}] System info:${sys_name}-${release_all}"
 }
 
 get_ip(){

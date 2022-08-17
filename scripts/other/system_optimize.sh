@@ -4,11 +4,11 @@ system_optimize_set(){
 
 	###yum替换为阿里源
 	[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
-	if [[ ${os_release} < "7" ]];then
+	if [[ ${sys_name} = "Centos" && ${os_release} < "7" ]];then
 		\cp ${workdir}/config/yum/CentOS6-epel.repo /etc/yum.repos.d/epel.repo
 		\cp ${workdir}/config/yum/CentOS6-Base.repo /etc/yum.repos.d/CentOS-Base.repo
 	fi
-	if [[ ${os_release} > "6" ]];then
+	if [[ ${sys_name} = "Centos" && ${os_release} > "6" ]];then
 		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
 			curl -sL -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo >/dev/null 2>&1
 		fi
@@ -68,7 +68,7 @@ system_optimize_set(){
 	#echo 'PermitRootLogin no'
 	echo 'UseDNS no'
 	echo '+------------------------------------+'
-	if [[ ${os_release} < '7' ]];then
+	if [[ ${sys_name} = "Centos" && ${os_release} < "7" ]];then
 		/etc/init.d/sshd reload >/dev/null 2>&1 && success_log "完成SSHD服务优化" || error_log "SSHD服务优化失败"
 	else
 		systemctl restart sshd && success_log "完成SSHD服务优化" || error_log "SSHD服务优化失败"
