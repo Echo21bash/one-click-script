@@ -499,7 +499,6 @@ add_daemon_file(){
 			add_daemon_systemd_file ${system_service_config_file}
 		elif grep -qa init /proc/1/cmdline;then
 			add_daemon_sysvinit_file ${system_service_config_file}
-			
 		fi
 	fi
 
@@ -556,7 +555,8 @@ add_daemon_sysvinit_file(){
 	        echo -e "\e[00;32mStarting ${Name}\e[00m"
 	        id -u ${User} >/dev/null
 	        if [[ $? = 0 ]];then
-	            su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
+	            su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &" || \
+	            chroot --userspec=${User}: / sh -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
 	            sleep 5
 	        else
 	            echo -e "\e[00;31mUser ${User} does not exist\e[00m\n";
@@ -670,14 +670,13 @@ add_system_service(){
 	#$1服务名 $2服务文件路径
 	service_name=$1
 	service_file_dir=$2
-
-	if [[ "${os_release}" < '7' ]]; then
+	if grep -qa systemd /proc/1/cmdline;then 
+		\cp ${service_file_dir} /etc/systemd/system/${service_name}.service
+		diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
+	elif grep -qa init /proc/1/cmdline;then
 		\cp ${service_file_dir} /etc/init.d/${service_name}
 		chmod +x /etc/init.d/${service_name}
 		diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
-	elif [[ "${os_release}" > '6' ]]; then
-		\cp ${service_file_dir} /etc/systemd/system/${service_name}.service
-		diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
 	fi
 
 }
