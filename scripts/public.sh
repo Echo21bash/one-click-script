@@ -95,7 +95,9 @@ sys_info(){
 	#系统位数
 	os_bit=`getconf LONG_BIT`
 	#守护进程类型
-	if grep -qa systemd /proc/1/cmdline;then 
+	if grep -qa systemd /proc/1/cmdline;then
+		daemon_type="systemd"
+	elif command -v systemctl >/dev/null 2>&1;then
 		daemon_type="systemd"
 	elif grep -qa init /proc/1/cmdline;then
 		daemon_type="init"
