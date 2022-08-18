@@ -495,10 +495,11 @@ add_daemon_file(){
 			add_daemon_systemd_file ${system_service_config_file}
 		fi
 	else
-		if [[ "${os_release}" < '7' ]];then
-			add_daemon_sysvinit_file ${system_service_config_file}
-		elif [[ "${os_release}" > '6' ]];then
+		if grep -qa systemd /proc/1/cmdline;then 
 			add_daemon_systemd_file ${system_service_config_file}
+		elif grep -qa init /proc/1/cmdline;then
+			add_daemon_sysvinit_file ${system_service_config_file}
+			
 		fi
 	fi
 
