@@ -54,6 +54,122 @@ diy_echo(){
 	fi
 }
 
+
+sys_info(){
+
+	if [ -f /etc/redhat-release ]; then
+		if cat /etc/redhat-release | grep -Eqi "Centos";then
+			sys_name="Centos"
+		elif cat /etc/redhat-release | grep -Eqi "red hat" || cat /etc/redhat-release | grep -Eqi "redhat";then
+			sys_name="Red-hat"
+		fi
+		package_tool="yum"
+	elif [ -f /etc/openEuler-release ]; then
+		sys_name="openEuler"
+		package_tool="yum"
+	elif cat /etc/issue | grep -Eqi "debian"; then
+		sys_name="Debian"
+		package_tool="apt-get"
+	elif cat /etc/issue | grep -Eqi "ubuntu"; then
+		sys_name="Ubuntu"
+		package_tool="apt-get"
+	elif cat /etc/issue | grep -Eqi "Centos"; then
+		sys_name="Centos"
+		package_tool="yum"
+	elif cat /etc/issue | grep -Eqi "red hat|redhat"; then
+		sys_name="Red-hat"
+		package_tool="yum"
+	fi
+	#版本号
+	if [[ -s /etc/redhat-release ]]; then
+		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
+		os_release=${release_all%%.*}
+	elif [[ -s /etc/openEuler-release ]];then
+		release_all=`grep -oE  "[0-9.]+" /etc/openEuler-release`
+		os_release=`grep -oE  "[0-9.]+" /etc/openEuler-release`
+	else
+		release_all=`grep -oE  "[0-9.]+" /etc/issue`
+		os_release=${release_all%%.*}
+	fi
+
+	#系统位数
+	os_bit=`getconf LONG_BIT`
+	#守护进程类型
+	if grep -qa systemd /proc/1/cmdline;then
+		daemon_type="systemd"
+	elif command -v systemctl >/dev/null 2>&1;then
+		daemon_type="systemd"
+	elif grep -qa init /proc/1/cmdline;then
+		daemon_type="init"
+	fi
+	#总内存MB
+	total_mem=`free -m | grep -i Mem | awk '{print $2}'`
+	#总核心数
+	total_core=`cat /proc/cpuinfo | grep "processor"| wc -l`
+	#内核版本
+	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
+	#网络连接状态
+	http_code=`timeout 1 curl --connect-timeout 3 -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
+	if [ ${http_code} = '200' ];then
+		network_status="${green}connected${plain}"
+	else
+		network_status="${red}disconnected${plain}"
+	fi
+	if [[ ${sys_name} = "red-hat" ]];then
+		sys_name="Centos"
+	fi
+	echo -e "[${green}INFO${plain}] System info:${sys_name}-${release_all}"
+}
+
+
+sys_info_detail(){
+	sys_info
+	#系统开机时间
+	echo -e "${info} System boot time:"
+	date -d "$(awk '{printf("%d\n",$1~/./?int($1)+1:$1)}' /proc/uptime) second ago" +"%F %T"
+	#系统已经运行时间
+	echo -e "${info} The system is already running:"
+	awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=$1%60}{printf("%d天%d时%d分%d秒\n",a,b,c,d)}' /proc/uptime
+	#CPU型号
+	echo -e "${info} CPU型号:"
+	awk -F':[ ]' '/model name/{printf ("%s\n",$2);exit}' /proc/cpuinfo
+	#CPU详情
+	echo -e "${info} CPU详情:"
+	awk -F':[ ]' '/physical id/{a[$2]++}END{for(i in a)printf ("%s号CPU\t核心数:%s\n",i+1,a[i]);printf("CPU总颗数:%s\n",i+1)}' /proc/cpuinfo
+	#ip
+	echo -e "${info} 内网IP:"
+	hostname -I 2>/dev/null
+	[[ $? != "0" ]] && hostname -i
+	echo -e "${info} 网关:"
+	netstat -rn | awk '/^0.0.0.0/ {print $2}'
+	echo -e "${info} 外网IP:"
+	curl -s icanhazip.com
+	#内存使用情况
+	echo -e "${info} 内存使用情况(MB):参考[可用内存=free的内存+cached的内存+buffers的内存]"
+	free -m
+	#磁盘使用情况
+	echo -e "${info} 磁盘使用情况:"
+	df -h
+	#服务器负载情况
+	echo -e "${info} 服务器平均负载:"
+	uptime | awk '{print $(NF-4)" "$(NF-3)" "$(NF-2)" "$(NF-2)" "$NF}'
+	#当前在线用户
+	echo -e "${info} 当前在线用户:"
+	who
+}
+
+get_ip(){
+	local_ip=$(ip addr | grep -E 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v  "^255\.|\.255$|^127\.|^0\." | head -n 1)
+}
+
+get_public_ip(){
+	public_ip=$(curl ipv4.icanhazip.com)
+}
+
+get_net_name(){
+	net_name=$(ip addr | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -v  "^255\.|\.255$|^127\.|^0\." | grep -oE 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | head -n 1)
+}
+
 yes_or_no(){
 	#$1变量值
 	tmp=$(echo $1 | tr [A-Z] [a-z])
@@ -178,108 +294,6 @@ only_allow_numbers(){
 			return 1
 		fi
 	done
-}
-
-sys_info(){
-
-	if [ -f /etc/redhat-release ]; then
-		if cat /etc/redhat-release | grep -Eqi "Centos";then
-			sys_name="Centos"
-		elif cat /etc/redhat-release | grep -Eqi "red hat" || cat /etc/redhat-release | grep -Eqi "redhat";then
-			sys_name="Red-hat"
-		fi
-	elif [ -f /etc/openEuler-release ]; then
-		sys_name="openEuler"
-    elif cat /etc/issue | grep -Eqi "debian"; then
-        sys_name="Debian"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
-        sys_name="Ubuntu"
-    elif cat /etc/issue | grep -Eqi "Centos"; then
-        sys_name="Centos"
-    elif cat /etc/issue | grep -Eqi "red hat|redhat"; then
-        sys_name="Red-hat"
-	fi
-	#版本号
-    if [[ -s /etc/redhat-release ]]; then
-		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
-		os_release=${release_all%%.*}
-	elif [[ -s /etc/openEuler-release ]];then
-		release_all=`grep -oE  "[0-9.]+" /etc/issue`
-		os_release=`grep -oE  "[0-9.]+" /etc/issue`
-	else
-		release_all=`grep -oE  "[0-9.]+" /etc/issue`
-		os_release=${release_all%%.*}
-    fi
-
-	#系统位数
-	os_bit=`getconf LONG_BIT`
-	#总内存MB
-	total_mem=`free -m | grep -i Mem | awk '{print $2}'`
-	#总核心数
-	total_core=`cat /proc/cpuinfo | grep "processor"| wc -l`	
-	#内核版本
-	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
-	http_code=`timeout 1 curl --connect-timeout 3 -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
-	if [ ${http_code} = '200' ];then
-		network_status="${green}connected${plain}"
-	else
-		network_status="${red}disconnected${plain}"
-	fi
-	if [[ ${sys_name} = "red-hat" ]];then
-		sys_name="Centos"
-	fi
-
-}
-
-get_ip(){
-	local_ip=$(ip addr | grep -E 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v  "^255\.|\.255$|^127\.|^0\." | head -n 1)
-}
-
-get_public_ip(){
-	public_ip=$(curl ipv4.icanhazip.com)
-}
-
-get_net_name(){
-	net_name=$(ip addr | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -v  "^255\.|\.255$|^127\.|^0\." | grep -oE 'eth[0-9a-z]{1,3}|eno[0-9a-z]{1,3}|ens[0-9a-z]{1,3}|enp[0-9a-z]{1,3}' | head -n 1)
-}
-
-sys_info_detail(){
-	sys_info
-	#系统开机时间
-	echo -e "${info} System boot time:"
-	date -d "$(awk '{printf("%d\n",$1~/./?int($1)+1:$1)}' /proc/uptime) second ago" +"%F %T"
-	#系统已经运行时间
-	echo -e "${info} The system is already running:"
-	awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=$1%60}{printf("%d天%d时%d分%d秒\n",a,b,c,d)}' /proc/uptime
-	#CPU型号
-	echo -e "${info} CPU型号:"
-	awk -F':[ ]' '/model name/{printf ("%s\n",$2);exit}' /proc/cpuinfo
-	#CPU详情
-	echo -e "${info} CPU详情:"
-	awk -F':[ ]' '/physical id/{a[$2]++}END{for(i in a)printf ("%s号CPU\t核心数:%s\n",i+1,a[i]);printf("CPU总颗数:%s\n",i+1)}' /proc/cpuinfo
-	#ip
-	echo -e "${info} 内网IP:"
-	hostname -I 2>/dev/null
-	[[ $? != "0" ]] && hostname -i
-	echo -e "${info} 网关:"
-	netstat -rn | awk '/^0.0.0.0/ {print $2}'
-	echo -e "${info} 外网IP:"
-	curl -s icanhazip.com
-	#内存使用情况
-	echo -e "${info} 内存使用情况(MB):参考[可用内存=free的内存+cached的内存+buffers的内存]"
-	free -m
-	(( ${os_release} < "7" )) && free -m | grep -i Mem | awk '{print "总内存是:"$2"M,实际使用内存是:"$2-$4-$5-$6-$7"M,实际可用内存是:"$4+$6+$7"M,内存使用率是:"(1-($4+$6+$7)/$2)*100"%"}' 
-	(( ${os_release} >= "7" )) && free -m | grep -i Mem | awk '{print "总内存是:"$2"M,实际使用内存是:"$2-$4-$5-$6"M,实际可用内存是:"$4+$6"M,内存使用率是:"(1-($4+$6)/$2)*100"%"}'
-	free -m | grep -i Swap| awk '{print "总Swap大小:"$2"M,已使用的大小:"$3"M,可用大小:"$4"M,Swap使用率是:"$3/$2*100"%"}' 
-	#磁盘使用情况
-	echo -e "${info} 磁盘使用情况:"
-	df -h
-	#服务器负载情况
-	echo -e "${info} 服务器平均负载:"
-	uptime | awk '{print $(NF-4)" "$(NF-3)" "$(NF-2)" "$(NF-2)" "$NF}'
-	#当前在线用户
-	echo -e "${info} 当前在线用户:"
-	who
 }
 
 
@@ -491,20 +505,11 @@ add_daemon_file(){
 		exit 1
 	fi
 
-	if [[ -n ${daemon_type} ]];then
-		if [[ "${daemon_type}" = 'sysvinit' ]]; then
-			add_daemon_sysvinit_file ${system_service_config_file}
-		elif [[ "${daemon_type}" = 'systemd' ]]; then
-			add_daemon_systemd_file ${system_service_config_file}
-		fi
-	else
-		if [[ "${os_release}" < '7' ]];then
-			add_daemon_sysvinit_file ${system_service_config_file}
-		elif [[ "${os_release}" > '6' ]];then
-			add_daemon_systemd_file ${system_service_config_file}
-		fi
+	if [[ "${daemon_type}" = 'init' ]]; then
+		add_daemon_sysvinit_file ${system_service_config_file}
+	elif [[ "${daemon_type}" = 'systemd' ]]; then
+		add_daemon_systemd_file ${system_service_config_file}
 	fi
-
 
 }
 
@@ -558,7 +563,8 @@ add_daemon_sysvinit_file(){
 	        echo -e "\e[00;32mStarting ${Name}\e[00m"
 	        id -u ${User} >/dev/null
 	        if [[ $? = 0 ]];then
-	            su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
+	            su ${User} -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &" || \
+	            chroot --userspec=${User}: / sh -c "${ExecStart} ${StartArgs} >/dev/null 2>&1 &"
 	            sleep 5
 	        else
 	            echo -e "\e[00;31mUser ${User} does not exist\e[00m\n";
@@ -673,12 +679,11 @@ add_system_service(){
 	#$1服务名 $2服务文件路径
 	service_name=$1
 	service_file_dir=$2
-
-	if [[ "${os_release}" < '7' ]]; then
+	if [[ "${daemon_type}" = 'init' ]]; then
 		\cp ${service_file_dir} /etc/init.d/${service_name}
 		chmod +x /etc/init.d/${service_name}
 		diy_echo "service ${service_name} start|stop|restart|status" "$yellow"
-	elif [[ "${os_release}" > '6' ]]; then
+	elif [[ "${daemon_type}" = 'systemd' ]]; then
 		\cp ${service_file_dir} /etc/systemd/system/${service_name}.service
 		diy_echo "systemctl start|stop|restart|status ${service_name}" "$yellow"
 	fi
@@ -695,7 +700,10 @@ service_control(){
 		error_log "函数service_control缺少参数"
 	fi
 
-	if [[ ${os_release} < '7' ]];then
+	if [[ "${daemon_type}" = 'init' ]]; then
+		if [[ ${service_name} = "firewalld" ]];then
+			service_name="iptables"
+		fi
 		if [[ ${arg} = 'enable' ]];then
 			chkconfig --add ${service_name}
 			chkconfig ${service_name} on
@@ -724,7 +732,7 @@ service_control(){
 		fi
 	fi
 
-	if [[  ${os_release} > '6' ]];then
+	if [[ "${daemon_type}" = 'systemd' ]]; then
 		if [[ ${arg} = 'is-exist' ]];then
 			if [[ -f /etc/systemd/system/${service_name}.service || -f /usr/lib/systemd/system/${service_name}.service ]];then
 				echo exist

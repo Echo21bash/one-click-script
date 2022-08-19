@@ -7,6 +7,7 @@ system_security_set(){
 	sed -i 's/PASS_MIN_LEN.*/PASS_MIN_LEN 12/' /etc/login.defs
 	sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 15/' /etc/login.defs
 	success_log "更新密码过期周期为90天。"
+	
 	if [[ `grep 'pam_pwquality.so' /etc/pam.d/system-auth 2>/dev/null` ]];then
 		sed -i 's/password    requisite.*/password    requisite     pam_pwquality.so minlen=12 dcredit=-2 ucredit=-1 lcredit=-1 ocredit=-1 enforce_for_root try_first_pass local_users_only retry=3 authtok_type=/' /etc/pam.d/system-auth
 		success_log "更新密码复杂度策略"
@@ -17,23 +18,44 @@ system_security_set(){
 		success_log "更新密码复杂度策略"
 		info_log "密码复杂度策略为最小长度12位，至少包含2个数字，1个大写字母，1个小写字母，1个特殊字符"
 	fi
-	###ssh远程登录限制
-	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
-		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
-		success_log "更新远程登录失败策略"
-		info_log "登录失败策略为登录失败3次锁定10分钟"
-	else
-		info_log "已经存在策略，已跳过。"
-	fi
-	###本地登陆限制
-	if [[ -z `grep 'pam_tally2.so' /etc/pam.d/system-auth` ]];then
-		sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
-		success_log "更新本地登录失败策略"
-		info_log "登录失败策略为登录失败3次锁定10分钟"
-	else
-		info_log "已经存在策略，已跳过。"
-	fi	
 
+	if [[  ${sys_name} = "Centos" ]];then
+		###ssh远程登录限制
+		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
+			sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
+			success_log "更新远程登录失败策略"
+			info_log "登录失败策略为登录失败3次锁定10分钟"
+		else
+			info_log "已经存在策略，已跳过。"
+		fi
+		###本地登陆限制
+		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/system-auth` ]];then
+			sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
+			success_log "更新本地登录失败策略"
+			info_log "登录失败策略为登录失败3次锁定10分钟"
+		else
+			info_log "已经存在策略，已跳过。"
+		fi	
+	fi
+
+	if [[  ${sys_name} = "openEuler" ]];then
+		###ssh远程登录限制
+		if [[ -z `grep 'pam_faillock.so' /etc/pam.d/sshd` ]];then
+			sed -i '/#%PAM-1.0/aauth       required     pam_faillock.so deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
+			success_log "更新远程登录失败策略"
+			info_log "登录失败策略为登录失败3次锁定10分钟"
+		else
+			info_log "已经存在策略，已跳过。"
+		fi
+		###本地登陆限制
+		if [[ -z `grep 'pam_faillock.so' /etc/pam.d/system-auth` ]];then
+			sed -i '/#%PAM-1.0/aauth       required     pam_faillock.so deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
+			success_log "更新本地登录失败策略"
+			info_log "登录失败策略为登录失败3次锁定10分钟"
+		else
+			info_log "已经存在策略，已跳过。"
+		fi	
+	fi
 	###系统用户操作记录配置/var/log/bash_history.log
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
 	#!/bin/bash
@@ -54,7 +76,7 @@ system_security_set(){
 	chmod a+w /var/log/bash_history.log
 	chmod +x /etc/profile.d/bash_history.sh
 	source /etc/profile
-	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log"
+	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log和syslog"
 	
 	if [[ -z `grep '^Banner' /etc/ssh/sshd_config` ]];then
 		sed -i '/#Banner none/aBanner /etc/ssh/alert' /etc/ssh/sshd_config
