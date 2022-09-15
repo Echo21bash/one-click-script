@@ -53,8 +53,8 @@ openssh_local_run_telshell(){
 		info_log "现有版本大于等于选择版本无需升级"
 		exit 0
 	fi
-	cp ${workdir}/bin/telshell /tmp_dir
-	nohup /tmp_dir/telshell >/dev/null 2>&1 &
+	cp ${workdir}/bin/telshell ${tmp_dir}
+	nohup ${tmp_dir}/telshell >/dev/null 2>&1 &
 	if [[ -n `pidof telshell` ]];then
 		info_log "telnet已经就绪，端口为1000。"
 	else
