@@ -70,8 +70,8 @@ openssh_local_back(){
 	if [[ ! -f /etc/pam.d/sshd_back_upgrade ]];then
 		cp /etc/pam.d/sshd /etc/pam.d/sshd_back_upgrade
 	fi
-	if [[ ! -f /etc/ssh/sshd_config-bak ]];then
-		cp /etc/ssh/sshd_config_back_upgrade /etc/ssh/sshd_config_back_upgrade
+	if [[ ! -f /etc/ssh/sshd_config_back_upgrade ]];then
+		cp /etc/ssh/sshd_config /etc/ssh/sshd_config_back_upgrade
 	fi
 }
 
