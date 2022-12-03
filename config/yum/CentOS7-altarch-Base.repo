@@ -18,6 +18,7 @@ baseurl=http://mirrors.aliyun.com/centos-altarch/7/os/$basearch/
 gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64
 
 #released updates 
 [updates]
@@ -28,6 +29,7 @@ baseurl=http://mirrors.aliyun.com/centos-altarch/7/updates/$basearch/
 gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64
 
 #additional packages that may be useful
 [extras]
@@ -38,6 +40,7 @@ baseurl=http://mirrors.aliyun.com/centos-altarch/7/extras/$basearch/
 gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64
 enabled=1
 
 #additional packages that extend functionality of existing packages
@@ -50,3 +53,4 @@ gpgcheck=0
 enabled=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64
