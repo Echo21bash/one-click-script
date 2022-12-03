@@ -15,7 +15,7 @@ name=CentOS-$releasever - Base
 baseurl=http://mirrors.aliyun.com/centos-altarch/7/os/$basearch/
         https://mirrors.ustc.edu.cn/centos-altarch/7/os/$basearch/
         https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/
-gpgcheck=1
+gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
 
@@ -25,7 +25,7 @@ name=CentOS-$releasever - Updates
 baseurl=http://mirrors.aliyun.com/centos-altarch/7/updates/$basearch/
         https://mirrors.ustc.edu.cn/centos-altarch/7/updates/$basearch/
         https://repo.huaweicloud.com/centos-altarch/7/updates/$basearch/
-gpgcheck=1
+gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
 
@@ -35,7 +35,7 @@ name=CentOS-$releasever - Extras
 baseurl=http://mirrors.aliyun.com/centos-altarch/7/extras/$basearch/
         https://mirrors.ustc.edu.cn/centos-altarch/7/extras/$basearch/
         https://repo.huaweicloud.com/centos-altarch/7/extras/$basearch/
-gpgcheck=1
+gpgcheck=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
 enabled=1
@@ -46,7 +46,7 @@ name=CentOS-$releasever - Plus
 baseurl=http://mirrors.aliyun.com/centos-altarch/7/centosplus/$basearch/
         http://mirrors.ustc.edu.cn/centos-altarch/7/centosplus/$basearch/
         https://repo.huaweicloud.com/centos-altarch/7/centosplus/$basearch/
-gpgcheck=1
+gpgcheck=0
 enabled=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
