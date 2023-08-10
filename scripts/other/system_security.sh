@@ -65,7 +65,6 @@ system_security_set(){
 	    export OLD_PWD=$(pwd);
 	fi;
 	if [ ! -z "$LAST_CMD" ] && [ "$(history 1)" != "$LAST_CMD" ]; then
-	    echo  `whoami`_shell_cmd "[$OLD_PWD]$(history 1)" >>/var/log/bash_history.log;
 	    logger -t `whoami`_shell_cmd "[$OLD_PWD]$(history 1)";
 	fi;
 	export LAST_CMD="$(history 1)";
@@ -114,7 +113,9 @@ system_security_set(){
 		sed -i 's/^rotate.*/rotate 26/' /etc/logrotate.conf
 		success_log "系统日志轮转周期修改为26周"
 	fi
-	
+	if [[ ! -f /etc/logrotate.d/audit && -f /var/log/audit/audit.log ]];then
+		add_log_cut /etc/logrotate.d/audit /var/log/audit/audit.log
+	fi
 	service_control auditd enable
 	service_control auditd start
 	service_control rsyslog enable
