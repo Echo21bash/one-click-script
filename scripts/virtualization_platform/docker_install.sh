@@ -3,8 +3,7 @@
 docker_install_ctl(){
 
 	if [[ -n `which dockerd 2>/dev/null` ]];then
-		diy_echo "检测到可能已经安装docker请检查..." "${yellow}" "${warning}"
-		diy_echo "正在安装docker..." "" "${info}"
+		diy_echo "检测到已经安装了docker请检查..." "${yellow}" "${warning}"
 	else
 		if [[ ${os_release} < "7" ]];then
 			yum install -y docker
