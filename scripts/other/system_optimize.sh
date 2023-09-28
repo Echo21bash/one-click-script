@@ -25,7 +25,7 @@ system_optimize_set(){
 	fi
 	
 	###系统limit限制优化
-	[[ ! -f /etc/security/limits.conf.bakup ]] && cp /etc/security/limits.conf /etc/security/limits.conf.bakup
+	[[ ! -f /etc/security/limits.conf.default ]] && cp /etc/security/limits.conf /etc/security/limits.conf.default
 	if [[ -z `grep '*                  -        nofile         1024000' /etc/security/limits.conf` ]];then
 		echo '*                  -        nofile         1024000'>>/etc/security/limits.conf
 	fi
@@ -91,7 +91,7 @@ system_optimize_set(){
 	fi
 	
 	###内核参数调整
-	[ ! -f /etc/sysctl.conf.bakup ] && cp /etc/sysctl.conf /etc/sysctl.conf.bakup
+	[ ! -f /etc/sysctl.conf.default ] && cp /etc/sysctl.conf /etc/sysctl.conf.default
 	
 	[[ -z `grep -E '^kernel.sem' /etc/sysctl.conf` ]] && echo 'kernel.sem = 500 1024000 200 4096'>>/etc/sysctl.conf
 	#禁用ipv6

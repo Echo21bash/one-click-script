@@ -2,12 +2,15 @@
 
 system_security_set(){
 	###密码更改周期配置
+	[[ ! -f /etc/login.defs.default ]] && cp /etc/login.defs /etc/login.defs.default
 	sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
 	sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 80/' /etc/login.defs
 	sed -i 's/PASS_MIN_LEN.*/PASS_MIN_LEN 12/' /etc/login.defs
 	sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 15/' /etc/login.defs
 	success_log "更新密码过期周期为90天。"
 	
+	###密码复杂度配置
+	[[ ! -f /etc/pam.d/system-auth.default ]] && cp /etc/pam.d/system-auth /etc/pam.d/system-auth.default
 	if [[ `grep 'pam_pwquality.so' /etc/pam.d/system-auth 2>/dev/null` ]];then
 		sed -i 's/password    requisite.*/password    requisite     pam_pwquality.so minlen=12 dcredit=-2 ucredit=-1 lcredit=-1 ocredit=-1 enforce_for_root try_first_pass local_users_only retry=3 authtok_type=/' /etc/pam.d/system-auth
 		success_log "更新密码复杂度策略"
@@ -19,8 +22,10 @@ system_security_set(){
 		info_log "密码复杂度策略为最小长度12位，至少包含2个数字，1个大写字母，1个小写字母，1个特殊字符"
 	fi
 
+	###登录失败配置
 	if [[  ${sys_name} = "Centos" ]];then
 		###ssh远程登录限制
+		[[ ! -f //etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
 		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
 			success_log "更新远程登录失败策略"
@@ -29,6 +34,7 @@ system_security_set(){
 			info_log "已经存在策略，已跳过。"
 		fi
 		###本地登陆限制
+		[[ ! -f /etc/pam.d/system-auth.default ]] && cp /etc/pam.d/system-auth /etc/pam.d/system-auth.default
 		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/system-auth` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
 			success_log "更新本地登录失败策略"
@@ -40,6 +46,7 @@ system_security_set(){
 
 	if [[  ${sys_name} = "openEuler" ]];then
 		###ssh远程登录限制
+		[[ ! -f //etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
 		if [[ -z `grep 'pam_faillock.so' /etc/pam.d/sshd` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_faillock.so deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
 			success_log "更新远程登录失败策略"
@@ -48,6 +55,7 @@ system_security_set(){
 			info_log "已经存在策略，已跳过。"
 		fi
 		###本地登陆限制
+		[[ ! -f /etc/pam.d/system-auth.default ]] && cp /etc/pam.d/system-auth /etc/pam.d/system-auth.default
 		if [[ -z `grep 'pam_faillock.so' /etc/pam.d/system-auth` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_faillock.so deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/system-auth
 			success_log "更新本地登录失败策略"
@@ -56,7 +64,7 @@ system_security_set(){
 			info_log "已经存在策略，已跳过。"
 		fi	
 	fi
-	###系统用户操作记录配置/var/log/bash_history.log
+	###系统用户操作记录
 	cat >/etc/profile.d/bash_history.sh <<-'EOF'
 	#!/bin/bash
 	export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] [`who am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`] "
@@ -70,12 +78,11 @@ system_security_set(){
 	export LAST_CMD="$(history 1)";
 	export OLD_PWD=$(pwd);'
 	EOF
+	[[ ! -f /etc/profile.default ]] && cp /etc/profile /etc/profile.default
 	[[ -z `grep 'TMOUT=600' /etc/profile` ]] && echo 'TMOUT=600' >> /etc/profile
-	[[ ! -f /var/log/bash_history.log ]] && touch /var/log/bash_history.log
-	chmod a+w /var/log/bash_history.log
-	chmod +x /etc/profile.d/bash_history.sh
+
 	source /etc/profile
-	success_log "系统用户操作记录配置默认记录位置/var/log/bash_history.log和syslog"
+	success_log "系统用户操作记录配到到/var/log/messages"
 	
 	if [[ -z `grep '^Banner' /etc/ssh/sshd_config` ]];then
 		sed -i '/#Banner none/aBanner /etc/ssh/alert' /etc/ssh/sshd_config
@@ -110,6 +117,7 @@ system_security_set(){
 	fi
 	###系统日志轮转
 	if [[ -f /etc/logrotate.conf ]];then
+		[[ ! -f /etc/logrotate.conf.default ]] && cp /etc/logrotate.conf /etc/logrotate.conf.default
 		sed -i 's/^rotate.*/rotate 26/' /etc/logrotate.conf
 		success_log "系统日志轮转周期修改为26周"
 	fi
