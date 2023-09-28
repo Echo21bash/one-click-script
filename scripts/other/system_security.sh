@@ -46,7 +46,7 @@ system_security_set(){
 
 	if [[  ${sys_name} = "openEuler" ]];then
 		###ssh远程登录限制
-		[[ ! -f //etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
+		[[ ! -f /etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
 		if [[ -z `grep 'pam_faillock.so' /etc/pam.d/sshd` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_faillock.so deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
 			success_log "更新远程登录失败策略"
