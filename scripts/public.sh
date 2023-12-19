@@ -298,7 +298,7 @@ only_allow_numbers(){
 
 
 down_file(){
-	github_mirror=(https://ghproxy.com https://github.wuyanzheshui.workers.dev https://hub.fastgit.org https://download.fastgit.org https://github.com.cnpmjs.org)
+	github_mirror=(https://github.ink https://ghproxy.com https://github.wuyanzheshui.workers.dev https://hub.fastgit.org https://download.fastgit.org https://github.com.cnpmjs.org)
 	#$1下载链接、$2保存已存在的路径或路径+名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
