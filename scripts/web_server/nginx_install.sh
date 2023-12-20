@@ -55,8 +55,8 @@ nginx_compile(){
 	fi
 	if [[ ${add_module[*]} =~ '2' ]];then
 		down_file https://github.com/yaoweibin/nginx_upstream_check_module/archive/master.tar.gz nginx_upstream_check_module-master.tar.gz && tar zxf nginx_upstream_check_module-master.tar.gz
-		[[ ${online_select_version} > nginx-1.13.99 && ${online_select_version} < nginx-1.16.1 ]] && patch -p1 < ${tar_dir}/${add_module_value}-master/check_1.14.0+.patch
-		[[ ${online_select_version} > nginx-1.16.0 ]] && patch -p1 < ${tar_dir}/${add_module_value}-master/check_1.16.1+.patch
+		[[ ${online_select_version} > 1.13.99 && ${online_select_version} < 1.16.1 ]] && patch -p1 < ${tar_dir}/${add_module_value}-master/check_1.14.0+.patch
+		[[ ${online_select_version} > 1.16.0 ]] && patch -p1 < ${tar_dir}/${add_module_value}-master/check_1.16.1+.patch
 		
 		configure_arg="${configure_arg} --add-module=${tar_dir}/${add_module_value}-master"
 	fi
