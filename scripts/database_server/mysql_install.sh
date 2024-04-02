@@ -22,9 +22,17 @@ mysql_env_load(){
 mysql_down(){
 	if [[ ${branch} = '1' ]];then
 		if [[ ${os_bit} = '64' ]];then
-			down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz"
+			if [[ ${version_number} = '8.0' ]];then
+				down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.xz"
+			else
+				down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-x86_64.tar.gz"
+			fi
 		else
-			down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz"
+			if [[ ${version_number} = '8.0' ]];then
+				down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.xz"
+			else
+				down_url="${url}/MySQL-${detail_version_number%.*}/mysql-${detail_version_number}-linux-glibc2.12-i686.tar.gz"
+			fi
 		fi
 	else
 		down_url="${url}/mysql-wsrep-${detail_version_number}/binary/mysql-wsrep-${detail_version_number}-linux-x86_64.tar.gz"
