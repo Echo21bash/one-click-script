@@ -3,8 +3,8 @@
 go_env_load(){
 	tmp_dir=/usr/local/src/go_tmp
 	soft_name=go
-	program_version=('1.11' '1.12' '1.13' '1.14' '1.15')
-	url="https://gomirrors.org/dl/go/"
+	program_version=('1.13' '1.14' '1.15' '1.16' '1.17' '1.18' '1.19')
+	url="http://mirrors.aliyun.com/golang/"
 	select_version
 	install_dir_set
 	online_version
