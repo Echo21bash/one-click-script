@@ -54,15 +54,5 @@ enabled=0
 gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
        https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64
-       
-[kernel]
-name=CentOS-$releasever - Plus
-baseurl=http://mirrors.aliyun.com/centos-altarch/7/kernel/$basearch/
-        http://mirrors.ustc.edu.cn/centos-altarch/7/kernel/$basearch/
-        https://repo.huaweicloud.com/centos-altarch/7/kernel/$basearch/
-gpgcheck=0
-enabled=1
-gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
-       https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
-       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64 
+
        

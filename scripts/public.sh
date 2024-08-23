@@ -82,11 +82,10 @@ sys_info(){
 	fi
 	#版本号
 	if [[ -s /etc/redhat-release ]]; then
-		release_all=`grep -oE  "[0-9.0-9]+" /etc/redhat-release`
+		release_all=`grep -oE  "[0-9.]+" /etc/redhat-release`
 		os_release=${release_all%%.*}
 	elif [[ -s /etc/openEuler-release ]];then
-		release_all=`grep -oE  "[0-9.]+" /etc/openEuler-release`
-		os_release=`grep -oE  "[0-9.]+" /etc/openEuler-release`
+		os_release=`grep -oE  "[0-9]+\.[0-9]+" /etc/openEuler-release`
 	else
 		release_all=`grep -oE  "[0-9.]+" /etc/issue`
 		os_release=${release_all%%.*}
@@ -94,6 +93,8 @@ sys_info(){
 
 	#系统位数
 	os_bit=`getconf LONG_BIT`
+	#CPU架构
+	arch_type=`uname -m`
 	#守护进程类型
 	if grep -qa systemd /proc/1/cmdline;then
 		daemon_type="systemd"

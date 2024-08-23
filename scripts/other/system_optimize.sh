@@ -2,27 +2,36 @@
 
 system_optimize_set(){
 
-	###yum替换为阿里源
+	###yum替换为国内源
 	
-	if [[ ${sys_name} = "Centos" && ${os_release} < "7" ]];then
-		[[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]] && cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+	if [[ ${sys_name} = "Centos" && ${os_release} = "6" ]];then
+		if [[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]];then
+			cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+		fi
 		\cp ${workdir}/config/yum/CentOS6-epel.repo /etc/yum.repos.d/epel.repo
 		\cp ${workdir}/config/yum/CentOS6-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+		\cp ${workdir}/config/yum/CentOS6-Ius.repo /etc/yum.repos.d/CentOS-Ius.repo
 	fi
-	if [[ ${sys_name} = "Centos" && ${os_release} > "6" ]];then
-		if [[ ! -f /etc/yum.repos.d/epel.repo ]];then
-			\cp ${workdir}/config/yum/CentOS7-epel.repo /etc/yum.repos.d/epel.repo
+	if [[ ${sys_name} = "Centos" && ${os_release} = "7" ]];then
+		if [[ ! -f ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]];then
+			cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 		fi
-		if [[ -z `grep mirrors.aliyun.com /etc/yum.repos.d/CentOS-Base.repo` ]];then
-			curl -sL -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo >/dev/null 2>&1
+		\cp ${workdir}/config/yum/CentOS7-epel.repo /etc/yum.repos.d/epel.repo
+		\cp ${workdir}/config/yum/CentOS7-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+		\cp ${workdir}/config/yum/CentOS7-Ius.repo /etc/yum.repos.d/CentOS-Ius.repo
+		\cp ${workdir}/config/yum/CentOS7-altarch-Base.repo /etc/yum.repos.d/CentOS-altarch-Base.repo
+		\cp ${workdir}/config/yum/CentOS7-kernel.repo /etc/yum.repos.d/CentOS-kernel.repo
+	fi
+
+	if [[ ${package_tool} = "yum" ]];then
+		yum -y install bash-completion wget chrony vim sysstat net-tools >/dev/null 2>&1
+		if [[ $? = 0 ]];then
+			success_log "完成yum源优化,并安装必要的命令..."
+		else
+			error_log "yum源优化失败请检查网络!"
 		fi
 	fi
-	yum -y install bash-completion wget chrony vim sysstat net-tools >/dev/null 2>&1
-	if [[ $? = 0 ]];then
-		success_log "完成yum源优化,并安装必要的命令..."
-	else
-		error_log "yum源优化失败请检查网络!"
-	fi
+
 	
 	###系统limit限制优化
 	[[ ! -f /etc/security/limits.conf.default ]] && cp /etc/security/limits.conf /etc/security/limits.conf.default
@@ -74,7 +83,6 @@ system_optimize_set(){
 	###系统时区配置为上海东八区，根据阿里云时钟进行时间同步
 	rm -rf /etc/localtime
 	ln -sfn /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	yum -y install chrony
 
 	if [ $? -eq 0 ];then
 		if [[ -z `grep time.pool.aliyun.com /etc/chrony.conf` ]];then

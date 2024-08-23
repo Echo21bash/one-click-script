@@ -1,0 +1,34 @@
+### Name: ELRepo.org Community Enterprise Linux Repository for el7
+### URL: http://elrepo.org/
+
+[elrepo]
+name=ELRepo.org Community Enterprise Linux Repository - el7
+baseurl=https://mirrors.aliyun.com/elrepo/archive/elrepo/el7/$basearch/
+        https://mirrors.ustc.edu.cn/elrepo/archive/elrepo/el7/$basearch/
+        https://mirrors.tuna.tsinghua.edu.cn/elrepo/archive/elrepo/el7/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org
+protect=0
+
+
+[elrepo-kernel]
+name=ELRepo.org Community Enterprise Linux Kernel Repository - el7
+baseurl=https://mirrors.aliyun.com/elrepo/archive/kernel/el7/$basearch/
+        https://mirrors.ustc.edu.cn/elrepo/archive/kernel/el7/$basearch/
+        https://mirrors.tuna.tsinghua.edu.cn/archive/kernel/el7/$basearch/
+
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org
+protect=0
+
+[elrepo-extras]
+name=ELRepo.org Community Enterprise Linux Extras Repository - el7
+baseurl=https://mirrors.aliyun.com/elrepo/extras/el7/$basearch/
+        https://mirrors.ustc.edu.cn/elrepo/archive/extras/el7/$basearch/
+        https://mirrors.tuna.tsinghua.edu.cn/elrepo/archive/extras/el7/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org
+protect=0

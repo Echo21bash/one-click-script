@@ -1,0 +1,23 @@
+# CentOS-kernel.repo
+#
+# The mirror system uses the connecting IP address of the client and the
+# update status of each mirror to pick mirrors that are updated to and
+# geographically close to the client.  You should use this for CentOS updates
+# unless you are manually picking other mirrors.
+#
+# If the mirrorlist= does not work for you, as a fall back you can try the 
+# remarked out baseurl= line instead.
+#
+#
+     
+[kernel]
+name=CentOS-$releasever - kernel
+baseurl=http://mirrors.aliyun.com/centos-altarch/7/kernel/$basearch/
+        http://mirrors.ustc.edu.cn/centos-altarch/7/kernel/$basearch/
+        https://repo.huaweicloud.com/centos-altarch/7/kernel/$basearch/
+gpgcheck=0
+enabled=1
+gpgkey=https://repo.huaweicloud.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://mirrors.aliyun.com/centos-altarch/7/os/$basearch/RPM-GPG-KEY-CentOS-7
+       https://www.centos.org/keys/RPM-GPG-KEY-CentOS-7-aarch64 
+       

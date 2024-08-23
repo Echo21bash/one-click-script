@@ -1,23 +1,29 @@
 [epel]
 name=Extra Packages for Enterprise Linux 7 - $basearch
 baseurl=http://mirrors.aliyun.com/epel/7/$basearch
+        https://mirrors.ustc.edu.cn/epel/7/$basearch
+        https://repo.huaweicloud.com/epel/7/$basearch
 failovermethod=priority
 enabled=1
 gpgcheck=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgkey=http://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7
  
 [epel-debuginfo]
 name=Extra Packages for Enterprise Linux 7 - $basearch - Debug
 baseurl=http://mirrors.aliyun.com/epel/7/$basearch/debug
+        https://mirrors.ustc.edu.cn/epel/7/$basearch/debug
+        https://repo.huaweicloud.com/epel/7/$basearch/debug
 failovermethod=priority
 enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgkey=http://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7
 gpgcheck=0
  
 [epel-source]
 name=Extra Packages for Enterprise Linux 7 - $basearch - Source
 baseurl=http://mirrors.aliyun.com/epel/7/SRPMS
+        https://mirrors.ustc.edu.cn/epel/7/SRPMS
+        https://repo.huaweicloud.com/epel/7/SRPMS
 failovermethod=priority
 enabled=0
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgkey=http://mirrors.aliyun.com/epel/RPM-GPG-KEY-EPEL-7
 gpgcheck=0

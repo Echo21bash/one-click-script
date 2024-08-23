@@ -1,6 +1,8 @@
 [ius]
 name = IUS for Enterprise Linux 7 - $basearch
 baseurl = https://mirrors.aliyun.com/ius/7/$basearch/
+          https://mirrors.tuna.tsinghua.edu.cn/ius/7/$basearch/
+          https://mirrors.cloud.tencent.com/ius/7/$basearch/
 enabled = 1
 repo_gpgcheck = 0
 gpgcheck = 1
@@ -9,6 +11,8 @@ gpgkey = https://mirrors.aliyun.com/ius/RPM-GPG-KEY-IUS-7
 [ius-debuginfo]
 name = IUS for Enterprise Linux 7 - $basearch - Debug
 baseurl = https://mirrors.aliyun.com/ius/7/$basearch/debug/
+          https://mirrors.tuna.tsinghua.edu.cn/ius/7/$basearch/debug/
+          https://mirrors.cloud.tencent.com/ius/7/$basearch/debug/
 enabled = 0
 repo_gpgcheck = 0
 gpgcheck = 1
@@ -17,6 +21,8 @@ gpgkey = https://mirrors.aliyun.com/ius/RPM-GPG-KEY-IUS-7
 [ius-source]
 name = IUS for Enterprise Linux 7 - Source
 baseurl = https://mirrors.aliyun.com/ius/7/src/
+          https://mirrors.tuna.tsinghua.edu.cn/ius/7/src/
+          https://mirrors.cloud.tencent.com/ius/7/src/
 enabled = 0
 repo_gpgcheck = 0
 gpgcheck = 1
