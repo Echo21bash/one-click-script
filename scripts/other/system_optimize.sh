@@ -13,7 +13,7 @@ system_optimize_set(){
 		\cp ${workdir}/config/yum/CentOS6-Ius.repo /etc/yum.repos.d/CentOS-Ius.repo
 	fi
 	if [[ ${sys_name} = "Centos" && ${os_release} = "7" ]];then
-		if [[ ! -f ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]];then
+		if [[ ! -f /etc/yum.repos.d/CentOS-Base.repo.backup ]];then
 			cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 		fi
 		\cp ${workdir}/config/yum/CentOS7-epel.repo /etc/yum.repos.d/epel.repo

@@ -3,7 +3,7 @@
 redis_env_load(){
 	tmp_dir=/usr/local/src/redis_tmp
 	soft_name=redis
-	program_version=('3.2' '4.0' '5.0')
+	program_version=('3.2' '4.0' '5.0' '6.0' '6.2')
 	url="https://repo.huaweicloud.com/redis"
 	select_version
 	install_dir_set
