@@ -299,7 +299,7 @@ only_allow_numbers(){
 
 
 down_file(){
-	github_mirror=(https://github.ink https://ghproxy.com https://github.wuyanzheshui.workers.dev https://hub.fastgit.org https://download.fastgit.org https://github.com.cnpmjs.org)
+	github_mirror=(https://github.ink https://ghproxy.net https://kkgithub.com https://githubfast.com https://download.fastgit.org https://github.com.cnpmjs.org)
 	#$1下载链接、$2保存已存在的路径或路径+名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
@@ -310,7 +310,7 @@ down_file(){
 			do
 				mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
 				if [[ ${mirror_status} = '200' ]];then
-					if [[ ${mirror} = 'https://ghproxy.com' ]];then
+					if [[ ${mirror} = 'https://ghproxy.net' ]];then
 						mirror_down_url="${mirror}/${down_url}"
 					else
 						mirror_down_url="${mirror}/${down_url#*github.com/}"
