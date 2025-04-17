@@ -41,7 +41,9 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			timeout 10 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version || timeout 10 curl -sL https://hub.fastgit.org/${url#*github.com/}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 10 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version || \
+			timeout 10 curl -sL https://hub.fastgit.org/${url#*github.com/}/tags | grep /tag/ >${tmp_dir}/tmp_version ||\
+			timeout 10 curl -sL https://ghproxy.cn/${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
@@ -98,7 +100,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		fastdfs|greenplum|wireguard-ui|anylink|nacos)
+		tengine|fastdfs|greenplum|wireguard-ui|anylink|nacos)
 			all_version_github
 		;;
 	esac
