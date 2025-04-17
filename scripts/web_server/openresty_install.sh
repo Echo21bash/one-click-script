@@ -13,7 +13,7 @@ openresty_env_load(){
 openresty_down(){
 
 	online_down_file "${url}/v${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
-	unpacking_file ${tmp_dir}/v${detail_version_number}.tar.gz ${tmp_dir}
+	unpacking_file ${tmp_dir}/${soft_name}-${detail_version_number}.tar.gz ${tmp_dir}
 
 }
 
