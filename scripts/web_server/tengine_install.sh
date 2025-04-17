@@ -50,7 +50,6 @@ tengine_compile(){
 
 tengine_config(){
 	conf_dir=${home_dir}/conf
-	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
 	add_log_cut ${tmp_dir}/log_cut_tengine ${home_dir}/logs/*.log
 	\cp ${tmp_dir}/log_cut_tengine /etc/logrotate.d
 }
