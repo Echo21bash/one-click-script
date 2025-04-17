@@ -61,7 +61,7 @@ add_tengine_service(){
 	ExecStart="${home_dir}/bin/nginx -c ${home_dir}/nginx/conf/nginx.conf"
 	ExecReload="${home_dir}/bin/nginx -s reload"
 	ExecStop="${home_dir}/bin/nginx -s stop"
-	add_daemon_file
+	add_daemon_file ${home_dir}/init
 	add_system_service tengine ${home_dir}/init
 }
 
