@@ -57,7 +57,7 @@ tengine_config(){
 add_tengine_service(){
 
 	Type="forking"
-	ExecStart="${home_dir}/bin/nginx -c ${home_dir}/nginx/conf/nginx.conf"
+	ExecStart="${home_dir}/bin/nginx -c ${home_dir}/conf/nginx.conf"
 	ExecReload="${home_dir}/bin/nginx -s reload"
 	ExecStop="${home_dir}/bin/nginx -s stop"
 	add_daemon_file ${home_dir}/init

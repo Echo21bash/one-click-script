@@ -3,7 +3,7 @@
 openresty_env_load(){
 	tmp_dir=/usr/local/src/openresty_tmp
 	soft_name=openresty
-	program_version=(1.13 1.14 1.15)
+	program_version=('1.15' '1.16' '1.17' '1.18' '1.19' '1.20' '1.21')
 	url="https://repo.huaweicloud.com/openresty"
 	select_version
 	install_dir_set
@@ -11,8 +11,8 @@ openresty_env_load(){
 }
 
 openresty_down(){
-	down_url="${url}/v${detail_version_number}/v${detail_version_number}.tar.gz"
-	online_down_file
+
+	online_down_file "${url}/v${detail_version_number}/${soft_name}-${detail_version_number}.tar.gz"
 	unpacking_file ${tmp_dir}/v${detail_version_number}.tar.gz ${tmp_dir}
 
 }
@@ -50,7 +50,6 @@ openresty_compile(){
 
 openresty_config(){
 	conf_dir=${home_dir}/conf
-	cat ${workdir}/config/nginx.conf >${conf_dir}/nginx.conf
 	add_log_cut ${tmp_dir}/log_cut_openresty ${home_dir}/logs/*.log
 	\cp ${tmp_dir}/log_cut_openresty /etc/logrotate.d
 }
@@ -58,9 +57,9 @@ openresty_config(){
 add_openresty_service(){
 
 	Type="forking"
-	ExecStart="${home_dir}/bin/openresty -c ${home_dir}/nginx/conf/nginx.conf"
-	ExecReload="${home_dir}/bin/openresty -s reload"
-	ExecStop="${home_dir}/bin/openresty -s stop"
+	ExecStart="${home_dir}/bin/nginx -c ${home_dir}/conf/nginx.conf"
+	ExecReload="${home_dir}/bin/nginx -s reload"
+	ExecStop="${home_dir}/bin/nginx -s stop"
 	add_daemon_file ${home_dir}/init
 	add_system_service openresty ${home_dir}/init
 }
