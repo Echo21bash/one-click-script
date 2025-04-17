@@ -64,6 +64,7 @@ nginx_compile(){
 	make && make install
 	if [ $? = "0" ];then
 		mkdir -p ${home_dir}/conf.d
+		chown -R nginx.nginx ${home_dir}
 		echo -e "${info} nginx安装成功."
 	else
 		echo -e "${error} nginx安装失败!!!"

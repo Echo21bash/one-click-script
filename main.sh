@@ -54,16 +54,19 @@ done
 
 web_services(){
 
-output_option '请选择要安装的软件' 'Nginx Openresty Tomcat' 'web'
+output_option '请选择要安装的软件' 'Nginx Tengine Openresty Tomcat' 'web'
 
 for number in ${web[@]}; do
 	case "$number" in
 		1)nginx_install_ctl
 		;;
-		2)openresty_install_ctl
+		2)tengine_install_ctl
 		;;
-		3)tomcat_install_ctl
+		3)openresty_install_ctl
 		;;
+		4)tomcat_install_ctl
+		;;
+
 	esac
 done
 }

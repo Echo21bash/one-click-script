@@ -39,6 +39,7 @@ openresty_compile(){
 	./configure ${configure_arg}
 	make && make install
 	if [ $? = "0" ];then
+		chown -R nginx.nginx ${home_dir}
 		diy_echo "openresty安装成功." "${info} "
 	else
 		diy_echo "openresty安装失败!!!" "${red}" "${error}"
