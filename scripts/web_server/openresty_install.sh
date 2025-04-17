@@ -57,9 +57,9 @@ openresty_config(){
 add_openresty_service(){
 
 	Type="forking"
-	ExecStart="${home_dir}/bin/nginx -c ${home_dir}/conf/nginx.conf"
-	ExecReload="${home_dir}/bin/nginx -s reload"
-	ExecStop="${home_dir}/bin/nginx -s stop"
+	ExecStart="${home_dir}/nginx/sbin/nginx -c ${home_dir}/conf/nginx.conf"
+	ExecReload="${home_dir}/nginx/sbin/nginx -s reload"
+	ExecStop="${home_dir}/nginx/sbin/nginx -s stop"
 	add_daemon_file ${home_dir}/init
 	add_system_service openresty ${home_dir}/init
 }
