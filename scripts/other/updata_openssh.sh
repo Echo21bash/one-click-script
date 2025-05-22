@@ -4,8 +4,8 @@ openssh_env_load(){
 	tmp_dir=/usr/local/src/openssh_tmp
 	mkdir -p ${tmp_dir}
 	soft_name=openssh
-	program_version=('8.4' '8.5' '8.6' '8.8')
-	url='https://raw.githubusercontent.com/hebaodanroot/rpm_package'
+	program_version=('8.4' '8.5' '8.6' '8.8' '9.3' '9.8' '9.9')
+	url='https://raw.githubusercontent.com/Echo21bash/rpm_package'
 	select_version
 
 }
@@ -27,17 +27,17 @@ openssh_down(){
 	down_url="${url}/master/el${os_release}/openssh-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 	
-	down_url="${url}/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.x86_64.rpm"
-	online_down_file
+	#down_url="${url}/master/el${os_release}/openssh-askpass-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	#online_down_file
 	
-	down_url="${url}/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.x86_64.rpm"
-	online_down_file
+	#down_url="${url}/master/el${os_release}/openssh-askpass-gnome-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	#online_down_file
 	
 	down_url="${url}/master/el${os_release}/openssh-clients-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
 
-	down_url="${url}/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.x86_64.rpm"
-	online_down_file
+	#down_url="${url}/master/el${os_release}/openssh-debuginfo-${version_number}p1-1.el${os_release}.x86_64.rpm"
+	#online_down_file
 
 	down_url="${url}/master/el${os_release}/openssh-server-${version_number}p1-1.el${os_release}.x86_64.rpm"
 	online_down_file
@@ -83,7 +83,7 @@ openssh_local_upgrade(){
 		cd /etc/ssh/
 		chmod 400 ssh_host_ecdsa_key ssh_host_ed25519_key ssh_host_rsa_key
 		cat /etc/pam.d/sshd_back_upgrade >/etc/pam.d/sshd
-		cat	/etc/ssh/sshd_config_back_upgrade >/etc/ssh/sshd_config
+		cat /etc/ssh/sshd_config_back_upgrade >/etc/ssh/sshd_config
 		sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config
 		sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 		service_control sshd restart
