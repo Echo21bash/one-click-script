@@ -60,7 +60,7 @@ seaweedfs_config(){
 	METRICSPORT=10002
 	EOF
 	
-	cat >${home_dir}/etc/weedfiler<<-EOF
+	cat >${home_dir}/etc/weedadmin<<-EOF
 	ADMINUSER=admin
 	ADMINPASSWORD=admin
 	PORT=23646
