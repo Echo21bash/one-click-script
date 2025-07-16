@@ -115,7 +115,7 @@ seaweedfs_install(){
 		mkdir -p ${home_dir}/{bin,etc}
 		mkdir -p ${seaweedfs_data_dir}/{weedmaster,weedvolume,weedfiler,weedadmin}
 		mkdir -p /root/.seaweedfs
-		cp ${tmp_dir}/seaweedfs ${home_dir}/bin/seaweedfs
+		cp ${tmp_dir}/weed ${home_dir}/bin/weed
 		cp ${workdir}/config/seaweedfs/filer.toml /root/.seaweedfs/
 		sed -i "s#dir = \"./filerldb3\"#dir = \"${seaweedfs_data_dir}/weedfiler/filerldb3\"#" /root/.seaweedfs/filer.toml
 		add_seaweedfs_service
