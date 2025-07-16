@@ -7,7 +7,9 @@ seaweedfs_env_load(){
 	mkdir -p ${tmp_dir}
 	program_version=('3')
 	url='https://github.com/seaweedfs/seaweedfs'
+	select_version
 	install_dir_set
+	online_version
 }
 
 seaweedfs_install_set(){
@@ -126,8 +128,8 @@ seaweedfs_install(){
 seaweedfs_install_ctl(){
 	seaweedfs_env_load
 	seaweedfs_install_set
-	seaweedfs_install
 	seaweedfs_down
+	seaweedfs_install
 	seaweedfs_config
 	add_seaweedfs_service
 	service_control seaweedfs
