@@ -117,7 +117,7 @@ done
 
 storage_service(){
 
-output_option '请选择要安装的软件' 'FTP SFTP 对象存储服务(OSS/minio) FastDFS NFS' 'storage'
+output_option '请选择要安装的软件' 'FTP SFTP 对象存储服务(OSS/minio) FastDFS NFS SeaweedFS' 'storage'
 
 for number in ${storage[@]}; do
 	case "$number" in
@@ -130,6 +130,8 @@ for number in ${storage[@]}; do
 		4)fastdfs_install_ctl
 		;;
 		5)nfs_install_ctl
+		;;
+		6)seaweedfs_install_ctl
 		;;
 	esac
 done
