@@ -100,7 +100,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		tengine|fastdfs|greenplum|wireguard-ui|anylink|nacos)
+		tengine|fastdfs|greenplum|wireguard-ui|anylink|nacos|seaweedfs)
 			all_version_github
 		;;
 	esac
