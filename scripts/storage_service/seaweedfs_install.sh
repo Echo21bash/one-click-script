@@ -150,12 +150,12 @@ seaweedfs_install(){
 				*"$now_host"*)
 					auto_input_keyword "
 					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
-					mkdir -p ${seaweedfs_data_dir}/{weedvolume}
+					mkdir -p ${seaweedfs_data_dir}/weedvolume
 					mkdir -p ${home_dir}/{bin,etc}
 					EOF
 					scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}/bin
 					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{volume}.conf ${host_ip[$k]}:${home_dir}/etc
+					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/volume.conf ${host_ip[$k]}:${home_dir}/etc
 					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 					. /tmp/public.sh
 					Type=simple
@@ -172,14 +172,14 @@ seaweedfs_install(){
 				*"$now_host"*)
 					auto_input_keyword "
 					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
-					mkdir -p ${seaweedfs_data_dir}/{weedfiler}
+					mkdir -p ${seaweedfs_data_dir}/weedfiler
 					mkdir -p ${home_dir}/{bin,etc}
 					mkdir -p /root/.seaweedfs/
 					EOF
 					scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}/bin
 					scp -q -r -P ${ssh_port[$k]} ${workdir}/config/seaweedfs/filer.toml ${host_ip[$k]}:/root/.seaweedfs/
 					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
-					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{filer}.conf ${host_ip[$k]}:${home_dir}/etc
+					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/filer.conf ${host_ip[$k]}:${home_dir}/etc
 					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 					. /tmp/public.sh
 					Type=simple

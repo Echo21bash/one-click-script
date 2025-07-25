@@ -112,7 +112,7 @@ sys_info(){
 	kel=`uname -r | grep -oE [0-9]{1}.[0-9]{1,\}.[0-9]{1,\}-[0-9]{1,\}`
 	#网络连接状态
 	http_code=`timeout 1 curl --connect-timeout 3 -k -I -m 3 -o /dev/null -s -w %{http_code} www.baidu.com`
-	if [ ${http_code} = '200' ];then
+	if [[ ${http_code} = '200' ]];then
 		network_status="${green}connected${plain}"
 	else
 		network_status="${red}disconnected${plain}"
