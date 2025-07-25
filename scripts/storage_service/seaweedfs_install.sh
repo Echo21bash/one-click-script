@@ -111,13 +111,12 @@ seaweedfs_install(){
 	fi
 
 	if [[ ${deploy_mode} = '2' ]];then
-
+		local k=0
 		for now_host in ${host_ip[@]}
 		do
 			home_dir=${install_dir}/seaweedfs
 			get_seaweedfs_master_node
 			seaweedfs_config
-			
 			info_log "正在向节点${now_host}分发seaweedfs安装程序和配置文件..."
 			case "${master_ip[*]}" in
 				*"$now_host"*)
