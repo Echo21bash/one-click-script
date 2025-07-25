@@ -193,13 +193,14 @@ seaweedfs_install(){
 				;;
 			esac
 		done
+		((k++))
 	fi
 }
 
 get_seaweedfs_master_node(){
 	master_peers=
-	for master_peers in ${master_ip[*]}; do
-		master_peers=${master_peers}:9333,
+	for now_host in ${master_ip[*]}; do
+		master_peers=${now_host}:9333,
 	done
 }
 
