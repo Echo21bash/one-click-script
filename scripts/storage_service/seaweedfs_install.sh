@@ -32,75 +32,62 @@ seaweedfs_down(){
 }
 
 seaweedfs_config(){
-	cat >${home_dir}/etc/weedmaster<<-EOF
-	PORT=9333
-	MDIR=${seaweedfs_data_dir}/weedmaster
-	#Prometheus metrics listen port
-	METRICSPORT=10000
-	EOF
-	cat >${home_dir}/etc/weedvolume<<-EOF
-	PORT=8080
-	#directories to store data files. dir[,dir]...
-	DIR=${seaweedfs_data_dir}/weedvolume
-	#comma-separated master servers
-	MSERVER=127.0.0.1:9333
-	#Prometheus metrics listen port
-	METRICSPORT=10001
-	#current volume server's data center name
-	DATACENTER=dc1
-	#current volume server's rack name
-	RACK=rack1
-	MAX=100
-	EOF
-	cat >${home_dir}/etc/weedfiler<<-EOF
-	PORT=8888
-	DIR=${seaweedfs_data_dir}/weedfiler
-	MASTER=127.0.0.1:9333
-	#Prometheus metrics listen port
-	METRICSPORT=10002
-	EOF
 	
-	cat >${home_dir}/etc/weedadmin<<-EOF
-	ADMINUSER=admin
-	ADMINPASSWORD=admin
-	PORT=23646
-	DATADIR=${seaweedfs_data_dir}/weedadmin
-	MASTERS=127.0.0.1:9333
-	EOF
+	if [[ ${deploy_mode} = '1' ]];then
+		\cp ${workdir}/config/seaweedfs/master.conf ${home_dir}/etc/master.conf
+		\cp ${workdir}/config/seaweedfs/volume.conf ${home_dir}/etc/volume.conf
+		\cp ${workdir}/config/seaweedfs/filer.conf ${home_dir}/etc/filer.conf
+		\cp ${workdir}/config/seaweedfs/admin.conf ${home_dir}/etc/admin.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${home_dir}/etc/master.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${home_dir}/etc/volume.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${home_dir}/etc/filer.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${home_dir}/etc/admin.conf
+	fi
 
+	if [[ ${deploy_mode} = '2' ]];then
+		\cp ${workdir}/config/seaweedfs/master.conf ${tmp_dir}/master.conf
+		\cp ${workdir}/config/seaweedfs/volume.conf ${tmp_dir}/volume.conf
+		\cp ${workdir}/config/seaweedfs/filer.conf ${tmp_dir}/filer.conf
+		\cp ${workdir}/config/seaweedfs/admin.conf ${tmp_dir}/admin.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/master.conf
+		sed -i "s^#peers=^#peers=${master_peers}/^" ${tmp_dir}/master.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/volume.conf
+		sed -i "s^mserver=127.0.0.1:9333^mserver=${master_peers}/^" ${tmp_dir}/volume.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/filer.conf
+		sed -i "s^master=127.0.0.1:9333^master=${master_peers}/^" ${tmp_dir}/filer.conf
+		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/admin.conf
+		sed -i "s^masters=127.0.0.1:9333^masters=${master_peers}/^" ${tmp_dir}/admin.conf
+	fi
 
 }
 
 add_seaweedfs_service(){
+
 	if [[ ${deploy_mode} = '1' ]];then
 		Type=simple
-		EnvironmentFile="${home_dir}/etc/weedmaster"
 		WorkingDirectory="${home_dir}"
-		ExecStart="${home_dir}/bin/weed master"
+		ExecStart="${home_dir}/bin/weed master -options=${home_dir}/etc/master.conf"
 		add_daemon_file ${home_dir}/seaweedmaster.service
 		add_system_service seaweedmaster ${home_dir}/seaweedmaster.service
 		service_control seaweedmaster restart
 		
 		Type=simple
-		EnvironmentFile="${home_dir}/etc/weedvolume"
 		WorkingDirectory="${home_dir}"
-		ExecStart="${home_dir}/bin/weed volume"
+		ExecStart="${home_dir}/bin/weed volume -options=${home_dir}/etc/volume.conf"
 		add_daemon_file ${home_dir}/seaweedvolume.service
 		add_system_service seaweedvolume ${home_dir}/seaweedvolume.service
 		service_control seaweedvolume restart
 		
 		Type=simple
-		EnvironmentFile="${home_dir}/etc/weedfiler"
-		WorkingDirectory="${home_dir}"
-		ExecStart="${home_dir}/bin/weed filer"
+		WorkingDirectory="${seaweedfs_data_dir}/weedfiler"
+		ExecStart="${home_dir}/bin/weed filer -options=${home_dir}/etc/filer.conf"
 		add_daemon_file ${home_dir}/seaweedfiler.service
 		add_system_service seaweedfiler ${home_dir}/seaweedfiler.service
 		service_control seaweedfiler restart
 		
 		Type=simple
-		EnvironmentFile="${home_dir}/etc/weedadmin"
 		WorkingDirectory="${home_dir}"
-		ExecStart="${home_dir}/bin/weed admin"
+		ExecStart="${home_dir}/bin/weed admin -options=${home_dir}/etc/admin.conf"
 		add_daemon_file ${home_dir}/seaweedadmin.service
 		add_system_service seaweedadmin ${home_dir}/seaweedadmin.service
 		service_control seaweedadmin restart
@@ -111,26 +98,116 @@ add_seaweedfs_service(){
 seaweedfs_install(){
 	if [[ ${deploy_mode} = '1' ]];then
 		home_dir=${install_dir}/seaweedfs
-		mkdir -p ${home_dir}
 		mkdir -p ${home_dir}/{bin,etc}
 		mkdir -p ${seaweedfs_data_dir}/{weedmaster,weedvolume,weedfiler,weedadmin}
 		mkdir -p /root/.seaweedfs
 		cp ${tmp_dir}/weed ${home_dir}/bin/weed
 		cp ${workdir}/config/seaweedfs/filer.toml /root/.seaweedfs/
-		sed -i "s#dir = \"./filerldb3\"#dir = \"${seaweedfs_data_dir}/weedfiler/filerldb3\"#" /root/.seaweedfs/filer.toml
+		seaweedfs_config
 		add_seaweedfs_service
 		add_sys_env "PATH=${home_dir}/bin:\$PATH"
+		ln -s ${home_dir}/bin/weed /usr/bin/weed
+		ln -s ${home_dir}/bin/weed /usr/sbin/weed
 	fi
 
+	if [[ ${deploy_mode} = '2' ]];then
+
+		for now_host in ${host_ip[@]}
+		do
+			home_dir=${install_dir}/seaweedfs
+			get_seaweedfs_master_node
+			seaweedfs_config
+			
+			info_log "正在向节点${now_host}分发seaweedfs安装程序和配置文件..."
+			case "${master_ip[*]}" in
+				*"$now_host"*)
+					auto_input_keyword "
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					mkdir -p ${seaweedfs_data_dir}/{weedmaster,weedadmin}
+					mkdir -p ${home_dir}/{bin,etc}
+					EOF
+					scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}/bin
+					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{master,admin}.conf ${host_ip[$k]}:${home_dir}/etc
+					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					. /tmp/public.sh
+					Type=simple
+					WorkingDirectory="${home_dir}"
+					ExecStart=\"${home_dir}/bin/weed master -options=${home_dir}/etc/master.conf\"
+					add_daemon_file ${home_dir}/seaweedmaster.service
+					add_system_service seaweedmaster ${home_dir}/seaweedmaster.service
+					service_control seaweedmaster restart
+
+					ExecStart=\"${home_dir}/bin/weed admin -options=${home_dir}/etc/admin.conf\"
+					add_daemon_file ${home_dir}/seaweedadmin.service
+					add_system_service seaweedadmin ${home_dir}/seaweedadmin.service
+					service_control seaweedadmin restart
+					rm -rf /tmp/public.sh
+					EOF" "${passwd[$k]}"				
+				;;
+			esac
+			
+			case "${volume_ip[*]}" in
+				*"$now_host"*)
+					auto_input_keyword "
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					mkdir -p ${seaweedfs_data_dir}/{weedvolume}
+					mkdir -p ${home_dir}/{bin,etc}
+					EOF
+					scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}/bin
+					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{volume}.conf ${host_ip[$k]}:${home_dir}/etc
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					. /tmp/public.sh
+					Type=simple
+					WorkingDirectory="${home_dir}"
+					ExecStart=\"${home_dir}/bin/weed volume -options=${home_dir}/etc/volume.conf\"
+					add_daemon_file ${home_dir}/seaweedvolume.service
+					add_system_service seaweedvolume ${home_dir}/seaweedvolume.service
+					service_control seaweedvolume restart
+					rm -rf /tmp/public.sh
+					EOF" "${passwd[$k]}"				
+				;;
+			esac
+			case "${filer_ip[*]}" in
+				*"$now_host"*)
+					auto_input_keyword "
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					mkdir -p ${seaweedfs_data_dir}/{weedfiler}
+					mkdir -p ${home_dir}/{bin,etc}
+					mkdir -p /root/.seaweedfs/
+					EOF
+					scp -q -r -P ${ssh_port[$k]} ${tar_dir}/* ${host_ip[$k]}:${home_dir}/bin
+					scp -q -r -P ${ssh_port[$k]} ${workdir}/config/seaweedfs/filer.toml ${host_ip[$k]}:/root/.seaweedfs/
+					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
+					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/{filer}.conf ${host_ip[$k]}:${home_dir}/etc
+					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
+					. /tmp/public.sh
+					Type=simple
+					WorkingDirectory=\"${seaweedfs_data_dir}/weedfiler\"
+					ExecStart=\"${home_dir}/bin/weed filer -options=${home_dir}/etc/filer.conf\"
+					add_daemon_file ${home_dir}/seaweedfiler.service
+					add_system_service seaweedfiler ${home_dir}/seaweedfiler.service
+					service_control seaweedfiler restart
+					rm -rf /tmp/public.sh
+					EOF" "${passwd[$k]}"				
+				;;
+			esac
+		done
+	fi
 }
 
+get_seaweedfs_master_node(){
+	master_peers=
+	for master_peers in ${master_ip[*]}; do
+		master_peers=${master_peers}:9333,
+	done
+}
 
 seaweedfs_install_ctl(){
 	seaweedfs_env_load
 	seaweedfs_install_set
 	seaweedfs_down
 	seaweedfs_install
-	seaweedfs_config
-	add_seaweedfs_service
-	service_control seaweedfs
+	
 }
