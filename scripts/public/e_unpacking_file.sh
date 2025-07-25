@@ -32,9 +32,11 @@ unpacking_file(){
 		package_root_dir=
 	fi
 	#解压文件
-	if [[ -d ${unpack_dir}/${package_root_dir} ]];then
-		rm -rf ${unpack_dir}/${package_root_dir}
-	fi
+	if [[ -n ${package_root_dir} ]];then
+		if [[ -d ${unpack_dir}/${package_root_dir} ]];then
+			rm -rf ${unpack_dir}/${package_root_dir}
+		fi
+	if
 	info_log "正在解压文件${unpack_file_name}到${unpack_dir}"
 	if [[ ! -d ${unpack_dir} ]];then
 		mkdir -p ${unpack_dir}
