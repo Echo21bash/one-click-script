@@ -50,13 +50,13 @@ seaweedfs_config(){
 		\cp ${workdir}/config/seaweedfs/filer.conf ${tmp_dir}/filer.conf
 		\cp ${workdir}/config/seaweedfs/admin.conf ${tmp_dir}/admin.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/master.conf
-		sed -i "s^#peers=^#peers=${master_peers}/^" ${tmp_dir}/master.conf
+		sed -i "s^#peers=^#peers=${master_peers}^" ${tmp_dir}/master.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/volume.conf
-		sed -i "s^mserver=127.0.0.1:9333^mserver=${master_peers}/^" ${tmp_dir}/volume.conf
+		sed -i "s^mserver=127.0.0.1:9333^mserver=${master_peers}^" ${tmp_dir}/volume.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/filer.conf
-		sed -i "s^master=127.0.0.1:9333^master=${master_peers}/^" ${tmp_dir}/filer.conf
+		sed -i "s^master=127.0.0.1:9333^master=${master_peers}^" ${tmp_dir}/filer.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/admin.conf
-		sed -i "s^masters=127.0.0.1:9333^masters=${master_peers}/^" ${tmp_dir}/admin.conf
+		sed -i "s^masters=127.0.0.1:9333^masters=${master_peers}^" ${tmp_dir}/admin.conf
 	fi
 
 }
