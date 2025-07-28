@@ -209,7 +209,7 @@ get_seaweedfs_master_node(){
 
 seaweedfs_use(){
 	info_log "页面管理地址http://${master_ip[*]}:23646, 主节点管理页面http://${master_ip[*]}:9333, 存储节点地址http://${volume_ip[*]}:8080，filer节点地址http://${filer_ip[*]}:8888;
-	挂载命令：mount -t fuse.weed fuse /mnt -o \"filer=localhost:8888,filer.path=/\";\
+	挂载命令：mount -t fuse.weed fuse /mnt -o \"filer=localhost:8888,filer.path=/\";
 	或者修改/etc/fstab文件添加\"weed#fuse /mnt fuse _netdev,filer='localhost:8888',filer.path=/ 0 0\";"
 }
 

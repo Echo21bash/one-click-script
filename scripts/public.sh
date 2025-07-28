@@ -300,18 +300,27 @@ only_allow_numbers(){
 
 
 down_file(){
-	github_mirror=(https://ghproxy.net https://wget.la https://kkgithub.com https://githubfast.com https://download.fastgit.org https://github.com.cnpmjs.org)
+	github_mirror=(
+        "https://ghproxy.net|prefix"
+        "https://free.cn.eu.org|prefix"
+        "https://wget.la|prefix"
+        "https://gh.sixyin.com|prefix"
+        "https://kkgithub.com|replace"
+        "https://githubfast.com|replace"
+    )
 	#$1下载链接、$2保存已存在的路径或路径+名称
 	if [[ -n $1 && -n $2 ]];then
 		down_url=$1
 		path_file=$2
 		if [[ x`echo ${down_url} | grep -o github` = 'xgithub' ]];then
 			#对github连接尝试使用镜像地址
-			for mirror in ${github_mirror[@]};
+			for mirror_entry in ${github_mirror[@]};
 			do
-				mirror_status=`curl -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
+				local mirror="${mirror_entry%%|*}"
+				local mirror_type="${mirror_entry##*|}"
+				local mirror_status=`curl -k -I -m 10 -o /dev/null -s -w %{http_code} ${mirror}`
 				if [[ ${mirror_status} = '200' ]];then
-					if [[ ${mirror} = 'https://ghproxy.net' || ${mirror} = 'https://wget.la' ]];then
+					if [[ ${mirror_type} = "prefix" ]];then
 						mirror_down_url="${mirror}/${down_url}"
 					else
 						mirror_down_url="${mirror}/${down_url#*github.com/}"
@@ -333,13 +342,13 @@ down_file(){
 		if [[ ! -f ${full_path_file} ]];then
 			diy_echo "正在下载${down_url}" "${info}"
 			if [[ -n ${mirror_down_url} ]];then
-				wgot -c 8 -o ${path_file} ${mirror_down_url}
+				curl -k -C - -o ${full_path_file} ${mirror_down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
 				fi
 			else
-				wgot -c 8 -o ${path_file} ${down_url}
+				curl -k -C - -o ${full_path_file} ${down_url}
 				if [[ $? -ne '0' ]];then
 					diy_echo "下载失败" "${red}" "${error}"
 					exit 1
@@ -347,7 +356,7 @@ down_file(){
 			fi
 		fi
 	else
-		diy_echo "请检查下载链接是否正确" "${red}" "${error}"
+		diy_echo "down_file函数参数错误" "${red}" "${error}"
 		exit
 	fi
 }
