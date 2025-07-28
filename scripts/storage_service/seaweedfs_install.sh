@@ -50,14 +50,14 @@ seaweedfs_config(){
 		\cp ${workdir}/config/seaweedfs/filer.conf ${tmp_dir}/filer.conf
 		\cp ${workdir}/config/seaweedfs/admin.conf ${tmp_dir}/admin.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/master.conf
-		sed -i "s^##defaultReplication=010^defaultReplication=${defaultReplication}^" ${tmp_dir}/master.conf
+		sed -i "s^#defaultReplication=010^defaultReplication=${defaultReplication}^" ${tmp_dir}/master.conf
 		sed -i "s^#peers=^peers=${master_peers}^" ${tmp_dir}/master.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/volume.conf
 		sed -i "s^mserver=127.0.0.1:9333^mserver=${master_peers}^" ${tmp_dir}/volume.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/filer.conf
 		sed -i "s^master=127.0.0.1:9333^master=${master_peers}^" ${tmp_dir}/filer.conf
 		sed -i "s^/data/seaweedfs/^${seaweedfs_data_dir}/^" ${tmp_dir}/admin.conf
-		sed -i "s^masters=127.0.0.1:9333^masters=${master_peers}^" ${tmp_dir}/admin.conf
+		#sed -i "s^masters=127.0.0.1:9333^masters=${master_peers}^" ${tmp_dir}/admin.conf
 	fi
 
 }
@@ -181,6 +181,8 @@ seaweedfs_install(){
 					scp -q -r -P ${ssh_port[$k]} ${workdir}/config/seaweedfs/filer.toml ${host_ip[$k]}:/root/.seaweedfs/
 					scp -q -r -P ${ssh_port[$k]} ${workdir}/scripts/public.sh ${host_ip[$k]}:/tmp
 					scp -q -r -P ${ssh_port[$k]} ${tmp_dir}/filer.conf ${host_ip[$k]}:${home_dir}/etc
+					ln -s ${home_dir}/bin/weed /usr/bin/weed
+					ln -s ${home_dir}/bin/weed /usr/sbin/weed
 					ssh ${host_ip[$k]} -p ${ssh_port[$k]} <<-EOF
 					. /tmp/public.sh
 					Type=simple
@@ -190,7 +192,7 @@ seaweedfs_install(){
 					add_system_service seaweedfiler ${home_dir}/seaweedfiler.service
 					service_control seaweedfiler restart
 					rm -rf /tmp/public.sh
-					EOF" "${passwd[$k]}"				
+					EOF" "${passwd[$k]}"			
 				;;
 			esac
 			((k++))
@@ -205,10 +207,16 @@ get_seaweedfs_master_node(){
 	done
 }
 
+seaweedfs_use(){
+	info_log "页面管理地址http://${master_ip[*]}:23646, 主节点管理页面http://${master_ip[*]}:9333, 存储节点地址http://${volume_ip[*]}:8080，filer节点地址http://${filer_ip[*]}:8888;
+	挂载命令：mount -t fuse.weed fuse /mnt -o \"filer=localhost:8888,filer.path=/\";\
+	或者修改/etc/fstab文件添加\"weed#fuse /mnt fuse _netdev,filer='localhost:8888',filer.path=/ 0 0\";"
+}
+
 seaweedfs_install_ctl(){
 	seaweedfs_env_load
 	seaweedfs_install_set
 	seaweedfs_down
 	seaweedfs_install
-	
+	seaweedfs_use
 }
