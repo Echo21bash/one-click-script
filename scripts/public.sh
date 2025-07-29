@@ -347,7 +347,7 @@ down_file(){
 			done
 			if [[ ${http_code} != "200" ]];then
 				error_log "下载失败"
-				exit 1
+				return 1
 			fi
 		else
 			http_code=$(curl --user-agent "Mozilla/5.0" --connect-timeout 3 -L -k -C - -o ${full_path_file} ${mirror_down_url} -w "%{http_code}")
@@ -356,7 +356,7 @@ down_file(){
 			else
 				error_log "下载失败"
 				rm -rf ${full_path_file}
-				exit 1
+				return 1
 			fi
 		fi
 	else

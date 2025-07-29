@@ -58,7 +58,7 @@ sftpgo_down(){
 
 	down_url="${url}/releases/download/v${detail_version_number}/sftpgo_v${detail_version_number}_linux_x86_64.tar.xz"
 	online_down_file
-	unpacking_file sftpgo_${detail_version_number}_linux_x86_64.tar.xz ${tmp_dir}
+	unpacking_file sftpgo_v${detail_version_number}_linux_x86_64.tar.xz ${tmp_dir}
 
 }
 
