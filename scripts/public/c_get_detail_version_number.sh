@@ -41,9 +41,8 @@ all_version_github(){
 
 	case "$soft_name" in
 		*)
-			timeout 10 curl -sL ${url}/tags | grep /tag/ >${tmp_dir}/tmp_version || \
-			timeout 10 curl -sL https://hub.fastgit.org/${url#*github.com/}/tags | grep /tag/ >${tmp_dir}/tmp_version ||\
-			timeout 10 curl -sL https://ghproxy.cn/${url}/tags | grep /tag/ >${tmp_dir}/tmp_version
+			timeout 20 down_file ${url}/tags ${tmp_dir}/tmp_version
+			cat ${tmp_dir}/tmp_version | grep /tag/ >${tmp_dir}/tmp_version
 		;;
 	esac
 	
@@ -61,7 +60,7 @@ ver_rule_general(){
 			fi
 		;;
 		
-		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix|anylink|wireguard-ui|fastdfs|seaweedfs)
+		erlang|go|php|ruby|nginx|memcached|mongodb|redis|zookeeper|kafka|rabbitmq|zabbix|anylink|wireguard-ui|fastdfs|seaweedfs|sftpgo)
 			cat ${tmp_dir}/tmp_version | grep -Eio "${ver}\.[0-9]{1,2}" | sort -uV >${tmp_dir}/all_version
 		;;
 		mysql)
@@ -100,7 +99,7 @@ online_version(){
 		mysql|mongodb|tomcat|k8s)
 			all_version_other
 		;;
-		tengine|fastdfs|greenplum|wireguard-ui|anylink|nacos|seaweedfs)
+		tengine|fastdfs|greenplum|wireguard-ui|anylink|nacos|seaweedfs|sftpgo)
 			all_version_github
 		;;
 	esac
