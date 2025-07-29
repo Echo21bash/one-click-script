@@ -42,7 +42,7 @@ all_version_github(){
 	case "$soft_name" in
 		*)
 			down_file ${url}/tags ${tmp_dir}/tmp_version_tags
-			cat ${tmp_dir}/tmp_version_tags | grep /tag/ >${tmp_dir}/tmp_version
+			cat ${tmp_dir}/tmp_version_tags | grep /tag/ >${tmp_dir}/tmp_version 2 >/dev/null
 		;;
 	esac
 	
