@@ -303,10 +303,11 @@ down_file(){
 	#github加速站、一种是替换一种是前缀
 	github_mirror=(
 		"https://kkgithub.com|replace"
-        "https://ghproxy.net|prefix"
         "https://tvv.tw|prefix"
         "https://ghfast.top|prefix"
+        "https://gh-proxy.net|prefix"
         "https://free.cn.eu.org|prefix"
+        "https://ghproxy.net|prefix"
         "https://wget.la|prefix"
         "https://gh.sixyin.com|prefix"
         "https://githubfast.com|replace"
