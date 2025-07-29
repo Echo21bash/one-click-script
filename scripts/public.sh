@@ -304,6 +304,8 @@ down_file(){
 	github_mirror=(
 		"https://kkgithub.com|replace"
         "https://ghproxy.net|prefix"
+        "https://tvv.tw|prefix"
+        "https://ghfast.top|prefix"
         "https://free.cn.eu.org|prefix"
         "https://wget.la|prefix"
         "https://gh.sixyin.com|prefix"
