@@ -25,7 +25,7 @@ system_security_set(){
 	###登录失败配置
 	if [[  ${sys_name} = "Centos" ]];then
 		###ssh远程登录限制
-		[[ ! -f //etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
+		[[ ! -f /etc/pam.d/sshd.default ]] && cp /etc/pam.d/sshd /etc/pam.d/sshd.default
 		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/sshd` ]];then
 			sed -i '/#%PAM-1.0/aauth       required     pam_tally2.so  onerr=fail  deny=3  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/sshd
 			success_log "更新远程登录失败策略"
@@ -41,7 +41,19 @@ system_security_set(){
 			info_log "登录失败策略为登录失败3次锁定10分钟"
 		else
 			info_log "已经存在策略，已跳过。"
-		fi	
+		fi
+	fi
+
+	if [[  ${sys_name} = "Ubuntu" ]];then
+
+		[[ ! -f /etc/pam.d/common-auth.default ]] && cp /etc/pam.d/common-auth /etc/pam.d/common-auth.default
+		if [[ -z `grep 'pam_tally2.so' /etc/pam.d/common-auth` ]];then
+			sed -i '/nullok_secure/aauth       required     pam_tally2.so  onerr=fail  deny=5  unlock_time=300  even_deny_root  root_unlock_time=120' /etc/pam.d/common-auth
+			success_log "更新本地登录失败策略"
+			info_log "登录失败策略为登录失败3次锁定10分钟"
+		else
+			info_log "已经存在策略，已跳过。"
+		fi
 	fi
 
 	if [[  ${sys_name} = "openEuler" ]];then
