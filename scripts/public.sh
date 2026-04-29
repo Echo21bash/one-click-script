@@ -302,10 +302,10 @@ only_allow_numbers(){
 down_file(){
 	#github加速站、一种是替换一种是前缀
 	github_mirror=(
+		"https://docker.echo21bash.dpdns.org|prefix"
 		"https://kkgithub.com|replace"
         "https://tvv.tw|prefix"
         "https://ghfast.top|prefix"
-        "https://gh-proxy.net|prefix"
         "https://free.cn.eu.org|prefix"
         "https://ghproxy.net|prefix"
         "https://wget.la|prefix"
@@ -317,10 +317,8 @@ down_file(){
 		down_url=$1
 		path_file=$2
 		#获取下载完成路径及文件名
+		down_file_name=${down_url##*/}
 		if [[ -d ${path_file} ]];then
-			if [[ -z ${down_file_name} ]];then
-				down_file_name=${down_url##*/}
-			fi
 			full_path_file=${path_file}/${down_file_name}
 		else
 			full_path_file=${path_file}

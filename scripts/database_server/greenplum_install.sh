@@ -26,6 +26,7 @@ greenplum_down(){
 		down_url="${url}/releases/download/${detail_version_number}/greenplum-db-${detail_version_number}-rhel7-x86_64.rpm"
 	fi
 	online_down_file
+	file_name="greenplum-db-${detail_version_number}-rhel7-x86_64.rpm"
 }
 
 greenplum_install_env(){
