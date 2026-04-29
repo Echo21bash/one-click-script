@@ -323,6 +323,12 @@ down_file(){
 		else
 			full_path_file=${path_file}
 		fi
+		if [[ -s ${full_path_file} ]];then
+			info_log "已经存在文件${full_path_file}"
+			break
+		fi
+		#开始下载	
+		info_log "正在下载${down_url}"
 		#对github连接尝试使用镜像地址
 		if [[ x`echo ${down_url} | grep -o github` = 'xgithub' ]];then
 			for mirror_entry in ${github_mirror[@]};
@@ -335,9 +341,6 @@ down_file(){
 				else
 					mirror_down_url="${mirror}/${down_url#*github.com/}"
 				fi
-
-				#开始下载	
-				info_log "正在下载${down_url}"
 				http_code=$(curl --user-agent "Mozilla/5.0" --connect-timeout 3 -L -k -C - -o ${full_path_file} ${mirror_down_url} -w "%{http_code}")
 				if [[ $? == "0" && ${http_code} == "200" ]];then
 					success_log "下载完成"
