@@ -404,7 +404,7 @@ auto_ssh_keygen(){
 			else
 				su ${user} -c "expect <<-EOF
 				set timeout -1
-				spawn ssh-copy-id -i ${key_dir}/.ssh/id_rsa.pub ${user}@${host} -p ${ssh_port[$i]}
+				spawn ssh-copy-id -i ${key_dir}/.ssh/id_rsa.pub -p ${ssh_port[$i]} ${user}@${host}
 				expect {
 					\"*yes/no\" { send \"yes\\r\";exp_continue}
 					\"*password:\" { send \"${passwd[$i]}\\r\";exp_continue}
