@@ -302,8 +302,8 @@ only_allow_numbers(){
 down_file(){
 	#github加速站、一种是替换一种是前缀
 	github_mirror=(
-		"https://docker.echo21bash.dpdns.org|prefix"
-		"https://kkgithub.com|replace"
+        "https://docker.echo21bash.dpdns.org|prefix"
+        "https://kkgithub.com|replace"
         "https://tvv.tw|prefix"
         "https://ghfast.top|prefix"
         "https://free.cn.eu.org|prefix"
@@ -325,44 +325,45 @@ down_file(){
 		fi
 		if [[ -s ${full_path_file} ]];then
 			info_log "已经存在文件${full_path_file}"
-			break
-		fi
-		#开始下载	
-		info_log "正在下载${down_url}"
-		#对github连接尝试使用镜像地址
-		if [[ x`echo ${down_url} | grep -o github` = 'xgithub' ]];then
-			for mirror_entry in ${github_mirror[@]};
-			do
-				local mirror="${mirror_entry%%|*}"
-				local mirror_type="${mirror_entry##*|}"
+		else
+			#开始下载	
+			info_log "正在下载${down_url}"
+			#对github连接尝试使用镜像地址
+			if [[ x`echo ${down_url} | grep -o github` = 'xgithub' ]];then
+				for mirror_entry in ${github_mirror[@]};
+				do
+					local mirror="${mirror_entry%%|*}"
+					local mirror_type="${mirror_entry##*|}"
 
-				if [[ ${mirror_type} = "prefix" ]];then
-					mirror_down_url="${mirror}/${down_url}"
-				else
-					mirror_down_url="${mirror}/${down_url#*github.com/}"
+					if [[ ${mirror_type} = "prefix" ]];then
+						mirror_down_url="${mirror}/${down_url}"
+					else
+						mirror_down_url="${mirror}/${down_url#*github.com/}"
+					fi
+					http_code=$(curl --user-agent "Mozilla/5.0" --connect-timeout 3 -L -k -C - -o ${full_path_file} ${mirror_down_url} -w "%{http_code}")
+					if [[ $? == "0" && ${http_code} == "200" ]];then
+						success_log "下载完成"
+						break
+					else
+						rm -rf ${full_path_file}
+					fi
+				done
+				if [[ ${http_code} != "200" ]];then
+					error_log "下载失败"
+					return 1
 				fi
+			else
 				http_code=$(curl --user-agent "Mozilla/5.0" --connect-timeout 3 -L -k -C - -o ${full_path_file} ${mirror_down_url} -w "%{http_code}")
 				if [[ $? == "0" && ${http_code} == "200" ]];then
-					success_log "下载完成"
-					break
+					success_log "下载完成" 
 				else
+					error_log "下载失败"
 					rm -rf ${full_path_file}
+					return 1
 				fi
-			done
-			if [[ ${http_code} != "200" ]];then
-				error_log "下载失败"
-				return 1
-			fi
-		else
-			http_code=$(curl --user-agent "Mozilla/5.0" --connect-timeout 3 -L -k -C - -o ${full_path_file} ${mirror_down_url} -w "%{http_code}")
-			if [[ $? == "0" && ${http_code} == "200" ]];then
-				success_log "下载完成" 
-			else
-				error_log "下载失败"
-				rm -rf ${full_path_file}
-				return 1
 			fi
 		fi
+
 	else
 		diy_echo "down_file函数参数错误" "${red}" "${error}"
 		exit
